@@ -3,6 +3,7 @@ package com.fibreflow.core.common.extensions
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -98,7 +99,7 @@ fun <T> Flow<T>.retryWithBackoff(
 ): Flow<T> = retryWhen { cause, attempt ->
     if (attempt < maxRetries) {
         val delayDuration = minOf(
-            (initialDelay.inWholeMilliseconds * kotlin.math.pow(factor, attempt.toDouble())).toLong(),
+            (initialDelay.inWholeMilliseconds * pow(factor, attempt.toDouble())).toLong(),
             maxDelay.inWholeMilliseconds
         )
         delay(delayDuration)

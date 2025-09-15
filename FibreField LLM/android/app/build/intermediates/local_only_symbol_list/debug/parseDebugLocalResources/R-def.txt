@@ -1,0 +1,32 @@
+R_DEF: Internal format may change without notice
+local
+color accent
+color divider
+color icons
+color primary
+color primary_dark
+color primary_light
+color primary_text
+color secondary_text
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string camera
+string cancel
+string gallery
+string location
+string login
+string logout
+string network_error
+string no
+string ok
+string retry
+string settings
+string sync
+string welcome_message
+string yes
+style Theme.FibreField
+style Theme.FibreField.Dialog
+style Theme.FibreField.Fullscreen
+style Theme.FibreField.Starting
+xml network_security_config

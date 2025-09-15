@@ -60,9 +60,9 @@ sealed class Result<out T> {
     /**
      * Get data if success, default value otherwise
      */
-    fun getOrElse(defaultValue: T): T = when (this) {
+    fun getOrElse(defaultValue: () -> @UnsafeVariance T): T = when (this) {
         is Success -> data
-        else -> defaultValue
+        else -> defaultValue()
     }
     
     /**

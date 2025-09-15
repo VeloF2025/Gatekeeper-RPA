@@ -4,8 +4,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.firebase.crashlytics)
+    // TODO: Add google-services and firebase-crashlytics when google-services.json is available
+    // alias(libs.plugins.google.services)
+    // alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -217,9 +218,10 @@ dependencies {
     implementation(libs.sqlcipher)
     
     // Firebase (optional for analytics and crash reporting)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
+    // TODO: Add Firebase when google-services.json is configured
+    // implementation(platform(libs.firebase.bom))
+    // implementation(libs.firebase.analytics)
+    // implementation(libs.firebase.crashlytics)
     
     // Utilities
     implementation(libs.timber)
@@ -238,7 +240,8 @@ dependencies {
     
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose-ui-test-junit4)
     
     // Instrumentation test runner
     androidTestImplementation("androidx.test:runner:1.5.2")

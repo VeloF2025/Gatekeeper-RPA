@@ -28,6 +28,7 @@ dependencies {
     // Utilities
     implementation(libs.timber)
     implementation(libs.gson)
+    implementation(libs.androidx.exifinterface)
     
     // Testing
     testImplementation(libs.junit)
