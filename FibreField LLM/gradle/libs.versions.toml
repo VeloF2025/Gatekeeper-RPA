@@ -1,0 +1,147 @@
+[versions]
+# Android
+agp = "8.4.0"
+kotlin = "1.9.24"
+coreKtx = "1.13.0"
+appcompat = "1.6.1"
+material = "1.11.0"
+constraintLayout = "2.1.4"
+activityKtx = "1.9.0"
+fragmentKtx = "1.7.0"
+navigationFragment = "2.7.7"
+navigationUi = "2.7.7"
+lifecycleRuntime = "2.7.0"
+lifecycleViewModel = "2.7.0"
+lifecycleLiveData = "2.7.0"
+
+# Coroutines
+coroutinesCore = "1.8.0"
+coroutinesAndroid = "1.8.0"
+
+# Dependency Injection
+hilt = "2.51.1"
+hiltCompiler = "2.51.1"
+
+# Networking
+retrofit = "2.9.0"
+okhttp = "4.12.0"
+moshi = "1.15.1"
+moshiKotlin = "1.15.1"
+
+# Database
+room = "2.6.1"
+
+# ML Kit
+mlkitVisionCommon = "16.9.0"
+mlkitBarcodeScanning = "17.0.3"
+mlkitTextRecognition = "16.0.0"
+
+# TensorFlow Lite
+tensorflowLite = "2.16.1"
+tensorflowLiteSupport = "0.4.4"
+
+# MLC LLM
+mlcLlmAndroid = "0.2.0"
+
+# Camera
+cameraCore = "1.4.0-alpha04"
+camera2 = "1.4.0-alpha04"
+cameraLifecycle = "1.4.0-alpha04"
+cameraView = "1.4.0-alpha04"
+
+# Location
+playServicesLocation = "21.2.0"
+
+# WorkManager
+workManager = "2.9.0"
+
+# Testing
+junit = "4.13.2"
+junitExt = "1.1.5"
+espressoCore = "3.5.1"
+mockitoCore = "5.11.0"
+mockitoKotlin = "5.2.1"
+truth = "1.1.5"
+coroutinesTest = "1.8.0"
+archCoreTesting = "2.2.0"
+
+[libraries]
+# Android
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintLayout" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+
+# Navigation
+androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragment" }
+androidx-navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUi" }
+
+# Lifecycle
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntime" }
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModel" }
+androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleLiveData" }
+
+# Coroutines
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesCore" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutinesAndroid" }
+
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltCompiler" }
+
+# Networking
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshiKotlin" }
+
+# Database
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+# ML Kit
+mlkit-vision-common = { module = "com.google.android.gms:play-services-mlkit-common", version.ref = "mlkitVisionCommon" }
+mlkit-vision-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "mlkitBarcodeScanning" }
+mlkit-vision-text-recognition = { module = "com.google.android.gms:play-services-mlkit-text-recognition", version.ref = "mlkitTextRecognition" }
+
+# TensorFlow Lite
+tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+
+# MLC LLM
+mlc-llm-android = { module = "ai.mlc:mlc-llm-android", version.ref = "mlcLlmAndroid" }
+
+# Camera
+camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camera2" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraLifecycle" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraView" }
+
+# Location
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+
+# WorkManager
+workmanager = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
+
+# Testing
+junit = { module = "junit:junit", version.ref = "junit" }
+junit-ext = { module = "androidx.test.ext:junit", version.ref = "junitExt" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+arch-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "archCoreTesting" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
