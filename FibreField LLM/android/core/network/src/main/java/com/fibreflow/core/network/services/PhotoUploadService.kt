@@ -1,7 +1,8 @@
-package com.fibreflow.infrastructure.sync
+package com.fibreflow.core.network.services
 
 import com.fibreflow.core.common.result.Result
 import com.fibreflow.core.network.api.InstallationAPI
+import com.fibreflow.infrastructure.sync.OfflineQueue
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -24,7 +25,7 @@ class PhotoUploadService @Inject constructor(
     companion object {
         const val MAX_RETRY_ATTEMPTS = 3
         const val MAX_FILE_SIZE_MB = 10
-        const val SUPPORTED_IMAGE_TYPES = arrayOf("image/jpeg", "image/png", "image/webp")
+        val SUPPORTED_IMAGE_TYPES = arrayOf("image/jpeg", "image/png", "image/webp")
     }
 
     /**
@@ -61,7 +62,12 @@ class PhotoUploadService @Inject constructor(
             // Attempt upload
             val response = installationApi.uploadPhoto(
                 installationId = installationId,
-                photo = multipartBody
+                photo = multipartBody,
+                stepName = stepName.toRequestBody(),
+                sequenceNumber = sequenceNumber.toString().toRequestBody(),
+                latitude = latitude?.toString()?.toRequestBody(),
+                longitude = longitude?.toString()?.toRequestBody(),
+                notes = notes?.toRequestBody()
             )
 
             if (response.isSuccessful) {

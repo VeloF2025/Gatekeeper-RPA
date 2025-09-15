@@ -21,8 +21,8 @@ class ErrorHandler @Inject constructor() {
 
     companion object {
         private const val TAG = "NetworkErrorHandler"
-        private const val MAX_RETRY_ATTEMPTS = 3
-        private const val RETRY_DELAY_MS = 1000L
+        const val MAX_RETRY_ATTEMPTS = 3
+        const val RETRY_DELAY_MS = 1000L
     }
 
     /**
@@ -45,7 +45,7 @@ class ErrorHandler @Inject constructor() {
                 val shouldRetry = shouldRetry(errorType, attempt, retryConfig)
 
                 if (!shouldRetry) {
-                    break
+                    return Result.Error(e, getErrorCode(errorType), getUserErrorMessage(errorType))
                 }
 
                 if (attempt < retryConfig.maxAttempts - 1) {
@@ -184,6 +184,30 @@ class ErrorHandler @Inject constructor() {
             "Error parsing response"
         }
     }
+
+    /**
+     * Get error code for error type
+     */
+    private fun getErrorCode(errorType: ErrorType): Int? {
+        return when (errorType) {
+            ErrorType.NETWORK -> 1001
+            ErrorType.TIMEOUT -> 1002
+            ErrorType.HTTP -> 1003
+            ErrorType.UNKNOWN -> 1000
+        }
+    }
+
+    /**
+     * Get user-friendly error message for error type
+     */
+    private fun getUserErrorMessage(errorType: ErrorType): String? {
+        return when (errorType) {
+            ErrorType.NETWORK -> "Network connection error. Please check your internet connection."
+            ErrorType.TIMEOUT -> "Request timed out. Please try again."
+            ErrorType.HTTP -> "Server error. Please try again later."
+            ErrorType.UNKNOWN -> "An unexpected error occurred. Please try again."
+        }
+    }
 }
 
 /**
@@ -217,8 +241,8 @@ enum class ErrorType {
  * Retry configuration
  */
 data class RetryConfig(
-    val maxAttempts: Int = MAX_RETRY_ATTEMPTS,
-    val baseDelayMs: Long = RETRY_DELAY_MS,
+    val maxAttempts: Int = ErrorHandler.MAX_RETRY_ATTEMPTS,
+    val baseDelayMs: Long = ErrorHandler.RETRY_DELAY_MS,
     val maxDelayMs: Long = 30000L, // 30 seconds
     val backoffStrategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL,
     val retryOnNetworkError: Boolean = true,

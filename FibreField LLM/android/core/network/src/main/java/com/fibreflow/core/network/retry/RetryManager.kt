@@ -19,10 +19,10 @@ class RetryManager @Inject constructor() {
 
     companion object {
         private const val TAG = "RetryManager"
-        private const val DEFAULT_MAX_ATTEMPTS = 3
-        private const val DEFAULT_INITIAL_DELAY_MS = 1000L
-        private const val DEFAULT_MAX_DELAY_MS = 30000L // 30 seconds
-        private const val DEFAULT_TIMEOUT_MS = 15000L // 15 seconds per attempt
+        const val DEFAULT_MAX_ATTEMPTS = 3
+        const val DEFAULT_INITIAL_DELAY_MS = 1000L
+        const val DEFAULT_MAX_DELAY_MS = 30000L // 30 seconds
+        const val DEFAULT_TIMEOUT_MS = 15000L // 15 seconds per attempt
     }
 
     /**
@@ -146,10 +146,10 @@ class RetryManager @Inject constructor() {
  * Retry configuration
  */
 data class RetryConfig(
-    val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS,
-    val initialDelayMs: Long = DEFAULT_INITIAL_DELAY_MS,
-    val maxDelayMs: Long = DEFAULT_MAX_DELAY_MS,
-    val timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    val maxAttempts: Int = RetryManager.DEFAULT_MAX_ATTEMPTS,
+    val initialDelayMs: Long = RetryManager.DEFAULT_INITIAL_DELAY_MS,
+    val maxDelayMs: Long = RetryManager.DEFAULT_MAX_DELAY_MS,
+    val timeoutMs: Long = RetryManager.DEFAULT_TIMEOUT_MS,
     val backoffStrategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL,
     val retryOnTimeout: Boolean = true,
     val retryOnNetworkError: Boolean = true,

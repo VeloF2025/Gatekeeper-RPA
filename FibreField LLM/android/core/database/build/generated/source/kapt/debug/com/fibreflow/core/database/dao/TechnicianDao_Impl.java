@@ -1239,7 +1239,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
               continue;
             }
             final Integer _value;
-            _value = new Integer(null);
+            _value = new Integer();
             if (!_result.containsKey(_key)) {
               _result.put(_key, _value);
             }

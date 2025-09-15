@@ -62,6 +62,11 @@ class AuthInterceptor @Inject constructor(
                 // Return original 401 response
                 chain.proceed(originalRequest)
             }
+            is Result.Loading -> {
+                // This shouldn't happen in synchronous context, but handle it
+                Timber.w("Unexpected loading state during token refresh")
+                chain.proceed(originalRequest)
+            }
         }
     }
 
