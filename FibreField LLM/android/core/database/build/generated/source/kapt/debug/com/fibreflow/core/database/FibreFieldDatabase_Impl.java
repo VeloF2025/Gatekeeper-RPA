@@ -13,12 +13,18 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
 import com.fibreflow.core.database.dao.AIConversationDao;
 import com.fibreflow.core.database.dao.AIConversationDao_Impl;
+import com.fibreflow.core.database.dao.ConfigurationDao;
+import com.fibreflow.core.database.dao.ConfigurationDao_Impl;
 import com.fibreflow.core.database.dao.DropDao;
 import com.fibreflow.core.database.dao.DropDao_Impl;
 import com.fibreflow.core.database.dao.InstallationDao;
 import com.fibreflow.core.database.dao.InstallationDao_Impl;
 import com.fibreflow.core.database.dao.PhotoDao;
 import com.fibreflow.core.database.dao.PhotoDao_Impl;
+import com.fibreflow.core.database.dao.ProjectDao;
+import com.fibreflow.core.database.dao.ProjectDao_Impl;
+import com.fibreflow.core.database.dao.RemediationDao;
+import com.fibreflow.core.database.dao.RemediationDao_Impl;
 import com.fibreflow.core.database.dao.SessionDao;
 import com.fibreflow.core.database.dao.SessionDao_Impl;
 import com.fibreflow.core.database.dao.SyncQueueDao;
@@ -27,10 +33,6 @@ import com.fibreflow.core.database.dao.TechnicianDao;
 import com.fibreflow.core.database.dao.TechnicianDao_Impl;
 import com.fibreflow.core.database.dao.ValidationResultDao;
 import com.fibreflow.core.database.dao.ValidationResultDao_Impl;
-import error.NonExistentClass;
-import error.NonExistentClass_FibreFieldDatabase_0_Impl;
-import error.NonExistentClass_FibreFieldDatabase_1_Impl;
-import error.NonExistentClass_FibreFieldDatabase_2_Impl;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
@@ -47,7 +49,7 @@ import javax.annotation.processing.Generated;
 @Generated("androidx.room.RoomProcessor")
 @SuppressWarnings({"unchecked", "deprecation"})
 public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
-  private volatile NonExistentClass _nonExistentClass;
+  private volatile ProjectDao _projectDao;
 
   private volatile DropDao _dropDao;
 
@@ -57,7 +59,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
 
   private volatile PhotoDao _photoDao;
 
-  private volatile NonExistentClass _nonExistentClass_1;
+  private volatile RemediationDao _remediationDao;
 
   private volatile SyncQueueDao _syncQueueDao;
 
@@ -67,7 +69,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
 
   private volatile SessionDao _sessionDao;
 
-  private volatile NonExistentClass _nonExistentClass_2;
+  private volatile ConfigurationDao _configurationDao;
 
   @Override
   @NonNull
@@ -79,7 +81,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_projects_active` ON `projects` (`active`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_projects_project_name` ON `projects` (`project_name`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_projects_created_at` ON `projects` (`created_at`)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `drops` (`drop_number` TEXT NOT NULL, `project_id` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL, `accuracy` REAL, `address` TEXT NOT NULL, `status` TEXT NOT NULL, `assigned_technician_id` TEXT, `customer_name` TEXT, `customer_phone` TEXT, `customer_email` TEXT, `installation_date` INTEGER, `activation_status` TEXT NOT NULL, `activation_date` INTEGER, `notes` TEXT, `priority` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync_attempt` INTEGER, `sync_error` TEXT, PRIMARY KEY(`drop_number`), FOREIGN KEY(`project_id`) REFERENCES `projects`(`project_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`assigned_technician_id`) REFERENCES `technicians`(`technician_id`) ON UPDATE NO ACTION ON DELETE SET NULL )");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `drops` (`drop_number` TEXT NOT NULL, `project_id` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL, `accuracy` REAL, `address` TEXT NOT NULL, `status` TEXT NOT NULL, `assigned_technician_id` TEXT, `customer_name` TEXT, `customer_phone` TEXT, `customer_email` TEXT, `installation_date` INTEGER, `activation_status` TEXT NOT NULL, `activation_date` INTEGER, `notes` TEXT, `priority` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync_attempt` INTEGER, `sync_error` TEXT, `assigned_at` INTEGER, `completed_at` INTEGER, `needs_sync` INTEGER NOT NULL, PRIMARY KEY(`drop_number`), FOREIGN KEY(`project_id`) REFERENCES `projects`(`project_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`assigned_technician_id`) REFERENCES `technicians`(`technician_id`) ON UPDATE NO ACTION ON DELETE SET NULL )");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_project_id` ON `drops` (`project_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_status` ON `drops` (`status`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_assigned_technician_id` ON `drops` (`assigned_technician_id`)");
@@ -89,7 +91,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_installation_date` ON `drops` (`installation_date`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_priority` ON `drops` (`priority`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_drops_activation_status` ON `drops` (`activation_status`)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `technicians` (`technician_id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT, `phone` TEXT, `role` TEXT NOT NULL, `certifications` TEXT, `active_projects` TEXT, `permissions` TEXT, `active` INTEGER NOT NULL, `last_login` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`technician_id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `technicians` (`technician_id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT, `phone` TEXT, `role` TEXT NOT NULL, `certifications` TEXT, `active_projects` TEXT, `permissions` TEXT, `active` INTEGER NOT NULL, `last_login` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `last_sync_at` INTEGER, PRIMARY KEY(`technician_id`))");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_technicians_active` ON `technicians` (`active`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_technicians_role` ON `technicians` (`role`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_technicians_email` ON `technicians` (`email`)");
@@ -131,7 +133,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_config_key` ON `configuration` (`config_key`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_updated_at` ON `configuration` (`updated_at`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9c53960b3fd55d423f5423e30dcb0446')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c68b678ca13836bca80948d28a42af4e')");
       }
 
       @Override
@@ -216,7 +218,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
                   + " Expected:\n" + _infoProjects + "\n"
                   + " Found:\n" + _existingProjects);
         }
-        final HashMap<String, TableInfo.Column> _columnsDrops = new HashMap<String, TableInfo.Column>(22);
+        final HashMap<String, TableInfo.Column> _columnsDrops = new HashMap<String, TableInfo.Column>(25);
         _columnsDrops.put("drop_number", new TableInfo.Column("drop_number", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDrops.put("project_id", new TableInfo.Column("project_id", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDrops.put("latitude", new TableInfo.Column("latitude", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -239,6 +241,9 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         _columnsDrops.put("sync_status", new TableInfo.Column("sync_status", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDrops.put("last_sync_attempt", new TableInfo.Column("last_sync_attempt", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsDrops.put("sync_error", new TableInfo.Column("sync_error", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDrops.put("assigned_at", new TableInfo.Column("assigned_at", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDrops.put("completed_at", new TableInfo.Column("completed_at", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsDrops.put("needs_sync", new TableInfo.Column("needs_sync", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysDrops = new HashSet<TableInfo.ForeignKey>(2);
         _foreignKeysDrops.add(new TableInfo.ForeignKey("projects", "CASCADE", "NO ACTION", Arrays.asList("project_id"), Arrays.asList("project_id")));
         _foreignKeysDrops.add(new TableInfo.ForeignKey("technicians", "SET NULL", "NO ACTION", Arrays.asList("assigned_technician_id"), Arrays.asList("technician_id")));
@@ -259,7 +264,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
                   + " Expected:\n" + _infoDrops + "\n"
                   + " Found:\n" + _existingDrops);
         }
-        final HashMap<String, TableInfo.Column> _columnsTechnicians = new HashMap<String, TableInfo.Column>(12);
+        final HashMap<String, TableInfo.Column> _columnsTechnicians = new HashMap<String, TableInfo.Column>(13);
         _columnsTechnicians.put("technician_id", new TableInfo.Column("technician_id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTechnicians.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTechnicians.put("email", new TableInfo.Column("email", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -272,6 +277,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         _columnsTechnicians.put("last_login", new TableInfo.Column("last_login", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTechnicians.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTechnicians.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTechnicians.put("last_sync_at", new TableInfo.Column("last_sync_at", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysTechnicians = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesTechnicians = new HashSet<TableInfo.Index>(4);
         _indicesTechnicians.add(new TableInfo.Index("index_technicians_active", false, Arrays.asList("active"), Arrays.asList("ASC")));
@@ -504,7 +510,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "9c53960b3fd55d423f5423e30dcb0446", "825e8cc4bd3b384ba14f933e1f4b57d5");
+    }, "c68b678ca13836bca80948d28a42af4e", "bda69c3c48a2dc7314afa288956794c4");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -560,17 +566,17 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
   @NonNull
   protected Map<Class<?>, List<Class<?>>> getRequiredTypeConverters() {
     final HashMap<Class<?>, List<Class<?>>> _typeConvertersMap = new HashMap<Class<?>, List<Class<?>>>();
-    _typeConvertersMap.put(NonExistentClass.class, NonExistentClass_FibreFieldDatabase_0_Impl.getRequiredConverters());
+    _typeConvertersMap.put(ProjectDao.class, ProjectDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(DropDao.class, DropDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(TechnicianDao.class, TechnicianDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(InstallationDao.class, InstallationDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(PhotoDao.class, PhotoDao_Impl.getRequiredConverters());
-    _typeConvertersMap.put(NonExistentClass.class, NonExistentClass_FibreFieldDatabase_1_Impl.getRequiredConverters());
+    _typeConvertersMap.put(RemediationDao.class, RemediationDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(SyncQueueDao.class, SyncQueueDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(AIConversationDao.class, AIConversationDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(ValidationResultDao.class, ValidationResultDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(SessionDao.class, SessionDao_Impl.getRequiredConverters());
-    _typeConvertersMap.put(NonExistentClass.class, NonExistentClass_FibreFieldDatabase_2_Impl.getRequiredConverters());
+    _typeConvertersMap.put(ConfigurationDao.class, ConfigurationDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -590,15 +596,15 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
   }
 
   @Override
-  public NonExistentClass projectDao() {
-    if (_nonExistentClass != null) {
-      return _nonExistentClass;
+  public ProjectDao projectDao() {
+    if (_projectDao != null) {
+      return _projectDao;
     } else {
       synchronized(this) {
-        if(_nonExistentClass == null) {
-          _nonExistentClass = new NonExistentClass_FibreFieldDatabase_0_Impl(this);
+        if(_projectDao == null) {
+          _projectDao = new ProjectDao_Impl(this);
         }
-        return _nonExistentClass;
+        return _projectDao;
       }
     }
   }
@@ -660,15 +666,15 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
   }
 
   @Override
-  public NonExistentClass remediationDao() {
-    if (_nonExistentClass_1 != null) {
-      return _nonExistentClass_1;
+  public RemediationDao remediationDao() {
+    if (_remediationDao != null) {
+      return _remediationDao;
     } else {
       synchronized(this) {
-        if(_nonExistentClass_1 == null) {
-          _nonExistentClass_1 = new NonExistentClass_FibreFieldDatabase_1_Impl(this);
+        if(_remediationDao == null) {
+          _remediationDao = new RemediationDao_Impl(this);
         }
-        return _nonExistentClass_1;
+        return _remediationDao;
       }
     }
   }
@@ -730,15 +736,15 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
   }
 
   @Override
-  public NonExistentClass configurationDao() {
-    if (_nonExistentClass_2 != null) {
-      return _nonExistentClass_2;
+  public ConfigurationDao configurationDao() {
+    if (_configurationDao != null) {
+      return _configurationDao;
     } else {
       synchronized(this) {
-        if(_nonExistentClass_2 == null) {
-          _nonExistentClass_2 = new NonExistentClass_FibreFieldDatabase_2_Impl(this);
+        if(_configurationDao == null) {
+          _configurationDao = new ConfigurationDao_Impl(this);
         }
-        return _nonExistentClass_2;
+        return _configurationDao;
       }
     }
   }

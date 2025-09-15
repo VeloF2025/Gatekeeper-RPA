@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9c53960b3fd55d423f5423e30dcb0446",
+    "identityHash": "c68b678ca13836bca80948d28a42af4e",
     "entities": [
       {
         "tableName": "projects",
@@ -114,7 +114,7 @@
       },
       {
         "tableName": "drops",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`drop_number` TEXT NOT NULL, `project_id` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL, `accuracy` REAL, `address` TEXT NOT NULL, `status` TEXT NOT NULL, `assigned_technician_id` TEXT, `customer_name` TEXT, `customer_phone` TEXT, `customer_email` TEXT, `installation_date` INTEGER, `activation_status` TEXT NOT NULL, `activation_date` INTEGER, `notes` TEXT, `priority` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync_attempt` INTEGER, `sync_error` TEXT, PRIMARY KEY(`drop_number`), FOREIGN KEY(`project_id`) REFERENCES `projects`(`project_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`assigned_technician_id`) REFERENCES `technicians`(`technician_id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`drop_number` TEXT NOT NULL, `project_id` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL, `accuracy` REAL, `address` TEXT NOT NULL, `status` TEXT NOT NULL, `assigned_technician_id` TEXT, `customer_name` TEXT, `customer_phone` TEXT, `customer_email` TEXT, `installation_date` INTEGER, `activation_status` TEXT NOT NULL, `activation_date` INTEGER, `notes` TEXT, `priority` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync_attempt` INTEGER, `sync_error` TEXT, `assigned_at` INTEGER, `completed_at` INTEGER, `needs_sync` INTEGER NOT NULL, PRIMARY KEY(`drop_number`), FOREIGN KEY(`project_id`) REFERENCES `projects`(`project_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`assigned_technician_id`) REFERENCES `technicians`(`technician_id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "dropNumber",
@@ -247,6 +247,24 @@
             "columnName": "sync_error",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "assignedAt",
+            "columnName": "assigned_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completed_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "needsSync",
+            "columnName": "needs_sync",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -367,7 +385,7 @@
       },
       {
         "tableName": "technicians",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`technician_id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT, `phone` TEXT, `role` TEXT NOT NULL, `certifications` TEXT, `active_projects` TEXT, `permissions` TEXT, `active` INTEGER NOT NULL, `last_login` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`technician_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`technician_id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT, `phone` TEXT, `role` TEXT NOT NULL, `certifications` TEXT, `active_projects` TEXT, `permissions` TEXT, `active` INTEGER NOT NULL, `last_login` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `last_sync_at` INTEGER, PRIMARY KEY(`technician_id`))",
         "fields": [
           {
             "fieldPath": "technicianId",
@@ -440,6 +458,12 @@
             "columnName": "updated_at",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncAt",
+            "columnName": "last_sync_at",
+            "affinity": "INTEGER",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1495,7 +1519,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9c53960b3fd55d423f5423e30dcb0446')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c68b678ca13836bca80948d28a42af4e')"
     ]
   }
 }

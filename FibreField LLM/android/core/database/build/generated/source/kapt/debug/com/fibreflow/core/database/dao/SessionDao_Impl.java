@@ -10,6 +10,7 @@ import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
+import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import com.fibreflow.core.database.converters.DateConverters;
@@ -22,7 +23,10 @@ import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -172,7 +176,7 @@ public final class SessionDao_Impl implements SessionDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE sessions SET isActive = 0, logoutTime = ? WHERE technicianId = ? AND isActive = 1";
+        final String _query = "UPDATE sessions SET is_active = 0, last_activity = ? WHERE technician_id = ? AND is_active = 1";
         return _query;
       }
     };
@@ -180,7 +184,7 @@ public final class SessionDao_Impl implements SessionDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE sessions SET isActive = 0, logoutTime = ?";
+        final String _query = "UPDATE sessions SET is_active = 0, last_activity = ?";
         return _query;
       }
     };
@@ -188,7 +192,7 @@ public final class SessionDao_Impl implements SessionDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "DELETE FROM sessions WHERE logoutTime IS NOT NULL AND logoutTime < ?";
+        final String _query = "DELETE FROM sessions WHERE last_activity < ?";
         return _query;
       }
     };
@@ -357,7 +361,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object getSessionById(final String sessionId,
       final Continuation<? super SessionEntity> $completion) {
-    final String _sql = "SELECT * FROM sessions WHERE id = ?";
+    final String _sql = "SELECT * FROM sessions WHERE session_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (sessionId == null) {
@@ -372,6 +376,65 @@ public final class SessionDao_Impl implements SessionDao {
       public SessionEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final SessionEntity _result;
+          if (_cursor.moveToFirst()) {
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _result = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -384,7 +447,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object getActiveSessionForTechnician(final String technicianId,
       final Continuation<? super SessionEntity> $completion) {
-    final String _sql = "SELECT * FROM sessions WHERE technicianId = ? AND isActive = 1 ORDER BY loginTime DESC LIMIT 1";
+    final String _sql = "SELECT * FROM sessions WHERE technician_id = ? AND is_active = 1 ORDER BY created_at DESC LIMIT 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -399,6 +462,65 @@ public final class SessionDao_Impl implements SessionDao {
       public SessionEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final SessionEntity _result;
+          if (_cursor.moveToFirst()) {
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _result = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -411,7 +533,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object getSessionsForTechnician(final String technicianId,
       final Continuation<? super List<SessionEntity>> $completion) {
-    final String _sql = "SELECT * FROM sessions WHERE technicianId = ? ORDER BY loginTime DESC";
+    final String _sql = "SELECT * FROM sessions WHERE technician_id = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -426,6 +548,65 @@ public final class SessionDao_Impl implements SessionDao {
       public List<SessionEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final List<SessionEntity> _result = new ArrayList<SessionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SessionEntity _item;
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _item = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -437,7 +618,7 @@ public final class SessionDao_Impl implements SessionDao {
 
   @Override
   public Object getActiveSessions(final Continuation<? super List<SessionEntity>> $completion) {
-    final String _sql = "SELECT * FROM sessions WHERE isActive = 1 ORDER BY loginTime DESC";
+    final String _sql = "SELECT * FROM sessions WHERE is_active = 1 ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<SessionEntity>>() {
@@ -446,6 +627,65 @@ public final class SessionDao_Impl implements SessionDao {
       public List<SessionEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final List<SessionEntity> _result = new ArrayList<SessionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SessionEntity _item;
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _item = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -457,7 +697,7 @@ public final class SessionDao_Impl implements SessionDao {
 
   @Override
   public Flow<List<SessionEntity>> getActiveSessionsFlow() {
-    final String _sql = "SELECT * FROM sessions WHERE isActive = 1 ORDER BY loginTime DESC";
+    final String _sql = "SELECT * FROM sessions WHERE is_active = 1 ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"sessions"}, new Callable<List<SessionEntity>>() {
       @Override
@@ -465,6 +705,65 @@ public final class SessionDao_Impl implements SessionDao {
       public List<SessionEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final List<SessionEntity> _result = new ArrayList<SessionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SessionEntity _item;
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _item = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -480,7 +779,7 @@ public final class SessionDao_Impl implements SessionDao {
 
   @Override
   public Object getActiveSessionCount(final Continuation<? super Integer> $completion) {
-    final String _sql = "SELECT COUNT(*) FROM sessions WHERE isActive = 1";
+    final String _sql = "SELECT COUNT(*) FROM sessions WHERE is_active = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
@@ -489,6 +788,18 @@ public final class SessionDao_Impl implements SessionDao {
       public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -501,7 +812,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object isTechnicianActive(final String technicianId,
       final Continuation<? super Integer> $completion) {
-    final String _sql = "SELECT COUNT(*) FROM sessions WHERE technicianId = ? AND isActive = 1";
+    final String _sql = "SELECT COUNT(*) FROM sessions WHERE technician_id = ? AND is_active = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -516,6 +827,18 @@ public final class SessionDao_Impl implements SessionDao {
       public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -528,7 +851,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object getSessionsInTimeRange(final long startTime, final long endTime,
       final Continuation<? super List<SessionEntity>> $completion) {
-    final String _sql = "SELECT * FROM sessions WHERE loginTime BETWEEN ? AND ? ORDER BY loginTime DESC";
+    final String _sql = "SELECT * FROM sessions WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, startTime);
@@ -541,6 +864,65 @@ public final class SessionDao_Impl implements SessionDao {
       public List<SessionEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "session_id");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfDeviceId = CursorUtil.getColumnIndexOrThrow(_cursor, "device_id");
+          final int _cursorIndexOfIsActive = CursorUtil.getColumnIndexOrThrow(_cursor, "is_active");
+          final int _cursorIndexOfLastActivity = CursorUtil.getColumnIndexOrThrow(_cursor, "last_activity");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfExpiresAt = CursorUtil.getColumnIndexOrThrow(_cursor, "expires_at");
+          final List<SessionEntity> _result = new ArrayList<SessionEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SessionEntity _item;
+            final String _tmpSessionId;
+            if (_cursor.isNull(_cursorIndexOfSessionId)) {
+              _tmpSessionId = null;
+            } else {
+              _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final String _tmpDeviceId;
+            if (_cursor.isNull(_cursorIndexOfDeviceId)) {
+              _tmpDeviceId = null;
+            } else {
+              _tmpDeviceId = _cursor.getString(_cursorIndexOfDeviceId);
+            }
+            final boolean _tmpIsActive;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsActive);
+            _tmpIsActive = _tmp != 0;
+            final Date _tmpLastActivity;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfLastActivity)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfLastActivity);
+            }
+            _tmpLastActivity = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpExpiresAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfExpiresAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfExpiresAt);
+            }
+            _tmpExpiresAt = __dateConverters.fromTimestamp(_tmp_3);
+            _item = new SessionEntity(_tmpSessionId,_tmpTechnicianId,_tmpDeviceId,_tmpIsActive,_tmpLastActivity,_tmpCreatedAt,_tmpExpiresAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -552,7 +934,7 @@ public final class SessionDao_Impl implements SessionDao {
 
   @Override
   public Object getAverageSessionDuration(final Continuation<? super Long> $completion) {
-    final String _sql = "SELECT AVG(logoutTime - loginTime) FROM sessions WHERE logoutTime IS NOT NULL AND isActive = 0";
+    final String _sql = "SELECT AVG(expires_at - created_at) FROM sessions WHERE is_active = 0";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Long>() {
@@ -561,6 +943,18 @@ public final class SessionDao_Impl implements SessionDao {
       public Long call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Long _result;
+          if (_cursor.moveToFirst()) {
+            final Long _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -573,7 +967,7 @@ public final class SessionDao_Impl implements SessionDao {
   @Override
   public Object getSessionCountByTechnician(
       final Continuation<? super Map<String, Integer>> $completion) {
-    final String _sql = "SELECT technicianId, COUNT(*) as sessionCount FROM sessions GROUP BY technicianId ORDER BY sessionCount DESC";
+    final String _sql = "SELECT technician_id, COUNT(*) as sessionCount FROM sessions GROUP BY technician_id ORDER BY sessionCount DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Integer>>() {
@@ -582,6 +976,20 @@ public final class SessionDao_Impl implements SessionDao {
       public Map<String, Integer> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Map<String, Integer> _result = new LinkedHashMap<String, Integer>();
+          while (_cursor.moveToNext()) {
+            final String _key;
+            _key = new String();
+            if () {
+              _result.put(_key, null);
+              continue;
+            }
+            final Integer _value;
+            _value = new Integer();
+            if (!_result.containsKey(_key)) {
+              _result.put(_key, _value);
+            }
+          }
           return _result;
         } finally {
           _cursor.close();

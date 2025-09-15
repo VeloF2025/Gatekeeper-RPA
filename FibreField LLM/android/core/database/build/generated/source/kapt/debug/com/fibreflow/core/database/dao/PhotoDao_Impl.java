@@ -10,14 +10,17 @@ import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
+import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.room.util.StringUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import com.fibreflow.core.database.converters.DateConverters;
 import com.fibreflow.core.database.converters.StatusConverters;
 import com.fibreflow.core.database.entities.PhotoEntity;
+import com.fibreflow.core.database.entities.PhotoType;
+import com.fibreflow.core.database.entities.UploadStatus;
+import com.fibreflow.core.database.entities.ValidationStatus;
 import java.lang.Class;
-import java.lang.Double;
 import java.lang.Exception;
 import java.lang.Float;
 import java.lang.Integer;
@@ -27,7 +30,9 @@ import java.lang.Override;
 import java.lang.String;
 import java.lang.StringBuilder;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -262,7 +267,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET validationStatus = ?, validatedAt = ?, validationNotes = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET validation_status = ?, updated_at = ?, override_reason = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -270,7 +275,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET validationStatus = ?, validatedAt = ?, validationConfidence = ?, detectedObjects = ?, extractedText = ?, validationNotes = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET validation_status = ?, updated_at = ?, validation_confidence = ?, ai_metadata = ?, override_reason = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -278,7 +283,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET needsSync = 1 WHERE id = ?";
+        final String _query = "UPDATE photos SET upload_status = 'PENDING' WHERE photo_id = ?";
         return _query;
       }
     };
@@ -286,7 +291,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET needsSync = 0, lastSyncedAt = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET upload_status = 'COMPLETED', updated_at = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -294,7 +299,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET filePath = ?, fileSizeBytes = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET file_path = ?, file_size_bytes = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -302,7 +307,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET latitude = ?, longitude = ?, altitude = ?, bearing = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET ai_metadata = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -310,7 +315,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE photos SET brightness = ?, sharpness = ?, contrast = ?, qualityScore = ? WHERE id = ?";
+        final String _query = "UPDATE photos SET validation_confidence = ? WHERE photo_id = ?";
         return _query;
       }
     };
@@ -318,7 +323,7 @@ public final class PhotoDao_Impl implements PhotoDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "DELETE FROM photos WHERE capturedAt < ?";
+        final String _query = "DELETE FROM photos WHERE created_at < ?";
         return _query;
       }
     };
@@ -436,7 +441,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object updatePhotoValidationStatus(final String photoId, final String status,
+  public Object updatePhotoValidationStatus(final long photoId, final String status,
       final String notes, final long timestamp, final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -458,11 +463,7 @@ public final class PhotoDao_Impl implements PhotoDao {
           _stmt.bindString(_argIndex, notes);
         }
         _argIndex = 4;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -480,9 +481,9 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object updatePhotoValidationResults(final String photoId, final String status,
-      final float confidence, final String objects, final String text, final String notes,
-      final long timestamp, final Continuation<? super Unit> $completion) {
+  public Object updatePhotoValidationResults(final long photoId, final String status,
+      final float confidence, final String objects, final String notes, final long timestamp,
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -505,23 +506,13 @@ public final class PhotoDao_Impl implements PhotoDao {
           _stmt.bindString(_argIndex, objects);
         }
         _argIndex = 5;
-        if (text == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, text);
-        }
-        _argIndex = 6;
         if (notes == null) {
           _stmt.bindNull(_argIndex);
         } else {
           _stmt.bindString(_argIndex, notes);
         }
-        _argIndex = 7;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _argIndex = 6;
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -539,19 +530,14 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object markPhotoForSync(final String photoId,
-      final Continuation<? super Unit> $completion) {
+  public Object markPhotoForSync(final long photoId, final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
       public Unit call() throws Exception {
         final SupportSQLiteStatement _stmt = __preparedStmtOfMarkPhotoForSync.acquire();
         int _argIndex = 1;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -569,7 +555,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object markPhotoSynced(final String photoId, final long timestamp,
+  public Object markPhotoSynced(final long photoId, final long timestamp,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -579,11 +565,7 @@ public final class PhotoDao_Impl implements PhotoDao {
         int _argIndex = 1;
         _stmt.bindLong(_argIndex, timestamp);
         _argIndex = 2;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -601,8 +583,8 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object updatePhotoFilePath(final String photoId, final String filePath,
-      final long fileSize, final Continuation<? super Unit> $completion) {
+  public Object updatePhotoFilePath(final long photoId, final String filePath, final long fileSize,
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -617,11 +599,7 @@ public final class PhotoDao_Impl implements PhotoDao {
         _argIndex = 2;
         _stmt.bindLong(_argIndex, fileSize);
         _argIndex = 3;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -639,8 +617,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object updatePhotoLocation(final String photoId, final Double latitude,
-      final Double longitude, final Double altitude, final Float bearing,
+  public Object updatePhotoLocation(final long photoId, final String locationData,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -648,35 +625,13 @@ public final class PhotoDao_Impl implements PhotoDao {
       public Unit call() throws Exception {
         final SupportSQLiteStatement _stmt = __preparedStmtOfUpdatePhotoLocation.acquire();
         int _argIndex = 1;
-        if (latitude == null) {
+        if (locationData == null) {
           _stmt.bindNull(_argIndex);
         } else {
-          _stmt.bindDouble(_argIndex, latitude);
+          _stmt.bindString(_argIndex, locationData);
         }
         _argIndex = 2;
-        if (longitude == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, longitude);
-        }
-        _argIndex = 3;
-        if (altitude == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, altitude);
-        }
-        _argIndex = 4;
-        if (bearing == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, bearing);
-        }
-        _argIndex = 5;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -694,8 +649,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object updatePhotoQualityMetrics(final String photoId, final Float brightness,
-      final Float sharpness, final Float contrast, final Float qualityScore,
+  public Object updatePhotoQualityMetrics(final long photoId, final Float qualityScore,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -703,35 +657,13 @@ public final class PhotoDao_Impl implements PhotoDao {
       public Unit call() throws Exception {
         final SupportSQLiteStatement _stmt = __preparedStmtOfUpdatePhotoQualityMetrics.acquire();
         int _argIndex = 1;
-        if (brightness == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, brightness);
-        }
-        _argIndex = 2;
-        if (sharpness == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, sharpness);
-        }
-        _argIndex = 3;
-        if (contrast == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindDouble(_argIndex, contrast);
-        }
-        _argIndex = 4;
         if (qualityScore == null) {
           _stmt.bindNull(_argIndex);
         } else {
           _stmt.bindDouble(_argIndex, qualityScore);
         }
-        _argIndex = 5;
-        if (photoId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, photoId);
-        }
+        _argIndex = 2;
+        _stmt.bindLong(_argIndex, photoId);
         try {
           __db.beginTransaction();
           try {
@@ -775,16 +707,12 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object getPhotoById(final String photoId,
+  public Object getPhotoById(final long photoId,
       final Continuation<? super PhotoEntity> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE id = ?";
+    final String _sql = "SELECT * FROM photos WHERE photo_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (photoId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, photoId);
-    }
+    _statement.bindLong(_argIndex, photoId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<PhotoEntity>() {
       @Override
@@ -792,6 +720,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public PhotoEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final PhotoEntity _result;
+          if (_cursor.moveToFirst()) {
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _result = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -802,21 +857,144 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Flow<PhotoEntity> getPhotoByIdFlow(final String photoId) {
-    final String _sql = "SELECT * FROM photos WHERE id = ?";
+  public Flow<PhotoEntity> getPhotoByIdFlow(final long photoId) {
+    final String _sql = "SELECT * FROM photos WHERE photo_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (photoId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, photoId);
-    }
+    _statement.bindLong(_argIndex, photoId);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"photos"}, new Callable<PhotoEntity>() {
       @Override
       @Nullable
       public PhotoEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final PhotoEntity _result;
+          if (_cursor.moveToFirst()) {
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _result = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -831,16 +1009,12 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object getPhotosByInstallation(final String installationId,
+  public Object getPhotosByInstallation(final long installationId,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE installationId = ? ORDER BY sequenceNumber ASC, capturedAt ASC";
+    final String _sql = "SELECT * FROM photos WHERE installation_id = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
       @Override
@@ -848,6 +1022,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -858,21 +1159,144 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Flow<List<PhotoEntity>> getPhotosByInstallationFlow(final String installationId) {
-    final String _sql = "SELECT * FROM photos WHERE installationId = ? ORDER BY sequenceNumber ASC, capturedAt ASC";
+  public Flow<List<PhotoEntity>> getPhotosByInstallationFlow(final long installationId) {
+    final String _sql = "SELECT * FROM photos WHERE installation_id = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"photos"}, new Callable<List<PhotoEntity>>() {
       @Override
       @NonNull
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -887,21 +1311,17 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object getPhotosByStep(final String installationId, final String stepName,
+  public Object getPhotosByStep(final long installationId, final String photoType,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE installationId = ? AND stepName = ? ORDER BY sequenceNumber ASC";
+    final String _sql = "SELECT * FROM photos WHERE installation_id = ? AND photo_type = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     _argIndex = 2;
-    if (stepName == null) {
+    if (photoType == null) {
       _statement.bindNull(_argIndex);
     } else {
-      _statement.bindString(_argIndex, stepName);
+      _statement.bindString(_argIndex, photoType);
     }
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -910,6 +1330,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -922,7 +1469,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getPhotosRequiringValidation(
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE validationStatus = 'PENDING' ORDER BY capturedAt ASC";
+    final String _sql = "SELECT * FROM photos WHERE validation_status = 'PENDING' ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -931,6 +1478,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -942,7 +1616,7 @@ public final class PhotoDao_Impl implements PhotoDao {
 
   @Override
   public Flow<List<PhotoEntity>> getPhotosRequiringValidationFlow() {
-    final String _sql = "SELECT * FROM photos WHERE validationStatus = 'PENDING' ORDER BY capturedAt ASC";
+    final String _sql = "SELECT * FROM photos WHERE validation_status = 'PENDING' ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"photos"}, new Callable<List<PhotoEntity>>() {
       @Override
@@ -950,6 +1624,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -965,7 +1766,7 @@ public final class PhotoDao_Impl implements PhotoDao {
 
   @Override
   public Object getValidatedPhotos(final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE validationStatus = 'PASSED' ORDER BY validatedAt DESC";
+    final String _sql = "SELECT * FROM photos WHERE validation_status = 'PASSED' ORDER BY updated_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -974,6 +1775,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -986,7 +1914,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getFailedValidationPhotos(
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE validationStatus = 'FAILED' ORDER BY validatedAt DESC";
+    final String _sql = "SELECT * FROM photos WHERE validation_status = 'FAILED' ORDER BY updated_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -995,6 +1923,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1006,7 +2061,7 @@ public final class PhotoDao_Impl implements PhotoDao {
 
   @Override
   public Object getPhotosNeedingSync(final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE needsSync = 1 ORDER BY capturedAt ASC";
+    final String _sql = "SELECT * FROM photos WHERE upload_status = 'PENDING' ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -1015,6 +2070,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1027,7 +2209,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getPhotosByQualityRange(final float minScore, final float maxScore,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE qualityScore BETWEEN ? AND ? ORDER BY qualityScore DESC";
+    final String _sql = "SELECT * FROM photos WHERE validation_confidence BETWEEN ? AND ? ORDER BY validation_confidence DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
     _statement.bindDouble(_argIndex, minScore);
@@ -1040,6 +2222,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1051,7 +2360,7 @@ public final class PhotoDao_Impl implements PhotoDao {
 
   @Override
   public Object getLowQualityPhotos(final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE qualityScore < 0.6 ORDER BY qualityScore ASC";
+    final String _sql = "SELECT * FROM photos WHERE validation_confidence < 0.6 ORDER BY validation_confidence ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<PhotoEntity>>() {
@@ -1060,6 +2369,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1072,7 +2508,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getPhotoCountByValidationStatus(final String status,
       final Continuation<? super Integer> $completion) {
-    final String _sql = "SELECT COUNT(*) FROM photos WHERE validationStatus = ?";
+    final String _sql = "SELECT COUNT(*) FROM photos WHERE validation_status = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (status == null) {
@@ -1087,6 +2523,18 @@ public final class PhotoDao_Impl implements PhotoDao {
       public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1131,7 +2579,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getPhotosInDateRange(final long startDate, final long endDate,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE capturedAt BETWEEN ? AND ? ORDER BY capturedAt DESC";
+    final String _sql = "SELECT * FROM photos WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, startDate);
@@ -1144,6 +2592,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1156,7 +2731,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object getPhotosByTechnician(final String technicianId,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT p.* FROM photos p INNER JOIN installations i ON p.installationId = i.id WHERE i.technicianId = ? ORDER BY p.capturedAt DESC";
+    final String _sql = "SELECT p.* FROM photos p INNER JOIN installations i ON p.installation_id = i.installation_id WHERE i.technician_id = ? ORDER BY p.created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -1171,6 +2746,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1184,10 +2886,10 @@ public final class PhotoDao_Impl implements PhotoDao {
   public Object getAverageQualityByStep(
       final Continuation<? super Map<String, Pair<Float, Integer>>> $completion) {
     final String _sql = "\n"
-            + "        SELECT stepName, AVG(qualityScore) as avgQuality, COUNT(*) as photoCount\n"
+            + "        SELECT photo_type, AVG(validation_confidence) as avgQuality, COUNT(*) as photoCount\n"
             + "        FROM photos\n"
-            + "        WHERE qualityScore IS NOT NULL\n"
-            + "        GROUP BY stepName\n"
+            + "        WHERE validation_confidence IS NOT NULL\n"
+            + "        GROUP BY photo_type\n"
             + "        ORDER BY avgQuality DESC\n"
             + "    ";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
@@ -1211,11 +2913,11 @@ public final class PhotoDao_Impl implements PhotoDao {
   public Object getValidationStatistics(
       final Continuation<? super Map<String, Pair<Integer, Float>>> $completion) {
     final String _sql = "\n"
-            + "        SELECT validationStatus, COUNT(*) as count,\n"
-            + "               AVG(validationConfidence) as avgConfidence\n"
+            + "        SELECT validation_status, COUNT(*) as count,\n"
+            + "               AVG(validation_confidence) as avgConfidence\n"
             + "        FROM photos\n"
-            + "        WHERE validationStatus IS NOT NULL\n"
-            + "        GROUP BY validationStatus\n"
+            + "        WHERE validation_status IS NOT NULL\n"
+            + "        GROUP BY validation_status\n"
             + "    ";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1237,7 +2939,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object searchPhotosByDetectedObject(final String objectName,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE detectedObjects LIKE '%' || ? || '%' ORDER BY capturedAt DESC";
+    final String _sql = "SELECT * FROM photos WHERE ai_metadata LIKE '%' || ? || '%' ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (objectName == null) {
@@ -1252,6 +2954,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1264,7 +3093,7 @@ public final class PhotoDao_Impl implements PhotoDao {
   @Override
   public Object searchPhotosByExtractedText(final String searchText,
       final Continuation<? super List<PhotoEntity>> $completion) {
-    final String _sql = "SELECT * FROM photos WHERE extractedText LIKE '%' || ? || '%' ORDER BY capturedAt DESC";
+    final String _sql = "SELECT * FROM photos WHERE ai_metadata LIKE '%' || ? || '%' ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (searchText == null) {
@@ -1279,6 +3108,133 @@ public final class PhotoDao_Impl implements PhotoDao {
       public List<PhotoEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfPhotoType = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_type");
+          final int _cursorIndexOfFilePath = CursorUtil.getColumnIndexOrThrow(_cursor, "file_path");
+          final int _cursorIndexOfFileSizeBytes = CursorUtil.getColumnIndexOrThrow(_cursor, "file_size_bytes");
+          final int _cursorIndexOfWidth = CursorUtil.getColumnIndexOrThrow(_cursor, "width");
+          final int _cursorIndexOfHeight = CursorUtil.getColumnIndexOrThrow(_cursor, "height");
+          final int _cursorIndexOfValidationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_status");
+          final int _cursorIndexOfValidationConfidence = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_confidence");
+          final int _cursorIndexOfAiMetadata = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_metadata");
+          final int _cursorIndexOfManualOverride = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override");
+          final int _cursorIndexOfOverrideReason = CursorUtil.getColumnIndexOrThrow(_cursor, "override_reason");
+          final int _cursorIndexOfOverrideBy = CursorUtil.getColumnIndexOrThrow(_cursor, "override_by");
+          final int _cursorIndexOfOverrideAt = CursorUtil.getColumnIndexOrThrow(_cursor, "override_at");
+          final int _cursorIndexOfUploadStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_status");
+          final int _cursorIndexOfUploadAttempts = CursorUtil.getColumnIndexOrThrow(_cursor, "upload_attempts");
+          final int _cursorIndexOfLastUploadAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_upload_attempt");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<PhotoEntity> _result = new ArrayList<PhotoEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final PhotoEntity _item;
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final PhotoType _tmpPhotoType;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfPhotoType)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfPhotoType);
+            }
+            _tmpPhotoType = __statusConverters.toPhotoType(_tmp);
+            final String _tmpFilePath;
+            if (_cursor.isNull(_cursorIndexOfFilePath)) {
+              _tmpFilePath = null;
+            } else {
+              _tmpFilePath = _cursor.getString(_cursorIndexOfFilePath);
+            }
+            final long _tmpFileSizeBytes;
+            _tmpFileSizeBytes = _cursor.getLong(_cursorIndexOfFileSizeBytes);
+            final int _tmpWidth;
+            _tmpWidth = _cursor.getInt(_cursorIndexOfWidth);
+            final int _tmpHeight;
+            _tmpHeight = _cursor.getInt(_cursorIndexOfHeight);
+            final ValidationStatus _tmpValidationStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfValidationStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfValidationStatus);
+            }
+            _tmpValidationStatus = __statusConverters.toValidationStatus(_tmp_1);
+            final Float _tmpValidationConfidence;
+            if (_cursor.isNull(_cursorIndexOfValidationConfidence)) {
+              _tmpValidationConfidence = null;
+            } else {
+              _tmpValidationConfidence = _cursor.getFloat(_cursorIndexOfValidationConfidence);
+            }
+            final String _tmpAiMetadata;
+            if (_cursor.isNull(_cursorIndexOfAiMetadata)) {
+              _tmpAiMetadata = null;
+            } else {
+              _tmpAiMetadata = _cursor.getString(_cursorIndexOfAiMetadata);
+            }
+            final boolean _tmpManualOverride;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfManualOverride);
+            _tmpManualOverride = _tmp_2 != 0;
+            final String _tmpOverrideReason;
+            if (_cursor.isNull(_cursorIndexOfOverrideReason)) {
+              _tmpOverrideReason = null;
+            } else {
+              _tmpOverrideReason = _cursor.getString(_cursorIndexOfOverrideReason);
+            }
+            final String _tmpOverrideBy;
+            if (_cursor.isNull(_cursorIndexOfOverrideBy)) {
+              _tmpOverrideBy = null;
+            } else {
+              _tmpOverrideBy = _cursor.getString(_cursorIndexOfOverrideBy);
+            }
+            final Date _tmpOverrideAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfOverrideAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfOverrideAt);
+            }
+            _tmpOverrideAt = __dateConverters.fromTimestamp(_tmp_3);
+            final UploadStatus _tmpUploadStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUploadStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfUploadStatus);
+            }
+            _tmpUploadStatus = __statusConverters.toUploadStatus(_tmp_4);
+            final int _tmpUploadAttempts;
+            _tmpUploadAttempts = _cursor.getInt(_cursorIndexOfUploadAttempts);
+            final Date _tmpLastUploadAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastUploadAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastUploadAttempt);
+            }
+            _tmpLastUploadAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new PhotoEntity(_tmpPhotoId,_tmpInstallationId,_tmpPhotoType,_tmpFilePath,_tmpFileSizeBytes,_tmpWidth,_tmpHeight,_tmpValidationStatus,_tmpValidationConfidence,_tmpAiMetadata,_tmpManualOverride,_tmpOverrideReason,_tmpOverrideBy,_tmpOverrideAt,_tmpUploadStatus,_tmpUploadAttempts,_tmpLastUploadAttempt,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1289,16 +3245,16 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object markPhotosSynced(final List<String> photoIds, final long timestamp,
+  public Object markPhotosSynced(final List<Long> photoIds, final long timestamp,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
       public Unit call() throws Exception {
         final StringBuilder _stringBuilder = StringUtil.newStringBuilder();
-        _stringBuilder.append("UPDATE photos SET needsSync = 0, lastSyncedAt = ");
+        _stringBuilder.append("UPDATE photos SET upload_status = 'COMPLETED', updated_at = ");
         _stringBuilder.append("?");
-        _stringBuilder.append(" WHERE id IN (");
+        _stringBuilder.append(" WHERE photo_id IN (");
         final int _inputSize = photoIds.size();
         StringUtil.appendPlaceholders(_stringBuilder, _inputSize);
         _stringBuilder.append(")");
@@ -1307,11 +3263,11 @@ public final class PhotoDao_Impl implements PhotoDao {
         int _argIndex = 1;
         _stmt.bindLong(_argIndex, timestamp);
         _argIndex = 2;
-        for (String _item : photoIds) {
+        for (Long _item : photoIds) {
           if (_item == null) {
             _stmt.bindNull(_argIndex);
           } else {
-            _stmt.bindString(_argIndex, _item);
+            _stmt.bindLong(_argIndex, _item);
           }
           _argIndex++;
         }

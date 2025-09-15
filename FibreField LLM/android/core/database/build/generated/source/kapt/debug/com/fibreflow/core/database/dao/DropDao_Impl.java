@@ -83,7 +83,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `drops` (`drop_number`,`project_id`,`latitude`,`longitude`,`altitude`,`accuracy`,`address`,`status`,`assigned_technician_id`,`customer_name`,`customer_phone`,`customer_email`,`installation_date`,`activation_status`,`activation_date`,`notes`,`priority`,`created_at`,`updated_at`,`sync_status`,`last_sync_attempt`,`sync_error`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `drops` (`drop_number`,`project_id`,`latitude`,`longitude`,`altitude`,`accuracy`,`address`,`status`,`assigned_technician_id`,`customer_name`,`customer_phone`,`customer_email`,`installation_date`,`activation_status`,`activation_date`,`notes`,`priority`,`created_at`,`updated_at`,`sync_status`,`last_sync_attempt`,`sync_error`,`assigned_at`,`completed_at`,`needs_sync`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -181,6 +181,20 @@ public final class DropDao_Impl implements DropDao {
         } else {
           statement.bindString(22, entity.getSyncError());
         }
+        final Long _tmp_6 = __dateConverters.dateToTimestamp(entity.getAssignedAt());
+        if (_tmp_6 == null) {
+          statement.bindNull(23);
+        } else {
+          statement.bindLong(23, _tmp_6);
+        }
+        final Long _tmp_7 = __dateConverters.dateToTimestamp(entity.getCompletedAt());
+        if (_tmp_7 == null) {
+          statement.bindNull(24);
+        } else {
+          statement.bindLong(24, _tmp_7);
+        }
+        final int _tmp_8 = entity.getNeedsSync() ? 1 : 0;
+        statement.bindLong(25, _tmp_8);
       }
     };
     this.__deletionAdapterOfDropEntity = new EntityDeletionOrUpdateAdapter<DropEntity>(__db) {
@@ -204,7 +218,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `drops` SET `drop_number` = ?,`project_id` = ?,`latitude` = ?,`longitude` = ?,`altitude` = ?,`accuracy` = ?,`address` = ?,`status` = ?,`assigned_technician_id` = ?,`customer_name` = ?,`customer_phone` = ?,`customer_email` = ?,`installation_date` = ?,`activation_status` = ?,`activation_date` = ?,`notes` = ?,`priority` = ?,`created_at` = ?,`updated_at` = ?,`sync_status` = ?,`last_sync_attempt` = ?,`sync_error` = ? WHERE `drop_number` = ?";
+        return "UPDATE OR ABORT `drops` SET `drop_number` = ?,`project_id` = ?,`latitude` = ?,`longitude` = ?,`altitude` = ?,`accuracy` = ?,`address` = ?,`status` = ?,`assigned_technician_id` = ?,`customer_name` = ?,`customer_phone` = ?,`customer_email` = ?,`installation_date` = ?,`activation_status` = ?,`activation_date` = ?,`notes` = ?,`priority` = ?,`created_at` = ?,`updated_at` = ?,`sync_status` = ?,`last_sync_attempt` = ?,`sync_error` = ?,`assigned_at` = ?,`completed_at` = ?,`needs_sync` = ? WHERE `drop_number` = ?";
       }
 
       @Override
@@ -302,10 +316,24 @@ public final class DropDao_Impl implements DropDao {
         } else {
           statement.bindString(22, entity.getSyncError());
         }
-        if (entity.getDropNumber() == null) {
+        final Long _tmp_6 = __dateConverters.dateToTimestamp(entity.getAssignedAt());
+        if (_tmp_6 == null) {
           statement.bindNull(23);
         } else {
-          statement.bindString(23, entity.getDropNumber());
+          statement.bindLong(23, _tmp_6);
+        }
+        final Long _tmp_7 = __dateConverters.dateToTimestamp(entity.getCompletedAt());
+        if (_tmp_7 == null) {
+          statement.bindNull(24);
+        } else {
+          statement.bindLong(24, _tmp_7);
+        }
+        final int _tmp_8 = entity.getNeedsSync() ? 1 : 0;
+        statement.bindLong(25, _tmp_8);
+        if (entity.getDropNumber() == null) {
+          statement.bindNull(26);
+        } else {
+          statement.bindString(26, entity.getDropNumber());
         }
       }
     };
@@ -313,7 +341,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET status = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET status = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -321,7 +349,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET assignedTechnicianId = ?, status = 'IN_PROGRESS', assignedAt = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET assigned_technician_id = ?, status = 'IN_PROGRESS', assigned_at = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -329,7 +357,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET assignedTechnicianId = NULL, status = 'AVAILABLE', assignedAt = NULL, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET assigned_technician_id = NULL, status = 'AVAILABLE', assigned_at = NULL, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -337,7 +365,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET status = 'COMPLETED', completedAt = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET status = 'COMPLETED', completed_at = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -345,7 +373,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET latitude = ?, longitude = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET latitude = ?, longitude = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -353,7 +381,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET priority = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET priority = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -361,7 +389,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET needsSync = 1, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET needs_sync = 1, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -369,7 +397,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET needsSync = 0, lastSyncedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET needs_sync = 0, last_sync_attempt = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -377,7 +405,7 @@ public final class DropDao_Impl implements DropDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE drops SET notes = ?, updatedAt = ? WHERE id = ?";
+        final String _query = "UPDATE drops SET notes = ?, updated_at = ? WHERE drop_number = ?";
         return _query;
       }
     };
@@ -813,7 +841,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object getDropById(final String dropId,
       final Continuation<? super DropEntity> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE id = ?";
+    final String _sql = "SELECT * FROM drops WHERE drop_number = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (dropId == null) {
@@ -828,6 +856,177 @@ public final class DropDao_Impl implements DropDao {
       public DropEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final DropEntity _result;
+          if (_cursor.moveToFirst()) {
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _result = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -839,7 +1038,7 @@ public final class DropDao_Impl implements DropDao {
 
   @Override
   public Flow<DropEntity> getDropByIdFlow(final String dropId) {
-    final String _sql = "SELECT * FROM drops WHERE id = ?";
+    final String _sql = "SELECT * FROM drops WHERE drop_number = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (dropId == null) {
@@ -853,6 +1052,177 @@ public final class DropDao_Impl implements DropDao {
       public DropEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final DropEntity _result;
+          if (_cursor.moveToFirst()) {
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _result = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -868,159 +1238,8 @@ public final class DropDao_Impl implements DropDao {
 
   @Override
   public Object getAllDrops(final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM drops ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
-    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-          _statement.release();
-        }
-      }
-    }, $completion);
-  }
-
-  @Override
-  public Flow<List<DropEntity>> getAllDropsFlow() {
-    final String _sql = "SELECT * FROM drops ORDER BY createdAt DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
-    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-        }
-      }
-
-      @Override
-      protected void finalize() {
-        _statement.release();
-      }
-    });
-  }
-
-  @Override
-  public Object getDropsByStatus(final String status,
-      final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE status = ? ORDER BY updatedAt DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
-    int _argIndex = 1;
-    if (status == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, status);
-    }
-    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-          _statement.release();
-        }
-      }
-    }, $completion);
-  }
-
-  @Override
-  public Flow<List<DropEntity>> getDropsByStatusFlow(final String status) {
-    final String _sql = "SELECT * FROM drops WHERE status = ? ORDER BY updatedAt DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
-    int _argIndex = 1;
-    if (status == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, status);
-    }
-    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-        }
-      }
-
-      @Override
-      protected void finalize() {
-        _statement.release();
-      }
-    });
-  }
-
-  @Override
-  public Object getAvailableDrops(final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, createdAt ASC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
-    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-          _statement.release();
-        }
-      }
-    }, $completion);
-  }
-
-  @Override
-  public Flow<List<DropEntity>> getAvailableDropsFlow() {
-    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, createdAt ASC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
-    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
-      @Override
-      @NonNull
-      public List<DropEntity> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          return _result;
-        } finally {
-          _cursor.close();
-        }
-      }
-
-      @Override
-      protected void finalize() {
-        _statement.release();
-      }
-    });
-  }
-
-  @Override
-  public Object getDropsInProximity(final double minLat, final double maxLat, final double minLng,
-      final double maxLng, final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ? ORDER BY priority DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 4);
-    int _argIndex = 1;
-    _statement.bindDouble(_argIndex, minLat);
-    _argIndex = 2;
-    _statement.bindDouble(_argIndex, maxLat);
-    _argIndex = 3;
-    _statement.bindDouble(_argIndex, minLng);
-    _argIndex = 4;
-    _statement.bindDouble(_argIndex, maxLng);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
       @Override
@@ -1050,6 +1269,9 @@ public final class DropDao_Impl implements DropDao {
           final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
           final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
           final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
           final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final DropEntity _item;
@@ -1173,7 +1395,1204 @@ public final class DropDao_Impl implements DropDao {
             } else {
               _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
             }
-            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError);
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Flow<List<DropEntity>> getAllDropsFlow() {
+    final String _sql = "SELECT * FROM drops ORDER BY created_at DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Object getDropsByStatus(final String status,
+      final Continuation<? super List<DropEntity>> $completion) {
+    final String _sql = "SELECT * FROM drops WHERE status = ? ORDER BY updated_at DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    if (status == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, status);
+    }
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Flow<List<DropEntity>> getDropsByStatusFlow(final String status) {
+    final String _sql = "SELECT * FROM drops WHERE status = ? ORDER BY updated_at DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    if (status == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, status);
+    }
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Object getAvailableDrops(final Continuation<? super List<DropEntity>> $completion) {
+    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, created_at ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Flow<List<DropEntity>> getAvailableDropsFlow() {
+    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, created_at ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"drops"}, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Object getDropsInProximity(final double minLat, final double maxLat, final double minLng,
+      final double maxLng, final Continuation<? super List<DropEntity>> $completion) {
+    final String _sql = "SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ? ORDER BY priority DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 4);
+    int _argIndex = 1;
+    _statement.bindDouble(_argIndex, minLat);
+    _argIndex = 2;
+    _statement.bindDouble(_argIndex, maxLat);
+    _argIndex = 3;
+    _statement.bindDouble(_argIndex, minLng);
+    _argIndex = 4;
+    _statement.bindDouble(_argIndex, maxLng);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
+      @Override
+      @NonNull
+      public List<DropEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
             _result.add(_item);
           }
           return _result;
@@ -1188,7 +2607,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object getDropsAssignedToTechnician(final String technicianId,
       final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE assignedTechnicianId = ? ORDER BY priority DESC, assignedAt ASC";
+    final String _sql = "SELECT * FROM drops WHERE assigned_technician_id = ? ORDER BY priority DESC, assigned_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -1203,6 +2622,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1214,7 +2804,7 @@ public final class DropDao_Impl implements DropDao {
 
   @Override
   public Flow<List<DropEntity>> getDropsAssignedToTechnicianFlow(final String technicianId) {
-    final String _sql = "SELECT * FROM drops WHERE assignedTechnicianId = ? ORDER BY priority DESC, assignedAt ASC";
+    final String _sql = "SELECT * FROM drops WHERE assigned_technician_id = ? ORDER BY priority DESC, assigned_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (technicianId == null) {
@@ -1228,6 +2818,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1314,7 +3075,7 @@ public final class DropDao_Impl implements DropDao {
 
   @Override
   public Object getDropsNeedingSync(final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE needsSync = 1 ORDER BY updatedAt ASC";
+    final String _sql = "SELECT * FROM drops WHERE needs_sync = 1 ORDER BY updated_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<DropEntity>>() {
@@ -1323,6 +3084,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1335,7 +3267,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object searchDropsByAddress(final String query,
       final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE address LIKE '%' || ? || '%' ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM drops WHERE address LIKE '%' || ? || '%' ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (query == null) {
@@ -1350,6 +3282,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1362,7 +3465,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object getDropsByMinPriority(final int minPriority,
       final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE priority >= ? ORDER BY priority DESC, createdAt ASC";
+    final String _sql = "SELECT * FROM drops WHERE priority >= ? ORDER BY priority DESC, created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, minPriority);
@@ -1373,6 +3476,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1385,7 +3659,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object getOverdueDrops(final long cutoffTime,
       final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE status = 'IN_PROGRESS' AND assignedAt < ? ORDER BY assignedAt ASC";
+    final String _sql = "SELECT * FROM drops WHERE status = 'IN_PROGRESS' AND assigned_at < ? ORDER BY assigned_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, cutoffTime);
@@ -1396,6 +3670,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1408,7 +3853,7 @@ public final class DropDao_Impl implements DropDao {
   @Override
   public Object getDropsInDateRange(final long startDate, final long endDate,
       final Continuation<? super List<DropEntity>> $completion) {
-    final String _sql = "SELECT * FROM drops WHERE createdAt BETWEEN ? AND ? ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM drops WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
     _statement.bindLong(_argIndex, startDate);
@@ -1421,6 +3866,177 @@ public final class DropDao_Impl implements DropDao {
       public List<DropEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfProjectId = CursorUtil.getColumnIndexOrThrow(_cursor, "project_id");
+          final int _cursorIndexOfLatitude = CursorUtil.getColumnIndexOrThrow(_cursor, "latitude");
+          final int _cursorIndexOfLongitude = CursorUtil.getColumnIndexOrThrow(_cursor, "longitude");
+          final int _cursorIndexOfAltitude = CursorUtil.getColumnIndexOrThrow(_cursor, "altitude");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
+          final int _cursorIndexOfAddress = CursorUtil.getColumnIndexOrThrow(_cursor, "address");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfAssignedTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_technician_id");
+          final int _cursorIndexOfCustomerName = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_name");
+          final int _cursorIndexOfCustomerPhone = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_phone");
+          final int _cursorIndexOfCustomerEmail = CursorUtil.getColumnIndexOrThrow(_cursor, "customer_email");
+          final int _cursorIndexOfInstallationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_date");
+          final int _cursorIndexOfActivationStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_status");
+          final int _cursorIndexOfActivationDate = CursorUtil.getColumnIndexOrThrow(_cursor, "activation_date");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfLastSyncAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_sync_attempt");
+          final int _cursorIndexOfSyncError = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_error");
+          final int _cursorIndexOfAssignedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "assigned_at");
+          final int _cursorIndexOfCompletedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_at");
+          final int _cursorIndexOfNeedsSync = CursorUtil.getColumnIndexOrThrow(_cursor, "needs_sync");
+          final List<DropEntity> _result = new ArrayList<DropEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final DropEntity _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final int _tmpProjectId;
+            _tmpProjectId = _cursor.getInt(_cursorIndexOfProjectId);
+            final double _tmpLatitude;
+            _tmpLatitude = _cursor.getDouble(_cursorIndexOfLatitude);
+            final double _tmpLongitude;
+            _tmpLongitude = _cursor.getDouble(_cursorIndexOfLongitude);
+            final Double _tmpAltitude;
+            if (_cursor.isNull(_cursorIndexOfAltitude)) {
+              _tmpAltitude = null;
+            } else {
+              _tmpAltitude = _cursor.getDouble(_cursorIndexOfAltitude);
+            }
+            final Float _tmpAccuracy;
+            if (_cursor.isNull(_cursorIndexOfAccuracy)) {
+              _tmpAccuracy = null;
+            } else {
+              _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
+            }
+            final String _tmpAddress;
+            if (_cursor.isNull(_cursorIndexOfAddress)) {
+              _tmpAddress = null;
+            } else {
+              _tmpAddress = _cursor.getString(_cursorIndexOfAddress);
+            }
+            final DropStatus _tmpStatus;
+            _tmpStatus = __DropStatus_stringToEnum(_cursor.getString(_cursorIndexOfStatus));
+            final String _tmpAssignedTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfAssignedTechnicianId)) {
+              _tmpAssignedTechnicianId = null;
+            } else {
+              _tmpAssignedTechnicianId = _cursor.getString(_cursorIndexOfAssignedTechnicianId);
+            }
+            final String _tmpCustomerName;
+            if (_cursor.isNull(_cursorIndexOfCustomerName)) {
+              _tmpCustomerName = null;
+            } else {
+              _tmpCustomerName = _cursor.getString(_cursorIndexOfCustomerName);
+            }
+            final String _tmpCustomerPhone;
+            if (_cursor.isNull(_cursorIndexOfCustomerPhone)) {
+              _tmpCustomerPhone = null;
+            } else {
+              _tmpCustomerPhone = _cursor.getString(_cursorIndexOfCustomerPhone);
+            }
+            final String _tmpCustomerEmail;
+            if (_cursor.isNull(_cursorIndexOfCustomerEmail)) {
+              _tmpCustomerEmail = null;
+            } else {
+              _tmpCustomerEmail = _cursor.getString(_cursorIndexOfCustomerEmail);
+            }
+            final Date _tmpInstallationDate;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfInstallationDate)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfInstallationDate);
+            }
+            _tmpInstallationDate = __dateConverters.fromTimestamp(_tmp);
+            final ActivationStatus _tmpActivationStatus;
+            _tmpActivationStatus = __ActivationStatus_stringToEnum(_cursor.getString(_cursorIndexOfActivationStatus));
+            final Date _tmpActivationDate;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfActivationDate)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfActivationDate);
+            }
+            _tmpActivationDate = __dateConverters.fromTimestamp(_tmp_1);
+            final String _tmpNotes;
+            if (_cursor.isNull(_cursorIndexOfNotes)) {
+              _tmpNotes = null;
+            } else {
+              _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            }
+            final int _tmpPriority;
+            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_4);
+            final Date _tmpLastSyncAttempt;
+            final Long _tmp_5;
+            if (_cursor.isNull(_cursorIndexOfLastSyncAttempt)) {
+              _tmp_5 = null;
+            } else {
+              _tmp_5 = _cursor.getLong(_cursorIndexOfLastSyncAttempt);
+            }
+            _tmpLastSyncAttempt = __dateConverters.fromTimestamp(_tmp_5);
+            final String _tmpSyncError;
+            if (_cursor.isNull(_cursorIndexOfSyncError)) {
+              _tmpSyncError = null;
+            } else {
+              _tmpSyncError = _cursor.getString(_cursorIndexOfSyncError);
+            }
+            final Date _tmpAssignedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfAssignedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfAssignedAt);
+            }
+            _tmpAssignedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpCompletedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfCompletedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfCompletedAt);
+            }
+            _tmpCompletedAt = __dateConverters.fromTimestamp(_tmp_7);
+            final boolean _tmpNeedsSync;
+            final int _tmp_8;
+            _tmp_8 = _cursor.getInt(_cursorIndexOfNeedsSync);
+            _tmpNeedsSync = _tmp_8 != 0;
+            _item = new DropEntity(_tmpDropNumber,_tmpProjectId,_tmpLatitude,_tmpLongitude,_tmpAltitude,_tmpAccuracy,_tmpAddress,_tmpStatus,_tmpAssignedTechnicianId,_tmpCustomerName,_tmpCustomerPhone,_tmpCustomerEmail,_tmpInstallationDate,_tmpActivationStatus,_tmpActivationDate,_tmpNotes,_tmpPriority,_tmpCreatedAt,_tmpUpdatedAt,_tmpSyncStatus,_tmpLastSyncAttempt,_tmpSyncError,_tmpAssignedAt,_tmpCompletedAt,_tmpNeedsSync);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1474,9 +4090,9 @@ public final class DropDao_Impl implements DropDao {
   public Object getAverageCompletionTimeByPriority(
       final Continuation<? super Map<Integer, Long>> $completion) {
     final String _sql = "\n"
-            + "        SELECT priority, AVG(completedAt - assignedAt) as avgCompletionTime\n"
+            + "        SELECT priority, AVG(completed_at - assigned_at) as avgCompletionTime\n"
             + "        FROM drops\n"
-            + "        WHERE status = 'COMPLETED' AND assignedAt IS NOT NULL AND completedAt IS NOT NULL\n"
+            + "        WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL\n"
             + "        GROUP BY priority\n"
             + "        ORDER BY priority DESC\n"
             + "    ";
@@ -1488,6 +4104,20 @@ public final class DropDao_Impl implements DropDao {
       public Map<Integer, Long> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Map<Integer, Long> _result = new LinkedHashMap<Integer, Long>();
+          while (_cursor.moveToNext()) {
+            final Integer _key;
+            _key = new Integer();
+            if () {
+              _result.put(_key, null);
+              continue;
+            }
+            final Long _value;
+            _value = new Long();
+            if (!_result.containsKey(_key)) {
+              _result.put(_key, _value);
+            }
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -1505,9 +4135,9 @@ public final class DropDao_Impl implements DropDao {
       @NonNull
       public Unit call() throws Exception {
         final StringBuilder _stringBuilder = StringUtil.newStringBuilder();
-        _stringBuilder.append("UPDATE drops SET needsSync = 0, lastSyncedAt = ");
+        _stringBuilder.append("UPDATE drops SET needs_sync = 0, last_sync_attempt = ");
         _stringBuilder.append("?");
-        _stringBuilder.append(" WHERE id IN (");
+        _stringBuilder.append(" WHERE drop_number IN (");
         final int _inputSize = dropIds.size();
         StringUtil.appendPlaceholders(_stringBuilder, _inputSize);
         _stringBuilder.append(")");
