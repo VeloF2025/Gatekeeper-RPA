@@ -5,7 +5,6 @@ import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
-import error.NonExistentClass;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
@@ -25,26 +24,21 @@ import javax.inject.Provider;
 public final class PhotoUploadService_Factory implements Factory<PhotoUploadService> {
   private final Provider<InstallationAPI> installationApiProvider;
 
-  private final Provider<NonExistentClass> offlineQueueProvider;
-
-  public PhotoUploadService_Factory(Provider<InstallationAPI> installationApiProvider,
-      Provider<NonExistentClass> offlineQueueProvider) {
+  public PhotoUploadService_Factory(Provider<InstallationAPI> installationApiProvider) {
     this.installationApiProvider = installationApiProvider;
-    this.offlineQueueProvider = offlineQueueProvider;
   }
 
   @Override
   public PhotoUploadService get() {
-    return newInstance(installationApiProvider.get(), offlineQueueProvider.get());
+    return newInstance(installationApiProvider.get());
   }
 
-  public static PhotoUploadService_Factory create(Provider<InstallationAPI> installationApiProvider,
-      Provider<NonExistentClass> offlineQueueProvider) {
-    return new PhotoUploadService_Factory(installationApiProvider, offlineQueueProvider);
+  public static PhotoUploadService_Factory create(
+      Provider<InstallationAPI> installationApiProvider) {
+    return new PhotoUploadService_Factory(installationApiProvider);
   }
 
-  public static PhotoUploadService newInstance(InstallationAPI installationApi,
-      NonExistentClass offlineQueue) {
-    return new PhotoUploadService(installationApi, offlineQueue);
+  public static PhotoUploadService newInstance(InstallationAPI installationApi) {
+    return new PhotoUploadService(installationApi);
   }
 }
