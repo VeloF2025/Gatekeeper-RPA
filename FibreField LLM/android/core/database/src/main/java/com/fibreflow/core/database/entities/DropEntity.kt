@@ -116,7 +116,19 @@ data class DropEntity(
     val lastSyncAttempt: Date? = null,
     
     @ColumnInfo(name = "sync_error")
-    val syncError: String? = null
+    val syncError: String? = null,
+
+    // Assignment tracking
+    @ColumnInfo(name = "assigned_at")
+    val assignedAt: Date? = null,
+
+    // Completion tracking
+    @ColumnInfo(name = "completed_at")
+    val completedAt: Date? = null,
+
+    // Sync tracking flag
+    @ColumnInfo(name = "needs_sync")
+    val needsSync: Boolean = false
 ) {
     
     /**

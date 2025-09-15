@@ -23,10 +23,10 @@ interface TechnicianDao {
     @Delete
     suspend fun deleteTechnician(technician: TechnicianEntity)
 
-    @Query("SELECT * FROM technicians WHERE id = :technicianId")
+    @Query("SELECT * FROM technicians WHERE technician_id = :technicianId")
     suspend fun getTechnicianById(technicianId: String): TechnicianEntity?
 
-    @Query("SELECT * FROM technicians WHERE id = :technicianId")
+    @Query("SELECT * FROM technicians WHERE technician_id = :technicianId")
     fun getTechnicianByIdFlow(technicianId: String): Flow<TechnicianEntity?>
 
     @Query("SELECT * FROM technicians WHERE email = :email")
@@ -38,10 +38,10 @@ interface TechnicianDao {
     @Query("SELECT * FROM technicians ORDER BY name ASC")
     fun getAllTechniciansFlow(): Flow<List<TechnicianEntity>>
 
-    @Query("SELECT * FROM technicians WHERE isActive = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM technicians WHERE active = 1 ORDER BY name ASC")
     suspend fun getActiveTechnicians(): List<TechnicianEntity>
 
-    @Query("SELECT * FROM technicians WHERE isActive = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM technicians WHERE active = 1 ORDER BY name ASC")
     fun getActiveTechniciansFlow(): Flow<List<TechnicianEntity>>
 
     @Query("SELECT * FROM technicians WHERE role = :role ORDER BY name ASC")
@@ -50,16 +50,16 @@ interface TechnicianDao {
     @Query("SELECT * FROM technicians WHERE role = :role ORDER BY name ASC")
     fun getTechniciansByRoleFlow(role: String): Flow<List<TechnicianEntity>>
 
-    @Query("UPDATE technicians SET isActive = :isActive WHERE id = :technicianId")
-    suspend fun updateTechnicianActiveStatus(technicianId: String, isActive: Boolean)
+    @Query("UPDATE technicians SET active = :active WHERE technician_id = :technicianId")
+    suspend fun updateTechnicianActiveStatus(technicianId: String, active: Boolean)
 
-    @Query("UPDATE technicians SET lastLoginAt = :timestamp WHERE id = :technicianId")
+    @Query("UPDATE technicians SET last_login = :timestamp WHERE technician_id = :technicianId")
     suspend fun updateLastLoginTime(technicianId: String, timestamp: Long = System.currentTimeMillis())
 
-    @Query("UPDATE technicians SET lastSyncAt = :timestamp WHERE id = :technicianId")
+    @Query("UPDATE technicians SET last_sync_at = :timestamp WHERE technician_id = :technicianId")
     suspend fun updateLastSyncTime(technicianId: String, timestamp: Long = System.currentTimeMillis())
 
-    @Query("SELECT COUNT(*) FROM technicians WHERE isActive = 1")
+    @Query("SELECT COUNT(*) FROM technicians WHERE active = 1")
     suspend fun getActiveTechnicianCount(): Int
 
     @Query("SELECT COUNT(*) FROM technicians")
@@ -68,16 +68,16 @@ interface TechnicianDao {
     @Query("SELECT COUNT(*) FROM technicians WHERE role = :role")
     suspend fun getTechnicianCountByRole(role: String): Int
 
-    @Query("DELETE FROM technicians WHERE isActive = 0 AND lastLoginAt < :cutoffDate")
+    @Query("DELETE FROM technicians WHERE active = 0 AND last_login < :cutoffDate")
     suspend fun deleteInactiveTechnicians(cutoffDate: Long): Int
 
     @Query("SELECT * FROM technicians WHERE name LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' ORDER BY name ASC")
     suspend fun searchTechnicians(query: String): List<TechnicianEntity>
 
-    @Query("SELECT * FROM technicians WHERE lastLoginAt BETWEEN :startTime AND :endTime ORDER BY lastLoginAt DESC")
+    @Query("SELECT * FROM technicians WHERE last_login BETWEEN :startTime AND :endTime ORDER BY last_login DESC")
     suspend fun getTechniciansByLastLoginRange(startTime: Long, endTime: Long): List<TechnicianEntity>
 
-    @Query("SELECT AVG(System.currentTimeMillis() - lastLoginAt) FROM technicians WHERE isActive = 1 AND lastLoginAt IS NOT NULL")
+    @Query("SELECT AVG(System.currentTimeMillis() - last_login) FROM technicians WHERE active = 1 AND last_login IS NOT NULL")
     suspend fun getAverageTimeSinceLastLogin(): Long?
 
     @Query("SELECT role, COUNT(*) as count FROM technicians GROUP BY role ORDER BY count DESC")

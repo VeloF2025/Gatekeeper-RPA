@@ -50,49 +50,49 @@ interface DropDao {
     /**
      * Get drop by ID
      */
-    @Query("SELECT * FROM drops WHERE id = :dropId")
+    @Query("SELECT * FROM drops WHERE drop_number = :dropId")
     suspend fun getDropById(dropId: String): DropEntity?
 
     /**
      * Get drop by ID as Flow
      */
-    @Query("SELECT * FROM drops WHERE id = :dropId")
+    @Query("SELECT * FROM drops WHERE drop_number = :dropId")
     fun getDropByIdFlow(dropId: String): Flow<DropEntity?>
 
     /**
      * Get all drops
      */
-    @Query("SELECT * FROM drops ORDER BY createdAt DESC")
+    @Query("SELECT * FROM drops ORDER BY created_at DESC")
     suspend fun getAllDrops(): List<DropEntity>
 
     /**
      * Get all drops as Flow
      */
-    @Query("SELECT * FROM drops ORDER BY createdAt DESC")
+    @Query("SELECT * FROM drops ORDER BY created_at DESC")
     fun getAllDropsFlow(): Flow<List<DropEntity>>
 
     /**
      * Get drops by status
      */
-    @Query("SELECT * FROM drops WHERE status = :status ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM drops WHERE status = :status ORDER BY updated_at DESC")
     suspend fun getDropsByStatus(status: String): List<DropEntity>
 
     /**
      * Get drops by status as Flow
      */
-    @Query("SELECT * FROM drops WHERE status = :status ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM drops WHERE status = :status ORDER BY updated_at DESC")
     fun getDropsByStatusFlow(status: String): Flow<List<DropEntity>>
 
     /**
      * Get available drops (not assigned or in progress)
      */
-    @Query("SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, createdAt ASC")
+    @Query("SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, created_at ASC")
     suspend fun getAvailableDrops(): List<DropEntity>
 
     /**
      * Get available drops as Flow
      */
-    @Query("SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, createdAt ASC")
+    @Query("SELECT * FROM drops WHERE status IN ('AVAILABLE', 'PENDING') ORDER BY priority DESC, created_at ASC")
     fun getAvailableDropsFlow(): Flow<List<DropEntity>>
 
     /**
@@ -104,49 +104,49 @@ interface DropDao {
     /**
      * Update drop status
      */
-    @Query("UPDATE drops SET status = :status, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET status = :status, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun updateDropStatus(dropId: String, status: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Assign drop to technician
      */
-    @Query("UPDATE drops SET assignedTechnicianId = :technicianId, status = 'IN_PROGRESS', assignedAt = :timestamp, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET assigned_technician_id = :technicianId, status = 'IN_PROGRESS', assigned_at = :timestamp, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun assignDropToTechnician(dropId: String, technicianId: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Unassign drop from technician
      */
-    @Query("UPDATE drops SET assignedTechnicianId = NULL, status = 'AVAILABLE', assignedAt = NULL, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET assigned_technician_id = NULL, status = 'AVAILABLE', assigned_at = NULL, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun unassignDrop(dropId: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Mark drop as completed
      */
-    @Query("UPDATE drops SET status = 'COMPLETED', completedAt = :timestamp, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET status = 'COMPLETED', completed_at = :timestamp, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun markDropCompleted(dropId: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Update drop location
      */
-    @Query("UPDATE drops SET latitude = :latitude, longitude = :longitude, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET latitude = :latitude, longitude = :longitude, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun updateDropLocation(dropId: String, latitude: Double, longitude: Double, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Update drop priority
      */
-    @Query("UPDATE drops SET priority = :priority, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET priority = :priority, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun updateDropPriority(dropId: String, priority: Int, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get drops assigned to technician
      */
-    @Query("SELECT * FROM drops WHERE assignedTechnicianId = :technicianId ORDER BY priority DESC, assignedAt ASC")
+    @Query("SELECT * FROM drops WHERE assigned_technician_id = :technicianId ORDER BY priority DESC, assigned_at ASC")
     suspend fun getDropsAssignedToTechnician(technicianId: String): List<DropEntity>
 
     /**
      * Get drops assigned to technician as Flow
      */
-    @Query("SELECT * FROM drops WHERE assignedTechnicianId = :technicianId ORDER BY priority DESC, assignedAt ASC")
+    @Query("SELECT * FROM drops WHERE assigned_technician_id = :technicianId ORDER BY priority DESC, assigned_at ASC")
     fun getDropsAssignedToTechnicianFlow(technicianId: String): Flow<List<DropEntity>>
 
     /**
@@ -164,55 +164,55 @@ interface DropDao {
     /**
      * Mark drop for sync
      */
-    @Query("UPDATE drops SET needsSync = 1, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET needs_sync = 1, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun markDropForSync(dropId: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Mark drop as synced
      */
-    @Query("UPDATE drops SET needsSync = 0, lastSyncedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET needs_sync = 0, last_sync_attempt = :timestamp WHERE drop_number = :dropId")
     suspend fun markDropSynced(dropId: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get drops needing sync
      */
-    @Query("SELECT * FROM drops WHERE needsSync = 1 ORDER BY updatedAt ASC")
+    @Query("SELECT * FROM drops WHERE needs_sync = 1 ORDER BY updated_at ASC")
     suspend fun getDropsNeedingSync(): List<DropEntity>
 
     /**
      * Search drops by address
      */
-    @Query("SELECT * FROM drops WHERE address LIKE '%' || :query || '%' ORDER BY createdAt DESC")
+    @Query("SELECT * FROM drops WHERE address LIKE '%' || :query || '%' ORDER BY created_at DESC")
     suspend fun searchDropsByAddress(query: String): List<DropEntity>
 
     /**
      * Get drops by priority level
      */
-    @Query("SELECT * FROM drops WHERE priority >= :minPriority ORDER BY priority DESC, createdAt ASC")
+    @Query("SELECT * FROM drops WHERE priority >= :minPriority ORDER BY priority DESC, created_at ASC")
     suspend fun getDropsByMinPriority(minPriority: Int): List<DropEntity>
 
     /**
      * Get overdue drops (assigned but not completed within expected time)
      */
-    @Query("SELECT * FROM drops WHERE status = 'IN_PROGRESS' AND assignedAt < :cutoffTime ORDER BY assignedAt ASC")
+    @Query("SELECT * FROM drops WHERE status = 'IN_PROGRESS' AND assigned_at < :cutoffTime ORDER BY assigned_at ASC")
     suspend fun getOverdueDrops(cutoffTime: Long): List<DropEntity>
 
     /**
      * Update drop notes
      */
-    @Query("UPDATE drops SET notes = :notes, updatedAt = :timestamp WHERE id = :dropId")
+    @Query("UPDATE drops SET notes = :notes, updated_at = :timestamp WHERE drop_number = :dropId")
     suspend fun updateDropNotes(dropId: String, notes: String?, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get drops created within date range
      */
-    @Query("SELECT * FROM drops WHERE createdAt BETWEEN :startDate AND :endDate ORDER BY createdAt DESC")
+    @Query("SELECT * FROM drops WHERE created_at BETWEEN :startDate AND :endDate ORDER BY created_at DESC")
     suspend fun getDropsInDateRange(startDate: Long, endDate: Long): List<DropEntity>
 
     /**
      * Bulk update sync status
      */
-    @Query("UPDATE drops SET needsSync = 0, lastSyncedAt = :timestamp WHERE id IN (:dropIds)")
+    @Query("UPDATE drops SET needs_sync = 0, last_sync_attempt = :timestamp WHERE drop_number IN (:dropIds)")
     suspend fun markDropsSynced(dropIds: List<String>, timestamp: Long = System.currentTimeMillis())
 
     /**
@@ -230,9 +230,9 @@ interface DropDao {
      * Get average completion time by priority
      */
     @Query("""
-        SELECT priority, AVG(completedAt - assignedAt) as avgCompletionTime
+        SELECT priority, AVG(completed_at - assigned_at) as avgCompletionTime
         FROM drops
-        WHERE status = 'COMPLETED' AND assignedAt IS NOT NULL AND completedAt IS NOT NULL
+        WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL
         GROUP BY priority
         ORDER BY priority DESC
     """)
