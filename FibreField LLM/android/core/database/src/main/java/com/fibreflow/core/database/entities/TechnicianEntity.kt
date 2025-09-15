@@ -71,7 +71,10 @@ data class TechnicianEntity(
     val createdAt: Date,
     
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Date
+    val updatedAt: Date,
+
+    @ColumnInfo(name = "last_sync_at")
+    val lastSyncAt: Date? = null
 ) {
     
     /**
