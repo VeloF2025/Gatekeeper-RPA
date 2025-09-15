@@ -50,98 +50,98 @@ interface InstallationDao {
     /**
      * Get installation by ID
      */
-    @Query("SELECT * FROM installations WHERE id = :installationId")
-    suspend fun getInstallationById(installationId: String): InstallationEntity?
+    @Query("SELECT * FROM installations WHERE installation_id = :installationId")
+    suspend fun getInstallationById(installationId: Long): InstallationEntity?
 
     /**
      * Get installation by ID as Flow for reactive updates
      */
-    @Query("SELECT * FROM installations WHERE id = :installationId")
-    fun getInstallationByIdFlow(installationId: String): Flow<InstallationEntity?>
+    @Query("SELECT * FROM installations WHERE installation_id = :installationId")
+    fun getInstallationByIdFlow(installationId: Long): Flow<InstallationEntity?>
 
     /**
      * Get all installations for a technician
      */
-    @Query("SELECT * FROM installations WHERE technicianId = :technicianId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM installations WHERE technician_id = :technicianId ORDER BY created_at DESC")
     suspend fun getInstallationsByTechnician(technicianId: String): List<InstallationEntity>
 
     /**
      * Get all installations for a technician as Flow
      */
-    @Query("SELECT * FROM installations WHERE technicianId = :technicianId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM installations WHERE technician_id = :technicianId ORDER BY created_at DESC")
     fun getInstallationsByTechnicianFlow(technicianId: String): Flow<List<InstallationEntity>>
 
     /**
      * Get installations by drop ID
      */
-    @Query("SELECT * FROM installations WHERE dropId = :dropId ORDER BY createdAt DESC")
-    suspend fun getInstallationsByDrop(dropId: String): List<InstallationEntity>
+    @Query("SELECT * FROM installations WHERE drop_number = :dropNumber ORDER BY created_at DESC")
+    suspend fun getInstallationsByDrop(dropNumber: String): List<InstallationEntity>
 
     /**
      * Get installations by status
      */
-    @Query("SELECT * FROM installations WHERE status = :status ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM installations WHERE status = :status ORDER BY updated_at DESC")
     suspend fun getInstallationsByStatus(status: String): List<InstallationEntity>
 
     /**
      * Get installations by status as Flow
      */
-    @Query("SELECT * FROM installations WHERE status = :status ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM installations WHERE status = :status ORDER BY updated_at DESC")
     fun getInstallationsByStatusFlow(status: String): Flow<List<InstallationEntity>>
 
     /**
      * Get pending installations (not completed)
      */
-    @Query("SELECT * FROM installations WHERE status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY createdAt ASC")
+    @Query("SELECT * FROM installations WHERE status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY created_at ASC")
     suspend fun getPendingInstallations(): List<InstallationEntity>
 
     /**
      * Get pending installations as Flow
      */
-    @Query("SELECT * FROM installations WHERE status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY createdAt ASC")
+    @Query("SELECT * FROM installations WHERE status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY created_at ASC")
     fun getPendingInstallationsFlow(): Flow<List<InstallationEntity>>
 
     /**
      * Get completed installations within date range
      */
-    @Query("SELECT * FROM installations WHERE status = 'COMPLETED' AND completedAt BETWEEN :startDate AND :endDate ORDER BY completedAt DESC")
+    @Query("SELECT * FROM installations WHERE status = 'COMPLETED' AND end_time BETWEEN :startDate AND :endDate ORDER BY end_time DESC")
     suspend fun getCompletedInstallationsInRange(startDate: Long, endDate: Long): List<InstallationEntity>
 
     /**
      * Get installations requiring sync
      */
-    @Query("SELECT * FROM installations WHERE needsSync = 1 ORDER BY updatedAt ASC")
+    @Query("SELECT * FROM installations WHERE ai_guidance_used = 1 ORDER BY updated_at ASC")
     suspend fun getInstallationsNeedingSync(): List<InstallationEntity>
 
     /**
      * Mark installation as needing sync
      */
-    @Query("UPDATE installations SET needsSync = 1, updatedAt = :timestamp WHERE id = :installationId")
-    suspend fun markInstallationForSync(installationId: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET ai_guidance_used = 1, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun markInstallationForSync(installationId: Long, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Mark installation as synced
      */
-    @Query("UPDATE installations SET needsSync = 0, lastSyncedAt = :timestamp WHERE id = :installationId")
-    suspend fun markInstallationSynced(installationId: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET ai_guidance_used = 0, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun markInstallationSynced(installationId: Long, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Update installation status
      */
-    @Query("UPDATE installations SET status = :status, updatedAt = :timestamp WHERE id = :installationId")
-    suspend fun updateInstallationStatus(installationId: String, status: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET status = :status, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun updateInstallationStatus(installationId: Long, status: String, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Update installation progress
      */
-    @Query("UPDATE installations SET currentStep = :currentStep, progress = :progress, updatedAt = :timestamp WHERE id = :installationId")
-    suspend fun updateInstallationProgress(installationId: String, currentStep: String, progress: Float, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET current_step = :currentStep, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun updateInstallationProgress(installationId: Long, currentStep: Int, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Mark installation as completed
      */
-    @Query("UPDATE installations SET status = 'COMPLETED', completedAt = :timestamp, updatedAt = :timestamp WHERE id = :installationId")
-    suspend fun markInstallationCompleted(installationId: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET status = 'COMPLETED', end_time = :timestamp, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun markInstallationCompleted(installationId: Long, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get installation count by status
@@ -158,41 +158,41 @@ interface InstallationDao {
     /**
      * Get installations created within date range
      */
-    @Query("SELECT * FROM installations WHERE createdAt BETWEEN :startDate AND :endDate ORDER BY createdAt DESC")
+    @Query("SELECT * FROM installations WHERE created_at BETWEEN :startDate AND :endDate ORDER BY created_at DESC")
     suspend fun getInstallationsInDateRange(startDate: Long, endDate: Long): List<InstallationEntity>
 
     /**
      * Delete old completed installations (cleanup)
      */
-    @Query("DELETE FROM installations WHERE status = 'COMPLETED' AND completedAt < :cutoffDate")
+    @Query("DELETE FROM installations WHERE status = 'COMPLETED' AND end_time < :cutoffDate")
     suspend fun deleteOldCompletedInstallations(cutoffDate: Long): Int
 
     /**
      * Search installations by equipment type
      */
-    @Query("SELECT * FROM installations WHERE equipmentType LIKE '%' || :equipmentType || '%' ORDER BY createdAt DESC")
-    suspend fun searchInstallationsByEquipment(equipmentType: String): List<InstallationEntity>
+    @Query("SELECT * FROM installations WHERE ont_serial LIKE '%' || :ontSerial || '%' ORDER BY created_at DESC")
+    suspend fun searchInstallationsByEquipment(ontSerial: String): List<InstallationEntity>
 
     /**
      * Get installations with validation issues
      */
-    @Query("SELECT * FROM installations WHERE hasValidationIssues = 1 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM installations WHERE validation_errors IS NOT NULL ORDER BY updated_at DESC")
     suspend fun getInstallationsWithValidationIssues(): List<InstallationEntity>
 
     /**
      * Update validation issues flag
      */
-    @Query("UPDATE installations SET hasValidationIssues = :hasIssues, updatedAt = :timestamp WHERE id = :installationId")
-    suspend fun updateValidationIssuesFlag(installationId: String, hasIssues: Boolean, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET validation_errors = :validationErrors, updated_at = :timestamp WHERE installation_id = :installationId")
+    suspend fun updateValidationIssuesFlag(installationId: Long, validationErrors: String?, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get average installation time by equipment type
      */
     @Query("""
-        SELECT equipmentType, AVG(completedAt - createdAt) as avgTime
+        SELECT ont_serial, AVG(end_time - start_time) as avgTime
         FROM installations
-        WHERE status = 'COMPLETED' AND equipmentType IS NOT NULL
-        GROUP BY equipmentType
+        WHERE status = 'COMPLETED' AND ont_serial IS NOT NULL
+        GROUP BY ont_serial
         ORDER BY avgTime ASC
     """)
     suspend fun getAverageInstallationTimeByEquipment(): Map<String, Long>
@@ -200,6 +200,6 @@ interface InstallationDao {
     /**
      * Bulk update sync status
      */
-    @Query("UPDATE installations SET needsSync = 0, lastSyncedAt = :timestamp WHERE id IN (:installationIds)")
-    suspend fun markInstallationsSynced(installationIds: List<String>, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE installations SET ai_guidance_used = 0, updated_at = :timestamp WHERE installation_id IN (:installationIds)")
+    suspend fun markInstallationsSynced(installationIds: List<Long>, timestamp: Long = System.currentTimeMillis())
 }

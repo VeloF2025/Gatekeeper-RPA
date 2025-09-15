@@ -50,73 +50,72 @@ interface PhotoDao {
     /**
      * Get photo by ID
      */
-    @Query("SELECT * FROM photos WHERE id = :photoId")
-    suspend fun getPhotoById(photoId: String): PhotoEntity?
+    @Query("SELECT * FROM photos WHERE photo_id = :photoId")
+    suspend fun getPhotoById(photoId: Long): PhotoEntity?
 
     /**
      * Get photo by ID as Flow
      */
-    @Query("SELECT * FROM photos WHERE id = :photoId")
-    fun getPhotoByIdFlow(photoId: String): Flow<PhotoEntity?>
+    @Query("SELECT * FROM photos WHERE photo_id = :photoId")
+    fun getPhotoByIdFlow(photoId: Long): Flow<PhotoEntity?>
 
     /**
      * Get all photos for an installation
      */
-    @Query("SELECT * FROM photos WHERE installationId = :installationId ORDER BY sequenceNumber ASC, capturedAt ASC")
-    suspend fun getPhotosByInstallation(installationId: String): List<PhotoEntity>
+    @Query("SELECT * FROM photos WHERE installation_id = :installationId ORDER BY created_at ASC")
+    suspend fun getPhotosByInstallation(installationId: Long): List<PhotoEntity>
 
     /**
      * Get all photos for an installation as Flow
      */
-    @Query("SELECT * FROM photos WHERE installationId = :installationId ORDER BY sequenceNumber ASC, capturedAt ASC")
-    fun getPhotosByInstallationFlow(installationId: String): Flow<List<PhotoEntity>>
+    @Query("SELECT * FROM photos WHERE installation_id = :installationId ORDER BY created_at ASC")
+    fun getPhotosByInstallationFlow(installationId: Long): Flow<List<PhotoEntity>>
 
     /**
      * Get photos by step
      */
-    @Query("SELECT * FROM photos WHERE installationId = :installationId AND stepName = :stepName ORDER BY sequenceNumber ASC")
-    suspend fun getPhotosByStep(installationId: String, stepName: String): List<PhotoEntity>
+    @Query("SELECT * FROM photos WHERE installation_id = :installationId AND photo_type = :photoType ORDER BY created_at ASC")
+    suspend fun getPhotosByStep(installationId: Long, photoType: String): List<PhotoEntity>
 
     /**
      * Get photos requiring validation
      */
-    @Query("SELECT * FROM photos WHERE validationStatus = 'PENDING' ORDER BY capturedAt ASC")
+    @Query("SELECT * FROM photos WHERE validation_status = 'PENDING' ORDER BY created_at ASC")
     suspend fun getPhotosRequiringValidation(): List<PhotoEntity>
 
     /**
      * Get photos requiring validation as Flow
      */
-    @Query("SELECT * FROM photos WHERE validationStatus = 'PENDING' ORDER BY capturedAt ASC")
+    @Query("SELECT * FROM photos WHERE validation_status = 'PENDING' ORDER BY created_at ASC")
     fun getPhotosRequiringValidationFlow(): Flow<List<PhotoEntity>>
 
     /**
      * Get validated photos
      */
-    @Query("SELECT * FROM photos WHERE validationStatus = 'PASSED' ORDER BY validatedAt DESC")
+    @Query("SELECT * FROM photos WHERE validation_status = 'PASSED' ORDER BY updated_at DESC")
     suspend fun getValidatedPhotos(): List<PhotoEntity>
 
     /**
      * Get failed validation photos
      */
-    @Query("SELECT * FROM photos WHERE validationStatus = 'FAILED' ORDER BY validatedAt DESC")
+    @Query("SELECT * FROM photos WHERE validation_status = 'FAILED' ORDER BY updated_at DESC")
     suspend fun getFailedValidationPhotos(): List<PhotoEntity>
 
     /**
      * Update photo validation status
      */
-    @Query("UPDATE photos SET validationStatus = :status, validatedAt = :timestamp, validationNotes = :notes WHERE id = :photoId")
-    suspend fun updatePhotoValidationStatus(photoId: String, status: String, notes: String?, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE photos SET validation_status = :status, updated_at = :timestamp, override_reason = :notes WHERE photo_id = :photoId")
+    suspend fun updatePhotoValidationStatus(photoId: Long, status: String, notes: String?, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Update photo validation results
      */
-    @Query("UPDATE photos SET validationStatus = :status, validatedAt = :timestamp, validationConfidence = :confidence, detectedObjects = :objects, extractedText = :text, validationNotes = :notes WHERE id = :photoId")
+    @Query("UPDATE photos SET validation_status = :status, updated_at = :timestamp, validation_confidence = :confidence, ai_metadata = :objects, override_reason = :notes WHERE photo_id = :photoId")
     suspend fun updatePhotoValidationResults(
-        photoId: String,
+        photoId: Long,
         status: String,
         confidence: Float,
         objects: String?, // JSON string of detected objects
-        text: String?,    // Extracted text
         notes: String?,
         timestamp: Long = System.currentTimeMillis()
     )
@@ -124,55 +123,55 @@ interface PhotoDao {
     /**
      * Mark photo for sync
      */
-    @Query("UPDATE photos SET needsSync = 1 WHERE id = :photoId")
-    suspend fun markPhotoForSync(photoId: String)
+    @Query("UPDATE photos SET upload_status = 'PENDING' WHERE photo_id = :photoId")
+    suspend fun markPhotoForSync(photoId: Long)
 
     /**
      * Mark photo as synced
      */
-    @Query("UPDATE photos SET needsSync = 0, lastSyncedAt = :timestamp WHERE id = :photoId")
-    suspend fun markPhotoSynced(photoId: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE photos SET upload_status = 'COMPLETED', updated_at = :timestamp WHERE photo_id = :photoId")
+    suspend fun markPhotoSynced(photoId: Long, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get photos needing sync
      */
-    @Query("SELECT * FROM photos WHERE needsSync = 1 ORDER BY capturedAt ASC")
+    @Query("SELECT * FROM photos WHERE upload_status = 'PENDING' ORDER BY created_at ASC")
     suspend fun getPhotosNeedingSync(): List<PhotoEntity>
 
     /**
      * Update photo file path
      */
-    @Query("UPDATE photos SET filePath = :filePath, fileSizeBytes = :fileSize WHERE id = :photoId")
-    suspend fun updatePhotoFilePath(photoId: String, filePath: String, fileSize: Long)
+    @Query("UPDATE photos SET file_path = :filePath, file_size_bytes = :fileSize WHERE photo_id = :photoId")
+    suspend fun updatePhotoFilePath(photoId: Long, filePath: String, fileSize: Long)
 
     /**
      * Update photo metadata
      */
-    @Query("UPDATE photos SET latitude = :latitude, longitude = :longitude, altitude = :altitude, bearing = :bearing WHERE id = :photoId")
-    suspend fun updatePhotoLocation(photoId: String, latitude: Double?, longitude: Double?, altitude: Double?, bearing: Float?)
+    @Query("UPDATE photos SET ai_metadata = :locationData WHERE photo_id = :photoId")
+    suspend fun updatePhotoLocation(photoId: Long, locationData: String?)
 
     /**
      * Update photo quality metrics
      */
-    @Query("UPDATE photos SET brightness = :brightness, sharpness = :sharpness, contrast = :contrast, qualityScore = :qualityScore WHERE id = :photoId")
-    suspend fun updatePhotoQualityMetrics(photoId: String, brightness: Float?, sharpness: Float?, contrast: Float?, qualityScore: Float?)
+    @Query("UPDATE photos SET validation_confidence = :qualityScore WHERE photo_id = :photoId")
+    suspend fun updatePhotoQualityMetrics(photoId: Long, qualityScore: Float?)
 
     /**
      * Get photos by quality score range
      */
-    @Query("SELECT * FROM photos WHERE qualityScore BETWEEN :minScore AND :maxScore ORDER BY qualityScore DESC")
+    @Query("SELECT * FROM photos WHERE validation_confidence BETWEEN :minScore AND :maxScore ORDER BY validation_confidence DESC")
     suspend fun getPhotosByQualityRange(minScore: Float, maxScore: Float): List<PhotoEntity>
 
     /**
      * Get low quality photos
      */
-    @Query("SELECT * FROM photos WHERE qualityScore < 0.6 ORDER BY qualityScore ASC")
+    @Query("SELECT * FROM photos WHERE validation_confidence < 0.6 ORDER BY validation_confidence ASC")
     suspend fun getLowQualityPhotos(): List<PhotoEntity>
 
     /**
      * Get photo count by validation status
      */
-    @Query("SELECT COUNT(*) FROM photos WHERE validationStatus = :status")
+    @Query("SELECT COUNT(*) FROM photos WHERE validation_status = :status")
     suspend fun getPhotoCountByValidationStatus(status: String): Int
 
     /**
@@ -184,29 +183,29 @@ interface PhotoDao {
     /**
      * Get photos captured within date range
      */
-    @Query("SELECT * FROM photos WHERE capturedAt BETWEEN :startDate AND :endDate ORDER BY capturedAt DESC")
+    @Query("SELECT * FROM photos WHERE created_at BETWEEN :startDate AND :endDate ORDER BY created_at DESC")
     suspend fun getPhotosInDateRange(startDate: Long, endDate: Long): List<PhotoEntity>
 
     /**
      * Delete photos older than cutoff date
      */
-    @Query("DELETE FROM photos WHERE capturedAt < :cutoffDate")
+    @Query("DELETE FROM photos WHERE created_at < :cutoffDate")
     suspend fun deleteOldPhotos(cutoffDate: Long): Int
 
     /**
      * Get photos by technician
      */
-    @Query("SELECT p.* FROM photos p INNER JOIN installations i ON p.installationId = i.id WHERE i.technicianId = :technicianId ORDER BY p.capturedAt DESC")
+    @Query("SELECT p.* FROM photos p INNER JOIN installations i ON p.installation_id = i.installation_id WHERE i.technician_id = :technicianId ORDER BY p.created_at DESC")
     suspend fun getPhotosByTechnician(technicianId: String): List<PhotoEntity>
 
     /**
      * Get average quality score by step
      */
     @Query("""
-        SELECT stepName, AVG(qualityScore) as avgQuality, COUNT(*) as photoCount
+        SELECT photo_type, AVG(validation_confidence) as avgQuality, COUNT(*) as photoCount
         FROM photos
-        WHERE qualityScore IS NOT NULL
-        GROUP BY stepName
+        WHERE validation_confidence IS NOT NULL
+        GROUP BY photo_type
         ORDER BY avgQuality DESC
     """)
     suspend fun getAverageQualityByStep(): Map<String, Pair<Float, Int>>
@@ -215,29 +214,29 @@ interface PhotoDao {
      * Get validation accuracy statistics
      */
     @Query("""
-        SELECT validationStatus, COUNT(*) as count,
-               AVG(validationConfidence) as avgConfidence
+        SELECT validation_status, COUNT(*) as count,
+               AVG(validation_confidence) as avgConfidence
         FROM photos
-        WHERE validationStatus IS NOT NULL
-        GROUP BY validationStatus
+        WHERE validation_status IS NOT NULL
+        GROUP BY validation_status
     """)
     suspend fun getValidationStatistics(): Map<String, Pair<Int, Float>>
 
     /**
      * Bulk update sync status
      */
-    @Query("UPDATE photos SET needsSync = 0, lastSyncedAt = :timestamp WHERE id IN (:photoIds)")
-    suspend fun markPhotosSynced(photoIds: List<String>, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE photos SET upload_status = 'COMPLETED', updated_at = :timestamp WHERE photo_id IN (:photoIds)")
+    suspend fun markPhotosSynced(photoIds: List<Long>, timestamp: Long = System.currentTimeMillis())
 
     /**
      * Get photos with detected objects containing specific text
      */
-    @Query("SELECT * FROM photos WHERE detectedObjects LIKE '%' || :objectName || '%' ORDER BY capturedAt DESC")
+    @Query("SELECT * FROM photos WHERE ai_metadata LIKE '%' || :objectName || '%' ORDER BY created_at DESC")
     suspend fun searchPhotosByDetectedObject(objectName: String): List<PhotoEntity>
 
     /**
      * Get photos with extracted text containing specific text
      */
-    @Query("SELECT * FROM photos WHERE extractedText LIKE '%' || :searchText || '%' ORDER BY capturedAt DESC")
+    @Query("SELECT * FROM photos WHERE ai_metadata LIKE '%' || :searchText || '%' ORDER BY created_at DESC")
     suspend fun searchPhotosByExtractedText(searchText: String): List<PhotoEntity>
 }
