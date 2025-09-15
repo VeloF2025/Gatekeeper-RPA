@@ -34,7 +34,8 @@ dependencies {
     implementation(libs.tensorflow.lite.support)
 
     // MLC LLM for Phi-3.5 Mini integration
-    implementation(libs.mlc.llm.android)
+    // TODO: Add MLC LLM via local build (not available in Maven)
+    // implementation(libs.mlc.llm.android)
 
     // Project dependencies
     implementation(project(":core:common"))

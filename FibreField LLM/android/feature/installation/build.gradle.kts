@@ -26,6 +26,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
+    // Compose BOM for version management
+    implementation(platform(libs.compose.bom))
+
     // Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)

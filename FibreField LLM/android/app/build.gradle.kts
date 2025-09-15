@@ -203,7 +203,8 @@ dependencies {
     implementation(libs.tensorflow.lite.support)
     
     // MLC LLM for on-device language model
-    implementation(libs.mlc.llm.android)
+    // TODO: Add MLC LLM via local build (not available in Maven)
+    // implementation(libs.mlc.llm.android)
     
     // Maps and Location
     implementation(libs.osmdroid.android)
