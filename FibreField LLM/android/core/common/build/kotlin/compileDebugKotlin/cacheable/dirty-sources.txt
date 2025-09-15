@@ -1,0 +1,10 @@
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\extensions\BitmapExtensions.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\extensions\FlowExtensions.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\utils\FileUtils.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\constants\ErrorCodes.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\utils\DateTimeUtils.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\constants\PhotoTypes.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\extensions\StringExtensions.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\utils\PermissionUtils.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\result\Result.kt
+C:\Jarvis\AI Workspace\FibreField LLM\android\core\common\src\main\java\com\fibreflow\core\common\constants\AppConstants.kt
