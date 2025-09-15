@@ -49,15 +49,7 @@ subprojects {
                     consumerProguardFiles("consumer-rules.pro")
                 }
                 
-                buildTypes {
-                    getByName("release") {
-                        isMinifyEnabled = false
-                        proguardFiles(
-                            getDefaultProguardFile("proguard-android-optimize.txt"),
-                            "proguard-rules.pro"
-                        )
-                    }
-                }
+                // buildTypes configuration removed - handled by individual modules
                 
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_17
