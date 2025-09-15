@@ -23,17 +23,6 @@ class JsonConverters {
         return map?.let { gson.toJson(it) }
     }
 
-    @TypeConverter
-    fun fromStringList(value: String?): List<String>? {
-        if (value.isNullOrBlank()) return null
-        val type = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value, type)
-    }
-
-    @TypeConverter
-    fun stringListToString(list: List<String>?): String? {
-        return list?.let { gson.toJson(it) }
-    }
 
     @TypeConverter
     fun fromIntList(value: String?): List<Int>? {

@@ -280,7 +280,7 @@ sealed class ValidationResult<out T> {
         is Invalid -> null
     }
     
-    fun getErrors(): List<String> = when (this) {
+    fun getErrorList(): List<String> = when (this) {
         is Valid -> emptyList()
         is Invalid -> errors
     }

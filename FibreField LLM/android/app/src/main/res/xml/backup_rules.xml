@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Include most app data in backup -->
+    <include domain="file" />
+    <include domain="sharedpref" />
+
+    <!-- Exclude sensitive authentication data -->
+    <exclude domain="sharedpref" path="auth_prefs.xml" />
+    <exclude domain="sharedpref" path="security_prefs.xml" />
+
+    <!-- Exclude database files with sensitive data -->
+    <exclude domain="database" path="fibreflow.db" />
+    <exclude domain="database" path="fibreflow.db-shm" />
+    <exclude domain="database" path="fibreflow.db-wal" />
+
+    <!-- Exclude cache and temporary files -->
+    <exclude domain="cache" />
+    <exclude domain="external" path="Android/data/com.fibreflow.technician/cache" />
+</full-backup-content>

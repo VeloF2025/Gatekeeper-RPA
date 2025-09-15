@@ -42,7 +42,7 @@ interface ActivationAPI {
     @POST("activations/{activationId}/start")
     suspend fun startActivation(
         @Path("activationId") activationId: String,
-        @Body startRequest: ActivationStartRequest = ActivationStartRequest()
+        @Body startRequest: ActivationStartRequest
     ): Response<ActivationResponse>
 
     /**
@@ -239,11 +239,6 @@ data class ActivationIssue(
     val resolution: String?
 )
 
-data class IssueLocation(
-    val latitude: Double,
-    val longitude: Double,
-    val accuracy: Float?
-)
 
 data class ActivationRescheduleRequest(
     val newScheduledDate: Long,
@@ -266,11 +261,6 @@ data class ActivationStatsResponse(
     val technicianStats: Map<String, TechnicianActivationStats>
 )
 
-data class IssueStats(
-    val issueType: String,
-    val count: Int,
-    val averageResolutionTime: Long
-)
 
 data class TechnicianActivationStats(
     val technicianId: String,
