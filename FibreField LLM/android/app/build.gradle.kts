@@ -241,7 +241,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose-ui-test-junit4)
+    androidTestImplementation(libs["compose-ui-test-junit4"])
     
     // Instrumentation test runner
     androidTestImplementation("androidx.test:runner:1.5.2")
