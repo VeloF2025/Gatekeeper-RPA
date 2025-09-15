@@ -99,7 +99,7 @@ fun <T> Flow<T>.retryWithBackoff(
 ): Flow<T> = retryWhen { cause, attempt ->
     if (attempt < maxRetries) {
         val delayDuration = minOf(
-            (initialDelay.inWholeMilliseconds * factor.pow(attempt.toDouble())).toLong(),
+            (initialDelay.inWholeMilliseconds * factor.pow(attempt.toInt())).toLong(),
             maxDelay.inWholeMilliseconds
         )
         delay(delayDuration)
