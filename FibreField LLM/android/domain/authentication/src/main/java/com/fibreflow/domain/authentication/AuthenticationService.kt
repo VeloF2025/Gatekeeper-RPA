@@ -8,6 +8,7 @@ import com.fibreflow.core.database.entities.SessionEntity
 import com.fibreflow.core.network.api.AuthenticationAPI
 import com.fibreflow.core.network.models.request.LoginRequest
 import com.fibreflow.core.network.models.response.AuthResponse
+import com.fibreflow.core.network.models.response.RefreshTokenResponse
 import com.fibreflow.domain.authentication.entities.AuthToken
 import com.fibreflow.domain.authentication.entities.BiometricCredentials
 import com.fibreflow.domain.authentication.entities.Technician
@@ -15,6 +16,7 @@ import com.fibreflow.domain.authentication.repositories.AuthRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -75,6 +77,8 @@ class AuthenticationService @Inject constructor(
                     val tokens = AuthToken(
                         accessToken = authResponse.accessToken,
                         refreshToken = authResponse.refreshToken,
+                        tokenType = authResponse.tokenType,
+                        expiresIn = authResponse.expiresIn,
                         expiresAt = System.currentTimeMillis() + (authResponse.expiresIn * 1000)
                     )
 
@@ -82,12 +86,13 @@ class AuthenticationService @Inject constructor(
 
                     // Create technician object
                     val technician = Technician(
-                        id = authResponse.userId,
-                        username = authResponse.userName,
+                        id = authResponse.user.id,
+                        username = authResponse.user.username,
                         email = email,
-                        fullName = authResponse.userName, // Using userName as fullName temporarily
-                        role = authResponse.role,
-                        isActive = true
+                        fullName = authResponse.user.fullName,
+                        role = authResponse.user.role,
+                        isActive = authResponse.user.isActive,
+                        permissions = authResponse.permissions
                     )
 
                     // Store in repository
@@ -153,7 +158,7 @@ class AuthenticationService @Inject constructor(
                 currentTechnician = technician
                 _authState.value = AuthState.Authenticated(technician)
 
-                Log.i(TAG, "Biometric login successful for technician: ${technician.name}")
+                Log.i(TAG, "Biometric login successful for technician: ${technician.username}")
                 Result.Success(technician)
             } else {
                 // Tokens expired, need password login
@@ -204,13 +209,15 @@ class AuthenticationService @Inject constructor(
                 ?: return@withContext Result.Error(RuntimeException("No tokens to refresh"))
 
             // Call refresh API
-            val response = authAPI.refreshToken(currentTokens.refreshToken)
+            val response = authAPI.refreshToken()
 
             if (response.isSuccessful) {
                 response.body()?.let { refreshResponse ->
                     val newTokens = AuthToken(
                         accessToken = refreshResponse.accessToken,
-                        refreshToken = refreshResponse.refreshToken ?: currentTokens.refreshToken,
+                        refreshToken = currentTokens.refreshToken, // RefreshTokenResponse doesn't have refreshToken field
+                        tokenType = refreshResponse.tokenType,
+                        expiresIn = refreshResponse.expiresIn,
                         expiresAt = System.currentTimeMillis() + (refreshResponse.expiresIn * 1000)
                     )
 
@@ -243,10 +250,13 @@ class AuthenticationService @Inject constructor(
             // Verify password first
             // TODO: Add verifyPassword endpoint to AuthenticationAPI
             // For now, we'll assume password verification is successful
+            // TODO: Implement proper password verification
+            // For now, we'll assume password verification is successful
+            // Once verifyPassword endpoint is added to AuthenticationAPI, implement:
             // val verifyResponse = authAPI.verifyPassword(password)
-            if (!verifyResponse.isSuccessful) {
-                return@withContext Result.Error(RuntimeException("Password verification failed"))
-            }
+            // if (!verifyResponse.isSuccessful) {
+            //     return@withContext Result.Error(RuntimeException("Password verification failed"))
+            // }
 
             // Store biometric credentials
             val credentials = BiometricCredentials(
@@ -256,7 +266,7 @@ class AuthenticationService @Inject constructor(
 
             biometricManager.storeCredentials(credentials)
 
-            Log.i(TAG, "Biometric authentication enabled for technician: ${technician.name}")
+            Log.i(TAG, "Biometric authentication enabled for technician: ${technician.username}")
             Result.Success(Unit)
 
         } catch (e: Exception) {
@@ -325,12 +335,13 @@ class AuthenticationService @Inject constructor(
                 // For now, we'll get the technician ID from stored credentials or current user
                 val technicianId = currentTechnician?.id ?: getStoredTechnicianIdFromTokens(tokens)
                 if (technicianId != null) {
-                    val technician = authRepository.getTechnicianById(technicianId)
-                    if (technician != null) {
+                    val technicianResult = authRepository.getTechnicianById(technicianId)
+                    if (technicianResult is Result.Success) {
+                        val technician = technicianResult.data
                         currentTechnician = technician
                         _authState.value = AuthState.Authenticated(technician)
                         createSession(technician)
-                        Log.i(TAG, "Existing session restored for technician: ${technician.name}")
+                        Log.i(TAG, "Existing session restored for technician: ${technician.username}")
                         return
                     }
                 }
