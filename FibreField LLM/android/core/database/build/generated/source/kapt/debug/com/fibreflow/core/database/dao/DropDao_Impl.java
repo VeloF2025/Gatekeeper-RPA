@@ -4473,10 +4473,10 @@ public final class DropDao_Impl implements DropDao {
       case AVAILABLE: return "AVAILABLE";
       case ASSIGNED: return "ASSIGNED";
       case IN_PROGRESS: return "IN_PROGRESS";
-      case PENDING_ACTIVATION: return "PENDING_ACTIVATION";
+      case PENDING_VALIDATION: return "PENDING_VALIDATION";
       case COMPLETED: return "COMPLETED";
       case FAILED: return "FAILED";
-      case REMEDIATION_REQUIRED: return "REMEDIATION_REQUIRED";
+      case CANCELLED: return "CANCELLED";
       default: throw new IllegalArgumentException("Can't convert enum to string, unknown enum value: " + _value);
     }
   }
@@ -4496,10 +4496,10 @@ public final class DropDao_Impl implements DropDao {
       case "AVAILABLE": return DropStatus.AVAILABLE;
       case "ASSIGNED": return DropStatus.ASSIGNED;
       case "IN_PROGRESS": return DropStatus.IN_PROGRESS;
-      case "PENDING_ACTIVATION": return DropStatus.PENDING_ACTIVATION;
+      case "PENDING_VALIDATION": return DropStatus.PENDING_VALIDATION;
       case "COMPLETED": return DropStatus.COMPLETED;
       case "FAILED": return DropStatus.FAILED;
-      case "REMEDIATION_REQUIRED": return DropStatus.REMEDIATION_REQUIRED;
+      case "CANCELLED": return DropStatus.CANCELLED;
       default: throw new IllegalArgumentException("Can't convert value to enum, unknown value: " + _value);
     }
   }

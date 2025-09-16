@@ -3,7 +3,7 @@ package com.fibreflow.core.common
 import android.graphics.Bitmap
 import android.graphics.Color
 import com.fibreflow.core.database.entities.DropEntity
-import com.fibreflow.core.database.entities.DropStatus
+import com.fibreflow.domain.drops.entities.DropStatus
 import com.fibreflow.core.network.models.request.LoginRequest
 import com.fibreflow.core.network.models.response.AuthResponse
 

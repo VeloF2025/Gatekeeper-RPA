@@ -4,6 +4,7 @@ package com.fibreflow.core.database.entities
 import androidx.room.*
 import com.fibreflow.core.database.converters.DateConverters
 import com.fibreflow.core.database.converters.LocationConverters
+import com.fibreflow.core.database.entities.DropStatus
 import java.util.*
 
 /**
@@ -159,7 +160,7 @@ data class DropEntity(
      * Check if drop requires remediation
      */
     val requiresRemediation: Boolean
-        get() = status == DropStatus.REMEDIATION_REQUIRED
+        get() = status == DropStatus.FAILED
     
     /**
      * Check if drop is overdue (installation date passed)
@@ -183,10 +184,10 @@ data class DropEntity(
             DropStatus.AVAILABLE -> "Available"
             DropStatus.ASSIGNED -> "Assigned"
             DropStatus.IN_PROGRESS -> "In Progress"
-            DropStatus.PENDING_ACTIVATION -> "Pending Activation"
+            DropStatus.PENDING_VALIDATION -> "Pending Validation"
             DropStatus.COMPLETED -> "Completed"
             DropStatus.FAILED -> "Failed"
-            DropStatus.REMEDIATION_REQUIRED -> "Needs Remediation"
+            DropStatus.CANCELLED -> "Cancelled"
         }
     
     /**
@@ -201,18 +202,6 @@ data class DropEntity(
         }
 }
 
-/**
- * Drop status enumeration
- */
-enum class DropStatus {
-    AVAILABLE,              // Ready for assignment
-    ASSIGNED,              // Assigned to technician
-    IN_PROGRESS,           // Installation in progress
-    PENDING_ACTIVATION,    // Installation complete, waiting for activation
-    COMPLETED,             // Fully completed and activated
-    FAILED,                // Installation failed
-    REMEDIATION_REQUIRED   // Requires remediation work
-}
 
 /**
  * Activation status enumeration

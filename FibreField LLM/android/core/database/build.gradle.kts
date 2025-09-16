@@ -30,29 +30,29 @@ android {
 dependencies {
     // Core modules
     implementation(project(":core:common"))
-    
+
     // Room Database - use api to expose to consumers
     api(libs.bundles.room)
     kapt(libs.androidx.room.compiler)
-    
+
     // Database encryption
     implementation(libs.sqlcipher)
-    
+
     // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
-    
+
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    
+
     // JSON handling
     implementation(libs.gson)
-    
+
     // Utilities
     implementation(libs.timber)
-    
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.androidx.room.testing)
@@ -60,7 +60,7 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.robolectric)
-    
+
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
 }
