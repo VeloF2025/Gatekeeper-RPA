@@ -14,6 +14,7 @@ import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.fibreflow.infrastructure.sync.models.*
 
 /**
  * Multi-Device Synchronization Service for FibreField
@@ -50,7 +51,7 @@ class MultiDeviceSync @Inject constructor(
     suspend fun syncWithDevice(
         remoteDeviceId: String,
         remoteData: DeviceSyncData
-    ): Result<SyncResult> {
+    ): Result<DeviceSyncResult> {
         return try {
             Timber.i("$TAG: Starting sync with device: $remoteDeviceId")
 
@@ -134,12 +135,12 @@ class MultiDeviceSync @Inject constructor(
     /**
      * Stream synchronization events for real-time updates
      */
-    fun syncEvents(): Flow<SyncEvent> = flow {
+    fun syncEvents(): Flow<models.SyncEvent> = flow {
         // In a real implementation, this would monitor sync events
         // For now, emit periodic status updates
         while (true) {
             delay(30000) // 30 seconds
-            emit(SyncEvent.StatusUpdate(getSyncStatus()))
+            emit(models.SyncEvent.StatusUpdate(getSyncStatus()))
         }
     }
 
@@ -462,76 +463,4 @@ class MultiDeviceSync @Inject constructor(
         // Placeholder - would track actual connected devices
         return 0
     }
-}
-
-/**
- * Data structures for multi-device synchronization
- */
-
-data class DeviceSyncData(
-    val deviceId: String,
-    val timestamp: Long,
-    val drops: List<DropEntity>,
-    val installations: List<InstallationEntity>,
-    val photos: List<PhotoEntity>,
-    val syncQueue: List<SyncQueueEntity>
-)
-
-data class SyncChange(
-    val id: String,
-    val type: SyncChangeType,
-    val entityType: SyncEntityType,
-    val entityId: String,
-    val data: Any,
-    val timestamp: Long,
-    val deviceId: String
-)
-
-data class SyncConflict(
-    val entityType: SyncEntityType,
-    val entityId: String,
-    val localData: Any,
-    val remoteData: Any,
-    val conflictType: SyncConflictType,
-    val timestamp: Long
-)
-
-data class ResolvedData(
-    val drops: List<DropEntity>,
-    val installations: List<InstallationEntity>,
-    val photos: List<PhotoEntity>
-)
-
-data class SyncResult(
-    val appliedDrops: Int,
-    val appliedInstallations: Int,
-    val appliedPhotos: Int,
-    val timestamp: Long
-)
-
-data class SyncStatus(
-    val deviceId: String,
-    val lastSyncTime: Long,
-    val pendingChanges: Int,
-    val activeConflicts: Int,
-    val connectedDevices: Int
-)
-
-enum class SyncChangeType {
-    INSERT, UPDATE, DELETE
-}
-
-enum class SyncEntityType {
-    DROP, INSTALLATION, PHOTO
-}
-
-enum class SyncConflictType {
-    DATA_MISMATCH, CHANGE_CONFLICT, DELETION_CONFLICT
-}
-
-sealed class SyncEvent {
-    data class StatusUpdate(val status: SyncStatus) : SyncEvent()
-    data class ConflictDetected(val conflict: SyncConflict) : SyncEvent()
-    data class SyncCompleted(val result: SyncResult) : SyncEvent()
-    data class Error(val message: String) : SyncEvent()
 }
