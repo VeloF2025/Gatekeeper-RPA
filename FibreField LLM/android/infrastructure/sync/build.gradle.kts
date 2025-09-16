@@ -41,7 +41,12 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.androidx.appcompat)
+
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime)
 
     // Room Database (explicit for sync module)
     implementation(libs.androidx.room.runtime)
@@ -50,6 +55,7 @@ dependencies {
 
     // Kotlin Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
     // Dagger Hilt
     implementation(libs.hilt.android)

@@ -80,7 +80,7 @@ class TokenManager @Inject constructor(
     /**
      * Check if stored access token is still valid
      */
-    fun isTokenValid(tokens: AuthToken? = null): Boolean {
+    fun hasValidToken(tokens: AuthToken? = null): Boolean {
         val tokenToCheck = tokens ?: getStoredTokens()
         return tokenToCheck?.let { isTokenValid(it) } ?: false
     }
