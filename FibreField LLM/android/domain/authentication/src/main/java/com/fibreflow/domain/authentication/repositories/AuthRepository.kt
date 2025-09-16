@@ -38,6 +38,16 @@ interface AuthRepository {
     suspend fun getCurrentUser(): Result<Technician>
 
     /**
+     * Save technician information
+     */
+    suspend fun saveTechnician(technician: Technician): Result<Unit>
+
+    /**
+     * Get technician by ID
+     */
+    suspend fun getTechnicianById(technicianId: String): Result<Technician>
+
+    /**
      * Save authentication tokens securely
      */
     suspend fun saveTokens(token: AuthToken): Result<Unit>

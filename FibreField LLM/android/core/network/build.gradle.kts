@@ -31,11 +31,11 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
-    // Network
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
+    // Network - use api to expose to consumers
+    api(libs.retrofit)
+    api(libs.retrofit.gson)
+    api(libs.okhttp)
+    api(libs.okhttp.logging.interceptor)
 
     // Utilities
     implementation(libs.timber)

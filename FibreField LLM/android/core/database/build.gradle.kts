@@ -31,8 +31,8 @@ dependencies {
     // Core modules
     implementation(project(":core:common"))
     
-    // Room Database
-    implementation(libs.bundles.room)
+    // Room Database - use api to expose to consumers
+    api(libs.bundles.room)
     kapt(libs.androidx.room.compiler)
     
     // Database encryption

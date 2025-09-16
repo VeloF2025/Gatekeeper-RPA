@@ -30,6 +30,10 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
 
+    // Room Database for entity access
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

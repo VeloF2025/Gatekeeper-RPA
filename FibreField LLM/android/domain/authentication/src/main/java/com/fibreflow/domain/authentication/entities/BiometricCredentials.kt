@@ -4,9 +4,10 @@ package com.fibreflow.domain.authentication.entities
  * Domain entity representing biometric authentication credentials
  */
 data class BiometricCredentials(
-    val userId: String,
-    val biometricToken: String,
-    val deviceId: String,
+    val technicianId: String,
+    val enrolledAt: Long,
+    val biometricToken: String = "",
+    val deviceId: String = "",
     val isEnabled: Boolean = true,
     val lastUsed: Long = System.currentTimeMillis(),
     val createdAt: Long = System.currentTimeMillis()

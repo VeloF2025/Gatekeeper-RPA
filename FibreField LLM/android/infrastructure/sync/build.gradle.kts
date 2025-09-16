@@ -43,6 +43,11 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation("androidx.appcompat:appcompat:1.6.1")
 
+    // Room Database (explicit for sync module)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+
     // Kotlin Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
