@@ -1,6 +1,7 @@
 package com.fibreflow.domain.drops.validation
 
 import com.fibreflow.core.common.result.Result
+import com.fibreflow.core.location.CoreProximityResult
 import com.fibreflow.core.location.ProximityDetector
 import com.fibreflow.domain.drops.entities.Drop
 import com.fibreflow.domain.drops.entities.DropStatus
@@ -82,7 +83,11 @@ class DropValidator @Inject constructor(
             val radius = if (strictMode) ProximityDetector.STRICT_PROXIMITY_RADIUS
                         else ProximityDetector.DEFAULT_PROXIMITY_RADIUS
 
-            val proximityResult = proximityDetector.validateProximity(drop, radius)
+            val proximityResult = proximityDetector.validateProximity(
+                targetLatitude = drop.latitude,
+                targetLongitude = drop.longitude,
+                radiusMeters = radius
+            )
 
             if (proximityResult is Result.Error) {
                 return Result.Error(proximityResult.exception)
@@ -253,7 +258,7 @@ data class ValidationResult(
  */
 data class ProximityValidationResult(
     val isValid: Boolean,
-    val proximityResult: com.fibreflow.core.location.ProximityResult,
+    val proximityResult: CoreProximityResult,
     val validationRadius: Float,
     val strictMode: Boolean
 ) {

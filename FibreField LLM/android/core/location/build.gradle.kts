@@ -1,4 +1,4 @@
-// 🟢 WORKING: Drops domain module for drop management and validation
+// 🟢 WORKING: Core location module for GPS and proximity services
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -8,7 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.fibreflow.domain.drops"
+    namespace = "com.fibreflow.core.location"
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -18,10 +22,6 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {
@@ -30,28 +30,19 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
+    // Location services
+    implementation(libs.play.services.location)
+
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
     // Project dependencies
     implementation(project(":core:common"))
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
-    implementation(project(":core:location"))
-
-    // Room Database for entity access
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
 
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
-}
-
-// Kapt configuration for better build performance
-kapt {
-    correctErrorTypes = true
 }

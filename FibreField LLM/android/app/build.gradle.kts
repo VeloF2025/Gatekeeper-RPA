@@ -147,6 +147,8 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:ai"))
+    implementation(project(":core:location"))
+    implementation(project(":core:authentication"))
 
     // Domain modules
     implementation(project(":domain:authentication"))

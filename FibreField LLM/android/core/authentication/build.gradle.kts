@@ -1,4 +1,4 @@
-// 🟢 WORKING: Drops domain module for drop management and validation
+// 🟢 WORKING: Core authentication module with authentication services
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -8,7 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.fibreflow.domain.drops"
+    namespace = "com.fibreflow.core.authentication"
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -18,10 +22,6 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {
@@ -29,6 +29,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
+
+    // Biometric authentication
+    implementation(libs.androidx.biometric)
+
+    // Security
+    implementation(libs.androidx.security.crypto)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -38,20 +44,10 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
-    implementation(project(":core:location"))
-
-    // Room Database for entity access
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
 
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
-}
-
-// Kapt configuration for better build performance
-kapt {
-    correctErrorTypes = true
 }

@@ -50,6 +50,9 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
+    implementation(project(":core:ai"))
+    implementation(project(":core:location"))
+    implementation(project(":core:authentication"))
     implementation(project(":domain:drops"))
     implementation(project(":domain:authentication"))
 

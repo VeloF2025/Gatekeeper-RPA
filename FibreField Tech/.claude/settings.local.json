@@ -4,7 +4,11 @@
       "WebSearch",
       "Read(//c/Jarvis/AI Workspace/Archon/**)",
       "Bash(chmod:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(gradlew test:*)",
+      "Bash(.gradlew test --info)",
+      "Bash(gradle test:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

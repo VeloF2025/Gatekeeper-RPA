@@ -26,6 +26,8 @@ include(":core:common")
 include(":core:database")
 include(":core:network")
 include(":core:ai")
+include(":core:location")
+include(":core:authentication")
 
 // Domain modules - business logic
 include(":domain:authentication")
