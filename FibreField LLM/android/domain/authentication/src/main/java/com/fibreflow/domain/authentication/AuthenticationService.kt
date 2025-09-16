@@ -1,6 +1,7 @@
 package com.fibreflow.domain.authentication
 
 import android.content.Context
+import android.provider.Settings
 import android.util.Log
 import com.fibreflow.core.common.result.Result
 import com.fibreflow.core.database.dao.SessionDao
@@ -17,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import retrofit2.Response
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -358,11 +360,15 @@ class AuthenticationService @Inject constructor(
 
     private suspend fun createSession(technician: Technician) {
         try {
+            val currentTime = System.currentTimeMillis()
             val session = SessionEntity(
+                sessionId = UUID.randomUUID().toString(),
                 technicianId = technician.id,
-                loginTime = System.currentTimeMillis(),
-                expiresAt = System.currentTimeMillis() + SESSION_TIMEOUT_MS,
-                isActive = true
+                deviceId = getDeviceId(),
+                isActive = true,
+                lastActivity = Date(currentTime),
+                createdAt = Date(currentTime),
+                expiresAt = Date(currentTime + SESSION_TIMEOUT_MS)
             )
 
             sessionDao.insertSession(session)
@@ -370,6 +376,16 @@ class AuthenticationService @Inject constructor(
 
         } catch (e: Exception) {
             Log.e(TAG, "Failed to create session", e)
+        }
+    }
+
+    private fun getDeviceId(): String {
+        return try {
+            Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+                ?: "unknown-device"
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to get device ID", e)
+            "unknown-device"
         }
     }
 
