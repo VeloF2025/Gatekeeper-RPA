@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml:2:13-83
-INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml:2:13-83
+ADDED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml:2:13-83
+INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml:2:13-83
 	package
-		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml
+		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml
 	xmlns:android
-		ADDED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml:2:23-81
+		ADDED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml:2:23-81
 uses-sdk
-INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml reason: use-sdk injection requested
-INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml
-INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml
+INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml reason: use-sdk injection requested
+INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml
+INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml
 	android:targetSdkVersion
-		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml
+		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml
 	android:minSdkVersion
-		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest1840914288682906729.xml
+		INJECTED from C:\Jarvis\AI Workspace\FibreField LLM\android\infrastructure\offline\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest11469419390518051592.xml
