@@ -1,0 +1,657 @@
+# FibreField Tech Android App - Agent Configuration
+# Configuration for specialized AI agents
+
+# Global settings
+global:
+  project_name: "FibreField Tech Android"
+  project_root: "./FibreFieldTech-Android"
+  max_parallel_agents: 8
+  task_timeout_hours: 24
+  quality_threshold: 0.95
+  test_coverage_threshold: 0.95
+
+  # Performance thresholds
+  performance_thresholds:
+    startup_time: 3.0       # seconds
+    memory_usage: 200       # MB
+    battery_usage: 5.0      # % per hour
+    inference_time: 0.5     # seconds for AI processing
+    sync_time: 2.0          # seconds for data sync
+
+  # Quality gates
+  quality_gates:
+    code_quality:
+      zero_warnings: true
+      zero_errors: true
+      formatting_check: true
+      code_review_required: true
+
+    performance:
+      startup_time_max: 3.0
+      memory_usage_max: 200
+      battery_drain_max: 5.0
+      fps_min: 60
+
+    security:
+      zero_vulnerabilities: true
+      encryption_required: true
+      auth_secure: true
+      audit_logging: true
+
+    testing:
+      unit_test_coverage: 0.95
+      integration_test_coverage: 0.90
+      ui_test_coverage: 0.85
+      performance_tests: true
+      security_tests: true
+
+# Agent configurations
+agents:
+  android-compose-ai-specialist:
+    capabilities:
+      - "ui_development"
+      - "jetpack_compose"
+      - "material_you"
+      - "animations"
+      - "accessibility"
+      - "responsive_design"
+      - "state_management"
+      - "navigation"
+
+    quality_standards:
+      test_coverage: 0.95
+      accessibility_score: 0.90
+      animation_performance: 0.95
+      component_reusability: 0.90
+      design_consistency: 0.95
+
+    assigned_modules:
+      - "core:ui"
+      - "core:design"
+      - "feature:authentication"
+      - "feature:installation"
+      - "feature:drops"
+      - "feature:activation"
+      - "feature:remediation"
+
+    constraints:
+      max_component_size: 300  # lines
+      no_hardcoded_values: true
+      material_you_compliance: true
+      dark_mode_support: true
+
+    tools:
+      - "android_studio"
+      - "compose_compiler"
+      - "layout_inspector"
+      - "accessibility_scanner"
+
+  ml-computer-vision-architect:
+    capabilities:
+      - "tensorflow_lite"
+      - "computer_vision"
+      - "ont_detection"
+      - "image_processing"
+      - "model_optimization"
+      - "ai_integration"
+      - "real_time_processing"
+      - "gpu_acceleration"
+
+    quality_standards:
+      model_accuracy: 0.90
+      inference_time: 0.5
+      memory_usage: 500
+      detection_confidence: 0.95
+      false_positive_rate: 0.05
+
+    assigned_modules:
+      - "core:ai"
+      - "feature:installation"
+      - "feature:remediation"
+
+    models:
+      ont_light_detection:
+        type: "tensorflow_lite"
+        size: "5MB"
+        accuracy_target: 0.95
+        quantized: true
+        gpu_accelerated: true
+
+      photo_quality_assessment:
+        type: "tensorflow_lite"
+        size: "3MB"
+        accuracy_target: 0.90
+        metrics: ["blur", "lighting", "composition"]
+
+      predictive_maintenance:
+        type: "phi_3.5_mini"
+        parameters: "3.8B"
+        quantized: true
+        context_window: 4096
+
+    constraints:
+      model_size_max: 10MB
+      inference_time_max: 500ms
+      accuracy_min: 0.90
+      offline_capable: true
+
+    tools:
+      - "tensorflow_lite"
+      - "ml_kit"
+      - "android_nnapi"
+      - "gpu_delegate"
+      - "model_optimizer"
+
+  offline-first-database-expert:
+    capabilities:
+      - "room_database"
+      - "offline_first"
+      - "data_sync"
+      - "conflict_resolution"
+      - "data_persistence"
+      - "migration_management"
+      - "query_optimization"
+      - "data_validation"
+
+    quality_standards:
+      sync_reliability: 0.99
+      data_integrity: 1.0
+      offline_functionality: 1.0
+      conflict_resolution_success: 0.95
+      query_performance: 0.95
+
+    assigned_modules:
+      - "core:database"
+      - "infrastructure:sync"
+
+    database_schema:
+      entities:
+        - "Installation"
+        - "Photo"
+        - "Validation"
+        - "Location"
+        - "Technician"
+        - "Drop"
+        - "Activation"
+        - "Remediation"
+
+      relationships:
+        - "Installation to Photos (1:many)"
+        - "Installation to Validations (1:many)"
+        - "Drop to Installation (1:many)"
+
+      indices:
+        - "installation_status"
+        - "technician_id"
+        - "sync_timestamp"
+        - "location_coordinates"
+
+    sync_strategy:
+      conflict_resolution: "last_write_wins_with_validation"
+      priority_levels: ["high", "medium", "low"]
+      batch_size: 100
+      retry_attempts: 3
+      backoff_strategy: "exponential"
+
+    constraints:
+      no_blocking_operations: true
+      thread_safe: true
+      data_encryption: true
+      backup_mechanism: true
+
+    tools:
+      - "room_persistence_library"
+      - "work_manager"
+      - "datastore"
+      - "sqlcipher"
+
+  camera-workflow-engineer:
+    capabilities:
+      - "camera_integration"
+      - "photo_capture"
+      - "image_processing"
+      - "camera_permissions"
+      - "image_annotation"
+      - "batch_operations"
+      - "file_management"
+      - "media_store"
+
+    quality_standards:
+      capture_success_rate: 0.99
+      image_quality_score: 0.90
+      processing_time: 2.0
+      storage_efficiency: 0.95
+      user_satisfaction: 0.90
+
+    assigned_modules:
+      - "feature:installation"
+      - "core:ui"
+
+    workflow_steps:
+      1:
+        name: "Pre-installation Survey"
+        required_photos: ["site_overview", "access_point", "obstacles"]
+        validation: "clearance_check"
+
+      2:
+        name: "Fiber Run Preparation"
+        required_photos: ["cable_path", "conduit_route", "equipment"]
+        validation: "path_verification"
+
+      3:
+        name: "ONT Installation"
+        required_photos: ["ont_position", "power_connection", "network_ports"]
+        validation: "light_detection"
+
+      4:
+        name: "Fiber Termination"
+        required_photos: ["termination_point", "splice_enclosure", "connection_quality"]
+        validation: "signal_check"
+
+      5:
+        name: "Service Activation"
+        required_photos: ["activation_test", "speed_test", "customer_handoff"]
+        validation: "performance_metrics"
+
+    camera_features:
+      - "flash_control"
+      - "zoom_support"
+      - "auto_focus"
+      - "exposure_control"
+      - "image_stabilization"
+      - "barcode_scanning"
+      - "ocr_support"
+
+    constraints:
+      image_size_max: "5MB"
+      resolution_min: "1920x1080"
+      format_supported: ["JPEG", "PNG"]
+      exif_preservation: true
+
+    tools:
+      - "camera_x"
+      - "ml_kit_vision"
+      - "image_processing"
+      - "media_store_api"
+
+  material-you-high-tech-ui-designer:
+    capabilities:
+      - "material_you"
+      - "dynamic_theming"
+      - "high_tech_aesthetics"
+      - "animation_design"
+      - "accessibility"
+      - "responsive_layout"
+      - "dark_mode"
+      - "color_system"
+
+    quality_standards:
+      design_consistency: 0.95
+      accessibility_score: 0.95
+      user_satisfaction: 0.90
+      performance_score: 0.95
+      contrast_ratio: 4.5
+
+    assigned_modules:
+      - "core:design"
+      - "core:ui"
+
+    design_system:
+      colors:
+        primary: "#0066CC"
+        secondary: "#003D7A"
+        tertiary: "#00A896"
+        surface: "#F8F9FA"
+        background: "#FFFFFF"
+        error: "#DC3545"
+        success: "#28A745"
+        warning: "#FFC107"
+        info: "#17A2B8"
+
+      typography:
+        font_family: "Roboto"
+        heading_sizes: [96, 60, 48, 34, 24, 20, 16]
+        body_sizes: [16, 14, 12]
+        line_height: 1.5
+
+      spacing:
+        base_unit: 8
+        scale: [0, 4, 8, 16, 24, 32, 48, 64, 96, 128]
+
+      elevation:
+        levels: [0, 1, 2, 3, 4, 6, 8, 12, 16, 24]
+
+      shape:
+        corner_radius: [0, 4, 8, 12, 16, 28]
+
+    animations:
+      duration:
+        fast: 150
+        medium: 300
+        slow: 500
+
+      easing:
+        standard: "cubic-bezier(0.4, 0.0, 0.2, 1)"
+        accelerate: "cubic-bezier(0.4, 0.0, 1.0, 1.0)"
+        decelerate: "cubic-bezier(0.0, 0.0, 0.2, 1.0)"
+
+    accessibility:
+      contrast_ratio_min: 4.5
+      touch_target_min: 48
+      font_scale_support: true
+      screen_reader_support: true
+
+    tools:
+      - "material_components"
+      - "compose_material3"
+      - "accessibility_scanner"
+      - "figma_integration"
+
+  android-performance-optimization-expert:
+    capabilities:
+      - "performance_optimization"
+      - "memory_management"
+      - "battery_optimization"
+      - "startup_optimization"
+      - "rendering_performance"
+      - "network_optimization"
+      - "profiling"
+      - "benchmarking"
+
+    quality_standards:
+      startup_time: 3.0
+      memory_usage: 200
+      battery_efficiency: 5.0
+      fps_target: 60
+      anr_rate: 0.01
+      crash_rate: 0.01
+
+    assigned_modules:
+      - "All modules"
+
+    optimization_areas:
+      startup:
+        - "app_initialization"
+        - "dependency_injection"
+        - "content_providers"
+        - "multidex_optimization"
+
+      memory:
+        - "image_optimization"
+        - "cache_management"
+        - "leak_detection"
+        - "object_pooling"
+
+      battery:
+        - "background_jobs"
+        - "location_updates"
+        - "sensor_usage"
+        - "network_calls"
+
+      rendering:
+        - "view_hierarchy"
+        - "overdraw_reduction"
+        - "layout_optimization"
+        - "animation_performance"
+
+    profiling_tools:
+      - "android_profiler"
+      - "leak_canary"
+      - "perfetto"
+      - "systrace"
+      - "gpu_inspector"
+
+    constraints:
+      no_blocking_ui: true
+      memory_leaks_zero: true
+      efficient_data_structures: true
+      lazy_loading_required: true
+
+    tools:
+      - "android_profiler"
+      - "benchmark_library"
+      - "jetpack_benchmark"
+      - "memory_analyzer"
+
+  biometric-security-architect:
+    capabilities:
+      - "biometric_authentication"
+      - "data_encryption"
+      - "security_audit"
+      - "vulnerability_scanning"
+      - "secure_storage"
+      - "network_security"
+      - "authentication_flows"
+      - "compliance"
+
+    quality_standards:
+      security_score: 1.0
+      auth_success_rate: 0.99
+      data_encryption: 1.0
+      vulnerability_rate: 0.0
+      compliance_score: 1.0
+
+    assigned_modules:
+      - "domain:authentication"
+      - "infrastructure:security"
+      - "feature:authentication"
+
+    authentication_methods:
+      biometric:
+        - "fingerprint"
+        - "face_recognition"
+        - "iris_scan"
+
+      fallback:
+        - "pin"
+        - "password"
+        - "pattern"
+
+    encryption_standards:
+      data_at_rest: "AES-256"
+      data_in_transit: "TLS 1.3"
+      key_management: "AndroidKeystore"
+      algorithm_compliance: "FIPS 140-2"
+
+    security_features:
+      - "device_attestation"
+      - "app_integrity"
+      - "root_detection"
+      - "debug_detection"
+      - "screen_pinning"
+      - "secure_screenshots"
+
+    compliance_requirements:
+      - "GDPR"
+      - "CCPA"
+      - "HIPAA"
+      - "PCI_DSS"
+      - "SOC_2"
+
+    tools:
+      - "biometric_prompt"
+      - "android_keystore"
+      - "security_library"
+      - "app_security_scanner"
+
+  android-testing-specialist:
+    capabilities:
+      - "unit_testing"
+      - "integration_testing"
+      - "ui_testing"
+      - "performance_testing"
+      - "security_testing"
+      - "test_automation"
+      - "continuous_integration"
+      - "quality_assurance"
+
+    quality_standards:
+      test_coverage: 0.95
+      test_reliability: 0.99
+      bug_detection_rate: 0.90
+      flaky_test_rate: 0.01
+      execution_time: 10.0
+
+    assigned_modules:
+      - "All modules"
+
+    testing_frameworks:
+      unit:
+        - "junit"
+        - "mockk"
+        - "truth"
+        - "turbine"
+
+      ui:
+        - "espresso"
+        - "compose_ui_test"
+        - "ui_automator"
+        - "barista"
+
+      performance:
+        - "jetpack_benchmark"
+        - "macrobenchmark"
+        - "firebase_performance"
+
+      security:
+        - "owasp_zap"
+        - "sonarqube"
+        - "security_testing_library"
+
+    test_categories:
+      unit_tests:
+        coverage_target: 0.95
+        execution_time: 300
+        parallel_execution: true
+
+      integration_tests:
+        coverage_target: 0.90
+        execution_time: 600
+        requires_device: true
+
+      ui_tests:
+        coverage_target: 0.85
+        execution_time: 900
+        device_matrix: true
+
+      performance_tests:
+        metrics: ["startup", "memory", "cpu", "battery"]
+        baselines_required: true
+        regression_detection: true
+
+    ci_cd_integration:
+      - "github_actions"
+      - "test_reporting"
+      - "coverage_reports"
+      - "quality_gates"
+      - "deployment_pipelines"
+
+    tools:
+      - "gradle_test_runner"
+      - "firebase_test_lab"
+      - "sonarqube"
+      - "allure_reports"
+
+# Execution strategies
+execution_strategies:
+  parallel:
+    max_concurrent_tasks: 8
+    agent_assignment_strategy: "capability_based"
+    load_balancing: true
+    fail_fast: false
+
+  phases:
+    1:
+      name: "Core Infrastructure"
+      duration_weeks: 2
+      critical_path: ["database", "ai_integration", "security"]
+      agents_primary: ["offline-first-database-expert", "ml-computer-vision-architect", "biometric-security-architect"]
+      agents_support: ["android-performance-optimization-expert", "android-testing-specialist"]
+
+    2:
+      name: "Core Features"
+      duration_weeks: 3
+      critical_path: ["camera_workflow", "installation_management"]
+      agents_primary: ["camera-workflow-engineer", "android-compose-ai-specialist", "material-you-high-tech-ui-designer"]
+      agents_support: ["ml-computer-vision-architect", "offline-first-database-expert"]
+
+    3:
+      name: "Advanced Features"
+      duration_weeks: 2
+      critical_path: ["ai_enhancements", "performance_optimization"]
+      agents_primary: ["ml-computer-vision-architect", "android-performance-optimization-expert", "android-compose-ai-specialist"]
+      agents_support: ["android-testing-specialist", "biometric-security-architect"]
+
+    4:
+      name: "Finalization & Deployment"
+      duration_weeks: 1
+      critical_path: ["testing", "deployment"]
+      agents_primary: ["android-testing-specialist", "biometric-security-architect"]
+      agents_support: ["all_agents"]
+
+# Quality gates
+quality_gates:
+  pre_commit:
+    - "lint_check"
+    - "unit_tests"
+    - "static_analysis"
+    - "security_scan"
+
+  pre_merge:
+    - "integration_tests"
+    - "ui_tests"
+    - "performance_tests"
+    - "code_review"
+
+  pre_release:
+    - "full_test_suite"
+    - "security_audit"
+    - "performance_benchmark"
+    - "compliance_check"
+    - "user_acceptance_testing"
+
+# Reporting and metrics
+metrics:
+  development_velocity:
+    - "story_points_per_sprint"
+    - "cycle_time"
+    - "lead_time"
+    - "throughput"
+
+  quality_metrics:
+    - "test_coverage"
+    - "bug_count"
+    - "escape_rate"
+    - "technical_debt"
+
+  performance_metrics:
+    - "app_rating"
+    - "crash_rate"
+    - "anr_rate"
+    - "load_time"
+    - "memory_usage"
+
+  business_metrics:
+    - "user_satisfaction"
+    - "adoption_rate"
+    - "retention_rate"
+    - "efficiency_improvement"
+    - "roi"
+
+# Notification settings
+notifications:
+  email:
+    enabled: true
+    recipients: ["dev-team@fibrefield.tech", "pm@fibrefield.tech"]
+    events: ["build_failure", "quality_gate_failure", "security_vulnerability"]
+
+  slack:
+    enabled: true
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channels: ["#android-dev", "#project-alerts"]
+    events: ["deployment", "critical_issue", "sprint_complete"]
+
+  dashboard:
+    enabled: true
+    refresh_interval: 30  # seconds
+    public_access: false

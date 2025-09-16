@@ -44,6 +44,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
+    implementation(project(":domain:authentication"))
+    implementation(project(":domain:drops"))
 
     // Testing
     testImplementation(libs.junit)

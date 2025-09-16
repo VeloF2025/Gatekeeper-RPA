@@ -111,6 +111,24 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveTechnician(technician: Technician): Result<Unit> {
+        return try {
+            technicianDao.insertTechnician(technician)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun getTechnicianById(technicianId: String): Result<Technician> {
+        return try {
+            val technician = technicianDao.getTechnicianById(technicianId)
+            technician?.let { Result.Success(it) } ?: Result.Error(RuntimeException("Technician not found"))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     override suspend fun saveTokens(token: AuthToken): Result<Unit> {
         return try {
             tokenManager.storeTokens(token)

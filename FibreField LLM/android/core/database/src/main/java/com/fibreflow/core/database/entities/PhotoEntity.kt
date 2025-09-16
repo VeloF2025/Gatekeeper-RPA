@@ -138,23 +138,3 @@ enum class PhotoType {
     TROUBLESHOOTING
 }
 
-/**
- * Validation status enum
- */
-enum class ValidationStatus {
-    PENDING,
-    PROCESSING,
-    PASSED,
-    FAILED,
-    REQUIRES_REVIEW
-}
-
-/**
- * Upload status enum
- */
-enum class UploadStatus {
-    PENDING,
-    UPLOADING,
-    COMPLETED,
-    FAILED
-}

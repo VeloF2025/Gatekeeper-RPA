@@ -128,15 +128,3 @@ data class InstallationEntity(
             (endTime.time - startTime.time) / (1000 * 60)
         } else null
 }
-
-/**
- * Installation status enum
- */
-enum class InstallationStatus {
-    NOT_STARTED,
-    IN_PROGRESS,
-    PENDING_VALIDATION,
-    COMPLETED,
-    FAILED,
-    CANCELLED
-}

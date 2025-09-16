@@ -30,6 +30,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
+    // Timber for logging
+    implementation(libs.timber)
+
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

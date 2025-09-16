@@ -81,7 +81,7 @@ class ProximityDetector @Inject constructor(
         lon1: Double,
         lat2: Double,
         lon2: Double
-    ): Double {
+    ): Float {
         return locationService.calculateDistance(lat1, lon1, lat2, lon2)
     }
 
