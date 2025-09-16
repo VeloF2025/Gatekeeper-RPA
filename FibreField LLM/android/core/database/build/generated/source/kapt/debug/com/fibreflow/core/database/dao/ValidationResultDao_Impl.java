@@ -141,7 +141,7 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
 
   @Override
   public Object insertValidationResult(final ValidationResultEntity result,
-      final Continuation<? super Long> arg1) {
+      final Continuation<? super Long> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -155,12 +155,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object insertValidationResults(final List<ValidationResultEntity> results,
-      final Continuation<? super List<Long>> arg1) {
+      final Continuation<? super List<Long>> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<List<Long>>() {
       @Override
       @NonNull
@@ -174,12 +174,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object deleteValidationResult(final ValidationResultEntity result,
-      final Continuation<? super Unit> arg1) {
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -193,12 +193,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object updateValidationResult(final ValidationResultEntity result,
-      final Continuation<? super Unit> arg1) {
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -212,12 +212,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object deleteOldValidationResults(final long cutoffDate,
-      final Continuation<? super Integer> arg1) {
+      final Continuation<? super Integer> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
@@ -238,12 +238,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           __preparedStmtOfDeleteOldValidationResults.release(_stmt);
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getValidationResultById(final long resultId,
-      final Continuation<? super ValidationResultEntity> arg1) {
+      final Continuation<? super ValidationResultEntity> $completion) {
     final String _sql = "SELECT * FROM validation_results WHERE validation_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -304,12 +304,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getValidationResultsByPhoto(final long photoId,
-      final Continuation<? super List<ValidationResultEntity>> arg1) {
+      final Continuation<? super List<ValidationResultEntity>> $completion) {
     final String _sql = "SELECT * FROM validation_results WHERE photo_id = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -370,12 +370,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getValidationResultsByInstallation(final long installationId,
-      final Continuation<? super List<ValidationResultEntity>> arg1) {
+      final Continuation<? super List<ValidationResultEntity>> $completion) {
     final String _sql = "SELECT * FROM validation_results WHERE photo_id IN (SELECT photo_id FROM photos WHERE installation_id = ?) ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -436,12 +436,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getValidationResultsByStatus(final boolean isValid,
-      final Continuation<? super List<ValidationResultEntity>> arg1) {
+      final Continuation<? super List<ValidationResultEntity>> $completion) {
     final String _sql = "SELECT * FROM validation_results WHERE is_valid = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -503,12 +503,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getValidationResultCountByStatus(final boolean isValid,
-      final Continuation<? super Integer> arg1) {
+      final Continuation<? super Integer> $completion) {
     final String _sql = "SELECT COUNT(*) FROM validation_results WHERE is_valid = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -539,7 +539,7 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @NonNull

@@ -11,7 +11,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -42,7 +41,7 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // Kotlin Coroutines
     implementation(libs.kotlinx.coroutines.android)

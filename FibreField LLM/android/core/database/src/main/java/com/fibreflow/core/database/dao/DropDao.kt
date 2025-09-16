@@ -256,6 +256,7 @@ interface DropDao {
  * Result class for duplicate drop query
  */
 data class DropDuplicateResult(
+    @ColumnInfo(name = "drop_number")
     val dropNumber: String,
     val count: Int,
     val ids: String

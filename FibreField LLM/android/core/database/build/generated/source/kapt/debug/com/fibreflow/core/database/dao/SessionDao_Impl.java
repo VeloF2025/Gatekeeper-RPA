@@ -197,7 +197,8 @@ public final class SessionDao_Impl implements SessionDao {
   }
 
   @Override
-  public Object insertSession(final SessionEntity session, final Continuation<? super Long> arg1) {
+  public Object insertSession(final SessionEntity session,
+      final Continuation<? super Long> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -211,12 +212,12 @@ public final class SessionDao_Impl implements SessionDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object insertSessions(final List<SessionEntity> sessions,
-      final Continuation<? super List<Long>> arg1) {
+      final Continuation<? super List<Long>> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<List<Long>>() {
       @Override
       @NonNull
@@ -230,11 +231,12 @@ public final class SessionDao_Impl implements SessionDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
-  public Object deleteSession(final SessionEntity session, final Continuation<? super Unit> arg1) {
+  public Object deleteSession(final SessionEntity session,
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -248,11 +250,12 @@ public final class SessionDao_Impl implements SessionDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
-  public Object updateSession(final SessionEntity session, final Continuation<? super Unit> arg1) {
+  public Object updateSession(final SessionEntity session,
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -266,12 +269,12 @@ public final class SessionDao_Impl implements SessionDao {
           __db.endTransaction();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object deactivateSession(final String technicianId, final long logoutTime,
-      final Continuation<? super Unit> arg2) {
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -298,12 +301,12 @@ public final class SessionDao_Impl implements SessionDao {
           __preparedStmtOfDeactivateSession.release(_stmt);
         }
       }
-    }, arg2);
+    }, $completion);
   }
 
   @Override
   public Object deactivateAllSessions(final long logoutTime,
-      final Continuation<? super Unit> arg1) {
+      final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -324,11 +327,12 @@ public final class SessionDao_Impl implements SessionDao {
           __preparedStmtOfDeactivateAllSessions.release(_stmt);
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
-  public Object deleteOldSessions(final long cutoffDate, final Continuation<? super Integer> arg1) {
+  public Object deleteOldSessions(final long cutoffDate,
+      final Continuation<? super Integer> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
@@ -349,12 +353,12 @@ public final class SessionDao_Impl implements SessionDao {
           __preparedStmtOfDeleteOldSessions.release(_stmt);
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getSessionById(final String sessionId,
-      final Continuation<? super SessionEntity> arg1) {
+      final Continuation<? super SessionEntity> $completion) {
     final String _sql = "SELECT * FROM sessions WHERE session_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -435,12 +439,12 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getActiveSessionForTechnician(final String technicianId,
-      final Continuation<? super SessionEntity> arg1) {
+      final Continuation<? super SessionEntity> $completion) {
     final String _sql = "SELECT * FROM sessions WHERE technician_id = ? AND is_active = 1 ORDER BY created_at DESC LIMIT 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -521,12 +525,12 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getSessionsForTechnician(final String technicianId,
-      final Continuation<? super List<SessionEntity>> arg1) {
+      final Continuation<? super List<SessionEntity>> $completion) {
     final String _sql = "SELECT * FROM sessions WHERE technician_id = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -607,11 +611,11 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
-  public Object getActiveSessions(final Continuation<? super List<SessionEntity>> arg0) {
+  public Object getActiveSessions(final Continuation<? super List<SessionEntity>> $completion) {
     final String _sql = "SELECT * FROM sessions WHERE is_active = 1 ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -686,7 +690,7 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg0);
+    }, $completion);
   }
 
   @Override
@@ -772,7 +776,7 @@ public final class SessionDao_Impl implements SessionDao {
   }
 
   @Override
-  public Object getActiveSessionCount(final Continuation<? super Integer> arg0) {
+  public Object getActiveSessionCount(final Continuation<? super Integer> $completion) {
     final String _sql = "SELECT COUNT(*) FROM sessions WHERE is_active = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -800,12 +804,12 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg0);
+    }, $completion);
   }
 
   @Override
   public Object isTechnicianActive(final String technicianId,
-      final Continuation<? super Integer> arg1) {
+      final Continuation<? super Integer> $completion) {
     final String _sql = "SELECT COUNT(*) FROM sessions WHERE technician_id = ? AND is_active = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -839,12 +843,12 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @Override
   public Object getSessionsInTimeRange(final long startTime, final long endTime,
-      final Continuation<? super List<SessionEntity>> arg2) {
+      final Continuation<? super List<SessionEntity>> $completion) {
     final String _sql = "SELECT * FROM sessions WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
@@ -923,11 +927,11 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg2);
+    }, $completion);
   }
 
   @Override
-  public Object getAverageSessionDuration(final Continuation<? super Long> arg0) {
+  public Object getAverageSessionDuration(final Continuation<? super Long> $completion) {
     final String _sql = "SELECT AVG(expires_at - created_at) FROM sessions WHERE is_active = 0";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -955,12 +959,12 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg0);
+    }, $completion);
   }
 
   @Override
   public Object getSessionCountForTechnician(final String technicianId,
-      final Continuation<? super Integer> arg1) {
+      final Continuation<? super Integer> $completion) {
     final String _sql = "SELECT COUNT(*) FROM sessions WHERE technician_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -994,7 +998,7 @@ public final class SessionDao_Impl implements SessionDao {
           _statement.release();
         }
       }
-    }, arg1);
+    }, $completion);
   }
 
   @NonNull

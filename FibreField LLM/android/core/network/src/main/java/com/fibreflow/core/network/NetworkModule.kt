@@ -1,7 +1,7 @@
 package com.fibreflow.core.network
 
 import android.content.Context
-import com.fibreflow.core.network.api.AuthApi
+import com.fibreflow.core.network.api.AuthenticationAPI
 import com.fibreflow.core.network.interceptors.AuthInterceptor
 import com.fibreflow.core.network.interceptors.LoggingInterceptor
 import com.fibreflow.core.network.interceptors.NetworkSecurityInterceptor
@@ -58,8 +58,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthApi(retrofit: Retrofit): AuthApi {
-        return retrofit.create(AuthApi::class.java)
+    fun provideAuthApi(retrofit: Retrofit): AuthenticationAPI {
+        return retrofit.create(AuthenticationAPI::class.java)
     }
 
     @Provides

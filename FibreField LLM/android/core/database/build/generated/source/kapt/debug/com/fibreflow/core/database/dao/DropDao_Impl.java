@@ -4392,11 +4392,18 @@ public final class DropDao_Impl implements DropDao {
       public List<DropDuplicateResult> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfDropNumber = 0;
           final int _cursorIndexOfCount = 1;
           final int _cursorIndexOfIds = 2;
           final List<DropDuplicateResult> _result = new ArrayList<DropDuplicateResult>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final DropDuplicateResult _item;
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
             final int _tmpCount;
             _tmpCount = _cursor.getInt(_cursorIndexOfCount);
             final String _tmpIds;
@@ -4405,7 +4412,7 @@ public final class DropDao_Impl implements DropDao {
             } else {
               _tmpIds = _cursor.getString(_cursorIndexOfIds);
             }
-            _item = new DropDuplicateResult(null,_tmpCount,_tmpIds);
+            _item = new DropDuplicateResult(_tmpDropNumber,_tmpCount,_tmpIds);
             _result.add(_item);
           }
           return _result;

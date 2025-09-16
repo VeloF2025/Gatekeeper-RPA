@@ -206,7 +206,7 @@ interface InstallationDao {
     /**
      * Get records with future timestamps
      */
-    @Query("SELECT * FROM installations WHERE started_at > :currentTime OR completed_at > :currentTime")
+    @Query("SELECT * FROM installations WHERE start_time > :currentTime OR end_time > :currentTime")
     suspend fun getRecordsWithFutureTimestamps(currentTime: Long = System.currentTimeMillis()): List<InstallationEntity>
 
     /**
