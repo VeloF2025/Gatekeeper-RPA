@@ -101,25 +101,33 @@ class DropRepositoryImpl @Inject constructor(
         return try {
             val dropEntity = dropDao.getDropById(dropNumber)
             dropEntity?.let { drop ->
-                val dropLocation = Location(
-                    latitude = drop.latitude,
-                    longitude = drop.longitude,
-                    accuracy = null,
-                    timestamp = System.currentTimeMillis()
+                val coreResult = proximityDetector.validateProximity(
+                    targetLatitude = drop.latitude,
+                    targetLongitude = drop.longitude,
+                    radiusMeters = 50.0f // 50 meters default
                 )
 
-                val distance = proximityDetector.calculateDistance(userLocation, dropLocation)
-                val isWithinRange = distance <= 50.0 // 50 meters default
+                when (coreResult) {
+                    is Result.Success -> {
+                        val dropLocation = Location(
+                            latitude = drop.latitude,
+                            longitude = drop.longitude,
+                            accuracy = null,
+                            timestamp = System.currentTimeMillis()
+                        )
 
-                val proximityResult = ProximityResult(
-                    dropNumber = dropNumber,
-                    userLocation = userLocation,
-                    dropLocation = dropLocation,
-                    distance = distance,
-                    isWithinRange = isWithinRange
-                )
+                        val proximityResult = ProximityResult(
+                            dropNumber = dropNumber,
+                            userLocation = userLocation,
+                            dropLocation = dropLocation,
+                            distance = coreResult.data.distanceMeters.toDouble(),
+                            isWithinRange = coreResult.data.isWithinProximity
+                        )
 
-                Result.Success(proximityResult)
+                        Result.Success(proximityResult)
+                    }
+                    is Result.Error -> Result.Error(coreResult.exception)
+                }
             } ?: Result.Error(IllegalArgumentException("Drop not found: $dropNumber"))
         } catch (e: Exception) {
             Timber.e(e, "Error validating proximity for drop: $dropNumber")
@@ -174,12 +182,12 @@ class DropRepositoryImpl @Inject constructor(
             // For now, get all drops and filter by distance
             val allDrops = dropDao.getAllDrops()
             val dropsInRadius = allDrops.filter { drop ->
-                val dropLocation = Location(
-                    latitude = drop.latitude,
-                    longitude = drop.longitude,
-                    timestamp = System.currentTimeMillis()
+                val distance = proximityDetector.calculateDistance(
+                    center.latitude,
+                    center.longitude,
+                    drop.latitude,
+                    drop.longitude
                 )
-                val distance = proximityDetector.calculateDistance(center, dropLocation)
                 distance <= radiusMeters
             }
             Result.Success(dropsInRadius.map { it.toDomain() })

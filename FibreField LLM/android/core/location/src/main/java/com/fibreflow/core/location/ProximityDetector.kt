@@ -1,13 +1,13 @@
+// 🟢 WORKING: Proximity detection service without domain dependencies
 package com.fibreflow.core.location
 
 import com.fibreflow.core.common.result.Result
-import com.fibreflow.domain.drops.entities.Drop
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Service for detecting proximity to drop locations
- * Validates if technician is within acceptable distance of installation point
+ * Service for detecting proximity to locations
+ * Validates if technician is within acceptable distance of target coordinates
  */
 @Singleton
 class ProximityDetector @Inject constructor(
@@ -22,15 +22,17 @@ class ProximityDetector @Inject constructor(
     }
 
     /**
-     * Check if technician is within proximity of a drop location
-     * @param drop The drop to check proximity for
+     * Check if technician is within proximity of a target location
+     * @param targetLatitude Target location latitude
+     * @param targetLongitude Target location longitude
      * @param radiusMeters Optional custom radius, defaults to DEFAULT_PROXIMITY_RADIUS
      * @return Result with proximity validation result
      */
     suspend fun validateProximity(
-        drop: Drop,
+        targetLatitude: Double,
+        targetLongitude: Double,
         radiusMeters: Float = DEFAULT_PROXIMITY_RADIUS
-    ): Result<ProximityResult> {
+    ): Result<CoreProximityResult> {
         return try {
             val currentLocationResult = locationService.getCurrentLocation()
 
@@ -43,20 +45,20 @@ class ProximityDetector @Inject constructor(
             val distance = locationService.calculateDistance(
                 currentLocation.latitude,
                 currentLocation.longitude,
-                drop.latitude,
-                drop.longitude
+                targetLatitude,
+                targetLongitude
             )
 
             val isWithinRadius = distance <= radiusMeters
 
-            val result = ProximityResult(
+            val result = CoreProximityResult(
                 isWithinProximity = isWithinRadius,
                 distanceMeters = distance,
                 requiredRadiusMeters = radiusMeters,
                 currentLatitude = currentLocation.latitude,
                 currentLongitude = currentLocation.longitude,
-                targetLatitude = drop.latitude,
-                targetLongitude = drop.longitude,
+                targetLatitude = targetLatitude,
+                targetLongitude = targetLongitude,
                 accuracy = currentLocation.accuracy
             )
 
@@ -67,15 +69,32 @@ class ProximityDetector @Inject constructor(
     }
 
     /**
-     * Check proximity for multiple drops
-     * @param drops List of drops to check
+     * Calculate distance between two locations
+     * @param lat1 First location latitude
+     * @param lon1 First location longitude
+     * @param lat2 Second location latitude
+     * @param lon2 Second location longitude
+     * @return Distance in meters
+     */
+    fun calculateDistance(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double
+    ): Double {
+        return locationService.calculateDistance(lat1, lon1, lat2, lon2)
+    }
+
+    /**
+     * Check proximity for multiple target locations
+     * @param targets List of target locations with identifiers
      * @param radiusMeters Proximity radius
-     * @return Map of drop numbers to proximity results
+     * @return Map of identifiers to proximity results
      */
     suspend fun validateMultipleProximities(
-        drops: List<Drop>,
+        targets: List<TargetLocation>,
         radiusMeters: Float = DEFAULT_PROXIMITY_RADIUS
-    ): Result<Map<String, ProximityResult>> {
+    ): Result<Map<String, CoreProximityResult>> {
         return try {
             val currentLocationResult = locationService.getCurrentLocation()
 
@@ -85,24 +104,24 @@ class ProximityDetector @Inject constructor(
 
             val currentLocation = (currentLocationResult as Result.Success).data
 
-            val results = drops.associate { drop ->
+            val results = targets.associate { target ->
                 val distance = locationService.calculateDistance(
                     currentLocation.latitude,
                     currentLocation.longitude,
-                    drop.latitude,
-                    drop.longitude
+                    target.latitude,
+                    target.longitude
                 )
 
                 val isWithinRadius = distance <= radiusMeters
 
-                drop.dropNumber to ProximityResult(
+                target.identifier to CoreProximityResult(
                     isWithinProximity = isWithinRadius,
                     distanceMeters = distance,
                     requiredRadiusMeters = radiusMeters,
                     currentLatitude = currentLocation.latitude,
                     currentLongitude = currentLocation.longitude,
-                    targetLatitude = drop.latitude,
-                    targetLongitude = drop.longitude,
+                    targetLatitude = target.latitude,
+                    targetLongitude = target.longitude,
                     accuracy = currentLocation.accuracy
                 )
             }
@@ -114,14 +133,14 @@ class ProximityDetector @Inject constructor(
     }
 
     /**
-     * Get the closest drop from current location
-     * @param drops List of available drops
-     * @return Result with closest drop and distance
+     * Get the closest target from current location
+     * @param targets List of target locations
+     * @return Result with closest target and distance
      */
-    suspend fun findClosestDrop(drops: List<Drop>): Result<ClosestDropResult> {
+    suspend fun findClosestTarget(targets: List<TargetLocation>): Result<ClosestTargetResult> {
         return try {
-            if (drops.isEmpty()) {
-                return Result.Error(Exception("No drops provided"))
+            if (targets.isEmpty()) {
+                return Result.Error(Exception("No targets provided"))
             }
 
             val currentLocationResult = locationService.getCurrentLocation()
@@ -132,29 +151,29 @@ class ProximityDetector @Inject constructor(
 
             val currentLocation = (currentLocationResult as Result.Success).data
 
-            var closestDrop: Drop? = null
+            var closestTarget: TargetLocation? = null
             var closestDistance = Float.MAX_VALUE
 
-            for (drop in drops) {
+            for (target in targets) {
                 val distance = locationService.calculateDistance(
                     currentLocation.latitude,
                     currentLocation.longitude,
-                    drop.latitude,
-                    drop.longitude
+                    target.latitude,
+                    target.longitude
                 )
 
                 if (distance < closestDistance) {
                     closestDistance = distance
-                    closestDrop = drop
+                    closestTarget = target
                 }
             }
 
-            if (closestDrop == null) {
-                return Result.Error(Exception("Unable to determine closest drop"))
+            if (closestTarget == null) {
+                return Result.Error(Exception("Unable to determine closest target"))
             }
 
-            val result = ClosestDropResult(
-                drop = closestDrop,
+            val result = ClosestTargetResult(
+                target = closestTarget,
                 distanceMeters = closestDistance,
                 currentLatitude = currentLocation.latitude,
                 currentLongitude = currentLocation.longitude
@@ -223,9 +242,18 @@ class ProximityDetector @Inject constructor(
 }
 
 /**
- * Result of proximity validation
+ * Target location with identifier
  */
-data class ProximityResult(
+data class TargetLocation(
+    val identifier: String,
+    val latitude: Double,
+    val longitude: Double
+)
+
+/**
+ * Result of proximity validation (core version)
+ */
+data class CoreProximityResult(
     val isWithinProximity: Boolean,
     val distanceMeters: Float,
     val requiredRadiusMeters: Float,
@@ -243,10 +271,10 @@ data class ProximityResult(
 }
 
 /**
- * Result for finding closest drop
+ * Result for finding closest target
  */
-data class ClosestDropResult(
-    val drop: Drop,
+data class ClosestTargetResult(
+    val target: TargetLocation,
     val distanceMeters: Float,
     val currentLatitude: Double,
     val currentLongitude: Double
