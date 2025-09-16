@@ -23,21 +23,21 @@ interface ValidationResultDao {
     @Delete
     suspend fun deleteValidationResult(result: ValidationResultEntity)
 
-    @Query("SELECT * FROM validation_results WHERE id = :resultId")
-    suspend fun getValidationResultById(resultId: String): ValidationResultEntity?
+    @Query("SELECT * FROM validation_results WHERE validation_id = :resultId")
+    suspend fun getValidationResultById(resultId: Long): ValidationResultEntity?
 
-    @Query("SELECT * FROM validation_results WHERE photoId = :photoId ORDER BY timestamp DESC")
-    suspend fun getValidationResultsByPhoto(photoId: String): List<ValidationResultEntity>
+    @Query("SELECT * FROM validation_results WHERE photo_id = :photoId ORDER BY created_at DESC")
+    suspend fun getValidationResultsByPhoto(photoId: Long): List<ValidationResultEntity>
 
-    @Query("SELECT * FROM validation_results WHERE installationId = :installationId ORDER BY timestamp DESC")
-    suspend fun getValidationResultsByInstallation(installationId: String): List<ValidationResultEntity>
+    @Query("SELECT * FROM validation_results WHERE photo_id IN (SELECT photo_id FROM photos WHERE installation_id = :installationId) ORDER BY created_at DESC")
+    suspend fun getValidationResultsByInstallation(installationId: Long): List<ValidationResultEntity>
 
-    @Query("SELECT * FROM validation_results WHERE validationStatus = :status ORDER BY timestamp DESC")
-    suspend fun getValidationResultsByStatus(status: String): List<ValidationResultEntity>
+    @Query("SELECT * FROM validation_results WHERE is_valid = :isValid ORDER BY created_at DESC")
+    suspend fun getValidationResultsByStatus(isValid: Boolean): List<ValidationResultEntity>
 
-    @Query("SELECT COUNT(*) FROM validation_results WHERE validationStatus = :status")
-    suspend fun getValidationResultCountByStatus(status: String): Int
+    @Query("SELECT COUNT(*) FROM validation_results WHERE is_valid = :isValid")
+    suspend fun getValidationResultCountByStatus(isValid: Boolean): Int
 
-    @Query("DELETE FROM validation_results WHERE timestamp < :cutoffDate")
+    @Query("DELETE FROM validation_results WHERE created_at < :cutoffDate")
     suspend fun deleteOldValidationResults(cutoffDate: Long): Int
 }

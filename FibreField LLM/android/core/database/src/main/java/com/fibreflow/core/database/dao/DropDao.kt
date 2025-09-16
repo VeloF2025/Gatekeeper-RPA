@@ -218,23 +218,12 @@ interface DropDao {
     /**
      * Get drop statistics
      */
-    @Query("""
-        SELECT status, COUNT(*) as count
-        FROM drops
-        GROUP BY status
-        ORDER BY count DESC
-    """)
-    suspend fun getDropStatusStatistics(): Map<String, Int>
+    @Query("SELECT COUNT(*) FROM drops WHERE status = 'AVAILABLE'")
+    suspend fun getAvailableDropCount(): Int
 
     /**
      * Get average completion time by priority
      */
-    @Query("""
-        SELECT priority, AVG(completed_at - assigned_at) as avgCompletionTime
-        FROM drops
-        WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL
-        GROUP BY priority
-        ORDER BY priority DESC
-    """)
-    suspend fun getAverageCompletionTimeByPriority(): Map<Int, Long>
+    @Query("SELECT AVG(completed_at - assigned_at) FROM drops WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL")
+    suspend fun getAverageCompletionTime(): Long?
 }

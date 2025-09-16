@@ -201,26 +201,14 @@ interface PhotoDao {
     /**
      * Get average quality score by step
      */
-    @Query("""
-        SELECT photo_type, AVG(validation_confidence) as avgQuality, COUNT(*) as photoCount
-        FROM photos
-        WHERE validation_confidence IS NOT NULL
-        GROUP BY photo_type
-        ORDER BY avgQuality DESC
-    """)
-    suspend fun getAverageQualityByStep(): Map<String, Pair<Float, Int>>
+    @Query("SELECT AVG(validation_confidence) FROM photos WHERE validation_confidence IS NOT NULL")
+    suspend fun getAveragePhotoQuality(): Float?
 
     /**
      * Get validation accuracy statistics
      */
-    @Query("""
-        SELECT validation_status, COUNT(*) as count,
-               AVG(validation_confidence) as avgConfidence
-        FROM photos
-        WHERE validation_status IS NOT NULL
-        GROUP BY validation_status
-    """)
-    suspend fun getValidationStatistics(): Map<String, Pair<Int, Float>>
+    @Query("SELECT COUNT(*) FROM photos WHERE validation_status = 'PASSED'")
+    suspend fun getPassedValidationCount(): Int
 
     /**
      * Bulk update sync status

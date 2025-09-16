@@ -77,9 +77,9 @@ interface TechnicianDao {
     @Query("SELECT * FROM technicians WHERE last_login BETWEEN :startTime AND :endTime ORDER BY last_login DESC")
     suspend fun getTechniciansByLastLoginRange(startTime: Long, endTime: Long): List<TechnicianEntity>
 
-    @Query("SELECT AVG(System.currentTimeMillis() - last_login) FROM technicians WHERE active = 1 AND last_login IS NOT NULL")
-    suspend fun getAverageTimeSinceLastLogin(): Long?
+    @Query("SELECT COUNT(*) FROM technicians WHERE last_login > :cutoffTime")
+    suspend fun getRecentlyActiveTechnicianCount(cutoffTime: Long): Int
 
-    @Query("SELECT role, COUNT(*) as count FROM technicians GROUP BY role ORDER BY count DESC")
-    suspend fun getTechnicianCountByRole(): Map<String, Int>
+    @Query("SELECT COUNT(*) FROM technicians WHERE role = 'TECHNICIAN'")
+    suspend fun getBasicTechnicianCount(): Int
 }

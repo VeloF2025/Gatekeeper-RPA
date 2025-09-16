@@ -188,14 +188,8 @@ interface InstallationDao {
     /**
      * Get average installation time by equipment type
      */
-    @Query("""
-        SELECT ont_serial, AVG(end_time - start_time) as avgTime
-        FROM installations
-        WHERE status = 'COMPLETED' AND ont_serial IS NOT NULL
-        GROUP BY ont_serial
-        ORDER BY avgTime ASC
-    """)
-    suspend fun getAverageInstallationTimeByEquipment(): Map<String, Long>
+    @Query("SELECT AVG(end_time - start_time) FROM installations WHERE status = 'COMPLETED' AND end_time IS NOT NULL")
+    suspend fun getAverageInstallationTime(): Long?
 
     /**
      * Bulk update sync status

@@ -59,6 +59,6 @@ interface SessionDao {
     @Query("SELECT AVG(expires_at - created_at) FROM sessions WHERE is_active = 0")
     suspend fun getAverageSessionDuration(): Long?
 
-    @Query("SELECT technician_id, COUNT(*) as sessionCount FROM sessions GROUP BY technician_id ORDER BY sessionCount DESC")
-    suspend fun getSessionCountByTechnician(): Map<String, Int>
+    @Query("SELECT COUNT(*) FROM sessions WHERE technician_id = :technicianId")
+    suspend fun getSessionCountForTechnician(technicianId: String): Int
 }

@@ -23,19 +23,19 @@ interface AIConversationDao {
     @Delete
     suspend fun deleteConversation(conversation: AIConversationEntity)
 
-    @Query("SELECT * FROM ai_conversations WHERE id = :conversationId")
-    suspend fun getConversationById(conversationId: String): AIConversationEntity?
+    @Query("SELECT * FROM ai_conversations WHERE conversation_id = :conversationId")
+    suspend fun getConversationById(conversationId: Long): AIConversationEntity?
 
-    @Query("SELECT * FROM ai_conversations WHERE installationId = :installationId ORDER BY timestamp ASC")
-    suspend fun getConversationsByInstallation(installationId: String): List<AIConversationEntity>
+    @Query("SELECT * FROM ai_conversations WHERE installation_id = :installationId ORDER BY created_at ASC")
+    suspend fun getConversationsByInstallation(installationId: Long): List<AIConversationEntity>
 
-    @Query("SELECT * FROM ai_conversations WHERE installationId = :installationId ORDER BY timestamp ASC")
-    fun getConversationsByInstallationFlow(installationId: String): Flow<List<AIConversationEntity>>
+    @Query("SELECT * FROM ai_conversations WHERE installation_id = :installationId ORDER BY created_at ASC")
+    fun getConversationsByInstallationFlow(installationId: Long): Flow<List<AIConversationEntity>>
 
-    @Query("SELECT * FROM ai_conversations WHERE technicianId = :technicianId ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun getRecentConversationsByTechnician(technicianId: String, limit: Int = 50): List<AIConversationEntity>
+    @Query("SELECT * FROM ai_conversations ORDER BY created_at DESC LIMIT :limit")
+    suspend fun getRecentConversations(limit: Int = 50): List<AIConversationEntity>
 
-    @Query("DELETE FROM ai_conversations WHERE timestamp < :cutoffDate")
+    @Query("DELETE FROM ai_conversations WHERE created_at < :cutoffDate")
     suspend fun deleteOldConversations(cutoffDate: Long): Int
 
     @Query("SELECT COUNT(*) FROM ai_conversations")

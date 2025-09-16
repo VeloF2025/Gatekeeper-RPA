@@ -23,27 +23,27 @@ interface SyncQueueDao {
     @Delete
     suspend fun deleteSyncItem(item: SyncQueueEntity)
 
-    @Query("SELECT * FROM sync_queue WHERE id = :itemId")
-    suspend fun getSyncItemById(itemId: String): SyncQueueEntity?
+    @Query("SELECT * FROM sync_queue WHERE sync_id = :itemId")
+    suspend fun getSyncItemById(itemId: Long): SyncQueueEntity?
 
-    @Query("SELECT * FROM sync_queue WHERE status = 'PENDING' ORDER BY priority DESC, createdAt ASC")
+    @Query("SELECT * FROM sync_queue WHERE sync_status = 'PENDING' ORDER BY created_at ASC")
     suspend fun getPendingSyncItems(): List<SyncQueueEntity>
 
-    @Query("SELECT * FROM sync_queue WHERE status = 'PENDING' ORDER BY priority DESC, createdAt ASC")
+    @Query("SELECT * FROM sync_queue WHERE sync_status = 'PENDING' ORDER BY created_at ASC")
     fun getPendingSyncItemsFlow(): Flow<List<SyncQueueEntity>>
 
-    @Query("SELECT * FROM sync_queue WHERE status = 'FAILED' ORDER BY retryCount ASC, createdAt ASC")
+    @Query("SELECT * FROM sync_queue WHERE sync_status = 'FAILED' ORDER BY retry_count ASC, created_at ASC")
     suspend fun getFailedSyncItems(): List<SyncQueueEntity>
 
-    @Query("UPDATE sync_queue SET status = :status, updatedAt = :timestamp WHERE id = :itemId")
-    suspend fun updateSyncStatus(itemId: String, status: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE sync_queue SET sync_status = :status, updated_at = :timestamp WHERE sync_id = :itemId")
+    suspend fun updateSyncStatus(itemId: Long, status: String, timestamp: Long = System.currentTimeMillis())
 
-    @Query("UPDATE sync_queue SET retryCount = retryCount + 1, lastAttemptAt = :timestamp, updatedAt = :timestamp WHERE id = :itemId")
-    suspend fun incrementRetryCount(itemId: String, timestamp: Long = System.currentTimeMillis())
+    @Query("UPDATE sync_queue SET retry_count = retry_count + 1, last_attempt = :timestamp, updated_at = :timestamp WHERE sync_id = :itemId")
+    suspend fun incrementRetryCount(itemId: Long, timestamp: Long = System.currentTimeMillis())
 
-    @Query("DELETE FROM sync_queue WHERE status = 'COMPLETED' AND updatedAt < :cutoffDate")
+    @Query("DELETE FROM sync_queue WHERE sync_status = 'COMPLETED' AND updated_at < :cutoffDate")
     suspend fun deleteCompletedItems(cutoffDate: Long): Int
 
-    @Query("SELECT COUNT(*) FROM sync_queue WHERE status = :status")
+    @Query("SELECT COUNT(*) FROM sync_queue WHERE sync_status = :status")
     suspend fun getSyncItemCountByStatus(status: String): Int
 }
