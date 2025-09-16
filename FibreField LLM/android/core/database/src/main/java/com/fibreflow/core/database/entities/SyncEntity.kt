@@ -80,7 +80,7 @@ data class SyncEntity(
      * Check if sync operation can be retried
      */
     val canRetry: Boolean
-        get() = retryCount < maxRetries && syncStatus != SyncStatus.SYNCED
+        get() = retryCount < maxRetries && syncStatus != SyncStatus.COMPLETED
 
     /**
      * Check if operation is ready for sync
@@ -122,7 +122,7 @@ data class SyncEntity(
      */
     fun markSynced(serverVersion: Long? = null): SyncEntity {
         return copy(
-            syncStatus = SyncStatus.SYNCED,
+            syncStatus = SyncStatus.COMPLETED,
             serverVersion = serverVersion,
             lastSyncAttempt = Date(),
             syncError = null,
@@ -235,60 +235,3 @@ data class SyncStatisticsEntity(
         get() = 1.0 - successRate
 }
 
-/**
- * Sync queue entity for managing sync operations
- */
-@Entity(
-    tableName = "sync_queue",
-    indices = [
-        Index(value = ["entity_type"]),
-        Index(value = ["priority"]),
-        Index(value = ["status"]),
-        Index(value = ["next_attempt"])
-    ]
-)
-@TypeConverters(DateConverters::class)
-data class SyncQueueEntity(
-    @PrimaryKey
-    @ColumnInfo(name = "queue_id")
-    val queueId: String,
-
-    @ColumnInfo(name = "entity_type")
-    val entityType: String,
-
-    @ColumnInfo(name = "entity_id")
-    val entityId: String,
-
-    @ColumnInfo(name = "operation")
-    val operation: String,
-
-    @ColumnInfo(name = "data")
-    val data: String, // JSON
-
-    @ColumnInfo(name = "priority")
-    val priority: Int = 1,
-
-    @ColumnInfo(name = "status")
-    val status: String = "PENDING",
-
-    @ColumnInfo(name = "retry_count")
-    val retryCount: Int = 0,
-
-    @ColumnInfo(name = "max_retries")
-    val maxRetries: Int = 3,
-
-    @ColumnInfo(name = "last_attempt")
-    val lastAttempt: Date? = null,
-
-    @ColumnInfo(name = "next_attempt")
-    val nextAttempt: Date? = null,
-
-    @ColumnInfo(name = "error_message")
-    val errorMessage: String? = null,
-
-    @ColumnInfo(name = "created_at")
-    val createdAt: Date = Date(),
-
-    @ColumnInfo(name = "updated_at")
-    val updatedAt: Date = Date()
-)

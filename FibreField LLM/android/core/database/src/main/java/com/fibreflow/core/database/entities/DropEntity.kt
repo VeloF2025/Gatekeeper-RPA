@@ -224,13 +224,3 @@ enum class ActivationStatus {
     FAILED      // Activation failed
 }
 
-/**
- * Synchronization status enumeration
- */
-enum class SyncStatus {
-    PENDING,      // Waiting to be synced
-    IN_PROGRESS,  // Currently syncing
-    SYNCED,       // Successfully synced
-    FAILED,       // Sync failed
-    CONFLICT      // Sync conflict detected
-}

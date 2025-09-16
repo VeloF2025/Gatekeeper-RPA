@@ -33,6 +33,9 @@ dependencies {
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.support)
 
+    // Logging
+    implementation(libs.timber)
+
     // MLC LLM for Phi-3.5 Mini integration
     // TODO: Add MLC LLM via local build (not available in Maven)
     // implementation(libs.mlc.llm.android)

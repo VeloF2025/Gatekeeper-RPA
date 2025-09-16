@@ -55,7 +55,7 @@ class DatabaseEncryption @Inject constructor(
                 return@withContext keyResult
             }
 
-            databaseKey = keyResult.data
+            databaseKey = (keyResult as Result.Success).data
 
             // Create SQLCipher support factory with derived key
             supportFactory = SupportFactory(SQLiteDatabase.getBytes(databaseKey?.toCharArray()))
@@ -97,7 +97,7 @@ class DatabaseEncryption @Inject constructor(
                 return@withContext newKeyResult
             }
 
-            val newKey = newKeyResult.data
+            val newKey = (newKeyResult as Result.Success).data
 
             // Update database key and factory
             databaseKey = newKey

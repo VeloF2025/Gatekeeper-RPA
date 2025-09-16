@@ -110,11 +110,9 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_remediations_installation_id` ON `remediations` (`installation_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_remediations_status` ON `remediations` (`status`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_remediations_created_at` ON `remediations` (`created_at`)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `sync_queue` (`queue_id` TEXT NOT NULL, `entity_type` TEXT NOT NULL, `entity_id` TEXT NOT NULL, `operation` TEXT NOT NULL, `data` TEXT NOT NULL, `priority` INTEGER NOT NULL, `status` TEXT NOT NULL, `retry_count` INTEGER NOT NULL, `max_retries` INTEGER NOT NULL, `last_attempt` INTEGER, `next_attempt` INTEGER, `error_message` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`queue_id`))");
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_entity_type` ON `sync_queue` (`entity_type`)");
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_priority` ON `sync_queue` (`priority`)");
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_status` ON `sync_queue` (`status`)");
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_next_attempt` ON `sync_queue` (`next_attempt`)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `sync_queue` (`sync_id` INTEGER NOT NULL, `entity_type` TEXT NOT NULL, `entity_id` TEXT NOT NULL, `operation` TEXT NOT NULL, `data` TEXT NOT NULL, `sync_status` TEXT NOT NULL, `retry_count` INTEGER NOT NULL, `last_attempt` INTEGER, `error_message` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`sync_id`))");
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_sync_status` ON `sync_queue` (`sync_status`)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_queue_created_at` ON `sync_queue` (`created_at`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `ai_conversations` (`conversation_id` INTEGER NOT NULL, `installation_id` INTEGER, `user_message` TEXT NOT NULL, `ai_response` TEXT NOT NULL, `confidence_score` REAL, `created_at` INTEGER NOT NULL, PRIMARY KEY(`conversation_id`))");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_ai_conversations_installation_id` ON `ai_conversations` (`installation_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_ai_conversations_created_at` ON `ai_conversations` (`created_at`)");
@@ -133,7 +131,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_config_key` ON `configuration` (`config_key`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_updated_at` ON `configuration` (`updated_at`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c68b678ca13836bca80948d28a42af4e')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d2f854056888621dbd9ac752c65e41c')");
       }
 
       @Override
@@ -383,27 +381,22 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
                   + " Expected:\n" + _infoRemediations + "\n"
                   + " Found:\n" + _existingRemediations);
         }
-        final HashMap<String, TableInfo.Column> _columnsSyncQueue = new HashMap<String, TableInfo.Column>(14);
-        _columnsSyncQueue.put("queue_id", new TableInfo.Column("queue_id", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashMap<String, TableInfo.Column> _columnsSyncQueue = new HashMap<String, TableInfo.Column>(11);
+        _columnsSyncQueue.put("sync_id", new TableInfo.Column("sync_id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("entity_type", new TableInfo.Column("entity_type", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("entity_id", new TableInfo.Column("entity_id", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("operation", new TableInfo.Column("operation", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("data", new TableInfo.Column("data", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsSyncQueue.put("priority", new TableInfo.Column("priority", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsSyncQueue.put("status", new TableInfo.Column("status", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsSyncQueue.put("sync_status", new TableInfo.Column("sync_status", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("retry_count", new TableInfo.Column("retry_count", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsSyncQueue.put("max_retries", new TableInfo.Column("max_retries", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("last_attempt", new TableInfo.Column("last_attempt", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsSyncQueue.put("next_attempt", new TableInfo.Column("next_attempt", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("error_message", new TableInfo.Column("error_message", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsSyncQueue.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysSyncQueue = new HashSet<TableInfo.ForeignKey>(0);
-        final HashSet<TableInfo.Index> _indicesSyncQueue = new HashSet<TableInfo.Index>(4);
-        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_entity_type", false, Arrays.asList("entity_type"), Arrays.asList("ASC")));
-        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_priority", false, Arrays.asList("priority"), Arrays.asList("ASC")));
-        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_status", false, Arrays.asList("status"), Arrays.asList("ASC")));
-        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_next_attempt", false, Arrays.asList("next_attempt"), Arrays.asList("ASC")));
+        final HashSet<TableInfo.Index> _indicesSyncQueue = new HashSet<TableInfo.Index>(2);
+        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_sync_status", false, Arrays.asList("sync_status"), Arrays.asList("ASC")));
+        _indicesSyncQueue.add(new TableInfo.Index("index_sync_queue_created_at", false, Arrays.asList("created_at"), Arrays.asList("ASC")));
         final TableInfo _infoSyncQueue = new TableInfo("sync_queue", _columnsSyncQueue, _foreignKeysSyncQueue, _indicesSyncQueue);
         final TableInfo _existingSyncQueue = TableInfo.read(db, "sync_queue");
         if (!_infoSyncQueue.equals(_existingSyncQueue)) {
@@ -510,7 +503,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "c68b678ca13836bca80948d28a42af4e", "bda69c3c48a2dc7314afa288956794c4");
+    }, "7d2f854056888621dbd9ac752c65e41c", "6b9f722429478aac961f8ebcd6dcd13e");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

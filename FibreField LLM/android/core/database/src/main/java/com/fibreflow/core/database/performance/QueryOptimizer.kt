@@ -177,7 +177,7 @@ class QueryOptimizer @Inject constructor() {
     }
 
     private fun calculateEstimatedImprovement(optimizations: List<QueryOptimization>): String {
-        val totalImprovement = optimizations.sumOf { improvement ->
+        val totalImprovement = optimizations.map { improvement ->
             when (improvement.expectedImprovement) {
                 "20-40% performance improvement" -> 30
                 "50-90% performance improvement" -> 70
@@ -185,7 +185,7 @@ class QueryOptimizer @Inject constructor() {
                 "Variable - depends on rewrite approach" -> 25
                 else -> 0
             }
-        }
+        }.sum()
 
         return when {
             totalImprovement > 100 -> "Significant improvement expected"

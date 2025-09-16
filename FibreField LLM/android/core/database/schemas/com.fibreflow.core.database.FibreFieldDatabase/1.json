@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c68b678ca13836bca80948d28a42af4e",
+    "identityHash": "7d2f854056888621dbd9ac752c65e41c",
     "entities": [
       {
         "tableName": "projects",
@@ -987,12 +987,12 @@
       },
       {
         "tableName": "sync_queue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`queue_id` TEXT NOT NULL, `entity_type` TEXT NOT NULL, `entity_id` TEXT NOT NULL, `operation` TEXT NOT NULL, `data` TEXT NOT NULL, `priority` INTEGER NOT NULL, `status` TEXT NOT NULL, `retry_count` INTEGER NOT NULL, `max_retries` INTEGER NOT NULL, `last_attempt` INTEGER, `next_attempt` INTEGER, `error_message` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`queue_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sync_id` INTEGER NOT NULL, `entity_type` TEXT NOT NULL, `entity_id` TEXT NOT NULL, `operation` TEXT NOT NULL, `data` TEXT NOT NULL, `sync_status` TEXT NOT NULL, `retry_count` INTEGER NOT NULL, `last_attempt` INTEGER, `error_message` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`sync_id`))",
         "fields": [
           {
-            "fieldPath": "queueId",
-            "columnName": "queue_id",
-            "affinity": "TEXT",
+            "fieldPath": "syncId",
+            "columnName": "sync_id",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -1020,14 +1020,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "priority",
-            "columnName": "priority",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "status",
-            "columnName": "status",
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1038,20 +1032,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "maxRetries",
-            "columnName": "max_retries",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "lastAttempt",
             "columnName": "last_attempt",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "nextAttempt",
-            "columnName": "next_attempt",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -1077,45 +1059,27 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "queue_id"
+            "sync_id"
           ]
         },
         "indices": [
           {
-            "name": "index_sync_queue_entity_type",
+            "name": "index_sync_queue_sync_status",
             "unique": false,
             "columnNames": [
-              "entity_type"
+              "sync_status"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_entity_type` ON `${TABLE_NAME}` (`entity_type`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_sync_status` ON `${TABLE_NAME}` (`sync_status`)"
           },
           {
-            "name": "index_sync_queue_priority",
+            "name": "index_sync_queue_created_at",
             "unique": false,
             "columnNames": [
-              "priority"
+              "created_at"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_priority` ON `${TABLE_NAME}` (`priority`)"
-          },
-          {
-            "name": "index_sync_queue_status",
-            "unique": false,
-            "columnNames": [
-              "status"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_status` ON `${TABLE_NAME}` (`status`)"
-          },
-          {
-            "name": "index_sync_queue_next_attempt",
-            "unique": false,
-            "columnNames": [
-              "next_attempt"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_next_attempt` ON `${TABLE_NAME}` (`next_attempt`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sync_queue_created_at` ON `${TABLE_NAME}` (`created_at`)"
           }
         ],
         "foreignKeys": []
@@ -1519,7 +1483,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c68b678ca13836bca80948d28a42af4e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d2f854056888621dbd9ac752c65e41c')"
     ]
   }
 }

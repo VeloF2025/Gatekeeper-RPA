@@ -14,7 +14,10 @@ import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import com.fibreflow.core.database.converters.DateConverters;
+import com.fibreflow.core.database.converters.StatusConverters;
+import com.fibreflow.core.database.entities.SyncOperation;
 import com.fibreflow.core.database.entities.SyncQueueEntity;
+import com.fibreflow.core.database.entities.SyncStatus;
 import java.lang.Class;
 import java.lang.Exception;
 import java.lang.Integer;
@@ -40,6 +43,8 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   private final EntityInsertionAdapter<SyncQueueEntity> __insertionAdapterOfSyncQueueEntity;
 
+  private final StatusConverters __statusConverters = new StatusConverters();
+
   private final DateConverters __dateConverters = new DateConverters();
 
   private final EntityDeletionOrUpdateAdapter<SyncQueueEntity> __deletionAdapterOfSyncQueueEntity;
@@ -58,17 +63,13 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `sync_queue` (`queue_id`,`entity_type`,`entity_id`,`operation`,`data`,`priority`,`status`,`retry_count`,`max_retries`,`last_attempt`,`next_attempt`,`error_message`,`created_at`,`updated_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `sync_queue` (`sync_id`,`entity_type`,`entity_id`,`operation`,`data`,`sync_status`,`retry_count`,`last_attempt`,`error_message`,`created_at`,`updated_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
       protected void bind(@NonNull final SupportSQLiteStatement statement,
           @NonNull final SyncQueueEntity entity) {
-        if (entity.getQueueId() == null) {
-          statement.bindNull(1);
-        } else {
-          statement.bindString(1, entity.getQueueId());
-        }
+        statement.bindLong(1, entity.getSyncId());
         if (entity.getEntityType() == null) {
           statement.bindNull(2);
         } else {
@@ -79,52 +80,46 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
         } else {
           statement.bindString(3, entity.getEntityId());
         }
-        if (entity.getOperation() == null) {
+        final String _tmp = __statusConverters.fromSyncOperation(entity.getOperation());
+        if (_tmp == null) {
           statement.bindNull(4);
         } else {
-          statement.bindString(4, entity.getOperation());
+          statement.bindString(4, _tmp);
         }
         if (entity.getData() == null) {
           statement.bindNull(5);
         } else {
           statement.bindString(5, entity.getData());
         }
-        statement.bindLong(6, entity.getPriority());
-        if (entity.getStatus() == null) {
-          statement.bindNull(7);
-        } else {
-          statement.bindString(7, entity.getStatus());
-        }
-        statement.bindLong(8, entity.getRetryCount());
-        statement.bindLong(9, entity.getMaxRetries());
-        final Long _tmp = __dateConverters.dateToTimestamp(entity.getLastAttempt());
-        if (_tmp == null) {
-          statement.bindNull(10);
-        } else {
-          statement.bindLong(10, _tmp);
-        }
-        final Long _tmp_1 = __dateConverters.dateToTimestamp(entity.getNextAttempt());
+        final String _tmp_1 = __statusConverters.fromSyncStatus(entity.getSyncStatus());
         if (_tmp_1 == null) {
-          statement.bindNull(11);
+          statement.bindNull(6);
         } else {
-          statement.bindLong(11, _tmp_1);
+          statement.bindString(6, _tmp_1);
+        }
+        statement.bindLong(7, entity.getRetryCount());
+        final Long _tmp_2 = __dateConverters.dateToTimestamp(entity.getLastAttempt());
+        if (_tmp_2 == null) {
+          statement.bindNull(8);
+        } else {
+          statement.bindLong(8, _tmp_2);
         }
         if (entity.getErrorMessage() == null) {
-          statement.bindNull(12);
+          statement.bindNull(9);
         } else {
-          statement.bindString(12, entity.getErrorMessage());
+          statement.bindString(9, entity.getErrorMessage());
         }
-        final Long _tmp_2 = __dateConverters.dateToTimestamp(entity.getCreatedAt());
-        if (_tmp_2 == null) {
-          statement.bindNull(13);
-        } else {
-          statement.bindLong(13, _tmp_2);
-        }
-        final Long _tmp_3 = __dateConverters.dateToTimestamp(entity.getUpdatedAt());
+        final Long _tmp_3 = __dateConverters.dateToTimestamp(entity.getCreatedAt());
         if (_tmp_3 == null) {
-          statement.bindNull(14);
+          statement.bindNull(10);
         } else {
-          statement.bindLong(14, _tmp_3);
+          statement.bindLong(10, _tmp_3);
+        }
+        final Long _tmp_4 = __dateConverters.dateToTimestamp(entity.getUpdatedAt());
+        if (_tmp_4 == null) {
+          statement.bindNull(11);
+        } else {
+          statement.bindLong(11, _tmp_4);
         }
       }
     };
@@ -132,34 +127,26 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "DELETE FROM `sync_queue` WHERE `queue_id` = ?";
+        return "DELETE FROM `sync_queue` WHERE `sync_id` = ?";
       }
 
       @Override
       protected void bind(@NonNull final SupportSQLiteStatement statement,
           @NonNull final SyncQueueEntity entity) {
-        if (entity.getQueueId() == null) {
-          statement.bindNull(1);
-        } else {
-          statement.bindString(1, entity.getQueueId());
-        }
+        statement.bindLong(1, entity.getSyncId());
       }
     };
     this.__updateAdapterOfSyncQueueEntity = new EntityDeletionOrUpdateAdapter<SyncQueueEntity>(__db) {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `sync_queue` SET `queue_id` = ?,`entity_type` = ?,`entity_id` = ?,`operation` = ?,`data` = ?,`priority` = ?,`status` = ?,`retry_count` = ?,`max_retries` = ?,`last_attempt` = ?,`next_attempt` = ?,`error_message` = ?,`created_at` = ?,`updated_at` = ? WHERE `queue_id` = ?";
+        return "UPDATE OR ABORT `sync_queue` SET `sync_id` = ?,`entity_type` = ?,`entity_id` = ?,`operation` = ?,`data` = ?,`sync_status` = ?,`retry_count` = ?,`last_attempt` = ?,`error_message` = ?,`created_at` = ?,`updated_at` = ? WHERE `sync_id` = ?";
       }
 
       @Override
       protected void bind(@NonNull final SupportSQLiteStatement statement,
           @NonNull final SyncQueueEntity entity) {
-        if (entity.getQueueId() == null) {
-          statement.bindNull(1);
-        } else {
-          statement.bindString(1, entity.getQueueId());
-        }
+        statement.bindLong(1, entity.getSyncId());
         if (entity.getEntityType() == null) {
           statement.bindNull(2);
         } else {
@@ -170,65 +157,55 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
         } else {
           statement.bindString(3, entity.getEntityId());
         }
-        if (entity.getOperation() == null) {
+        final String _tmp = __statusConverters.fromSyncOperation(entity.getOperation());
+        if (_tmp == null) {
           statement.bindNull(4);
         } else {
-          statement.bindString(4, entity.getOperation());
+          statement.bindString(4, _tmp);
         }
         if (entity.getData() == null) {
           statement.bindNull(5);
         } else {
           statement.bindString(5, entity.getData());
         }
-        statement.bindLong(6, entity.getPriority());
-        if (entity.getStatus() == null) {
-          statement.bindNull(7);
-        } else {
-          statement.bindString(7, entity.getStatus());
-        }
-        statement.bindLong(8, entity.getRetryCount());
-        statement.bindLong(9, entity.getMaxRetries());
-        final Long _tmp = __dateConverters.dateToTimestamp(entity.getLastAttempt());
-        if (_tmp == null) {
-          statement.bindNull(10);
-        } else {
-          statement.bindLong(10, _tmp);
-        }
-        final Long _tmp_1 = __dateConverters.dateToTimestamp(entity.getNextAttempt());
+        final String _tmp_1 = __statusConverters.fromSyncStatus(entity.getSyncStatus());
         if (_tmp_1 == null) {
-          statement.bindNull(11);
+          statement.bindNull(6);
         } else {
-          statement.bindLong(11, _tmp_1);
+          statement.bindString(6, _tmp_1);
+        }
+        statement.bindLong(7, entity.getRetryCount());
+        final Long _tmp_2 = __dateConverters.dateToTimestamp(entity.getLastAttempt());
+        if (_tmp_2 == null) {
+          statement.bindNull(8);
+        } else {
+          statement.bindLong(8, _tmp_2);
         }
         if (entity.getErrorMessage() == null) {
-          statement.bindNull(12);
+          statement.bindNull(9);
         } else {
-          statement.bindString(12, entity.getErrorMessage());
+          statement.bindString(9, entity.getErrorMessage());
         }
-        final Long _tmp_2 = __dateConverters.dateToTimestamp(entity.getCreatedAt());
-        if (_tmp_2 == null) {
-          statement.bindNull(13);
-        } else {
-          statement.bindLong(13, _tmp_2);
-        }
-        final Long _tmp_3 = __dateConverters.dateToTimestamp(entity.getUpdatedAt());
+        final Long _tmp_3 = __dateConverters.dateToTimestamp(entity.getCreatedAt());
         if (_tmp_3 == null) {
-          statement.bindNull(14);
+          statement.bindNull(10);
         } else {
-          statement.bindLong(14, _tmp_3);
+          statement.bindLong(10, _tmp_3);
         }
-        if (entity.getQueueId() == null) {
-          statement.bindNull(15);
+        final Long _tmp_4 = __dateConverters.dateToTimestamp(entity.getUpdatedAt());
+        if (_tmp_4 == null) {
+          statement.bindNull(11);
         } else {
-          statement.bindString(15, entity.getQueueId());
+          statement.bindLong(11, _tmp_4);
         }
+        statement.bindLong(12, entity.getSyncId());
       }
     };
     this.__preparedStmtOfUpdateSyncStatus = new SharedSQLiteStatement(__db) {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE sync_queue SET status = ?, updated_at = ? WHERE queue_id = ?";
+        final String _query = "UPDATE sync_queue SET sync_status = ?, updated_at = ? WHERE sync_id = ?";
         return _query;
       }
     };
@@ -236,7 +213,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "UPDATE sync_queue SET retry_count = retry_count + 1, last_attempt = ?, updated_at = ? WHERE queue_id = ?";
+        final String _query = "UPDATE sync_queue SET retry_count = retry_count + 1, last_attempt = ?, updated_at = ? WHERE sync_id = ?";
         return _query;
       }
     };
@@ -244,7 +221,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "DELETE FROM sync_queue WHERE status = 'COMPLETED' AND updated_at < ?";
+        final String _query = "DELETE FROM sync_queue WHERE sync_status = 'COMPLETED' AND updated_at < ?";
         return _query;
       }
     };
@@ -252,16 +229,16 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   @Override
   public Object insertSyncItem(final SyncQueueEntity item,
-      final Continuation<? super Unit> $completion) {
-    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      final Continuation<? super Long> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
-      public Unit call() throws Exception {
+      public Long call() throws Exception {
         __db.beginTransaction();
         try {
-          __insertionAdapterOfSyncQueueEntity.insert(item);
+          final Long _result = __insertionAdapterOfSyncQueueEntity.insertAndReturnId(item);
           __db.setTransactionSuccessful();
-          return Unit.INSTANCE;
+          return _result;
         } finally {
           __db.endTransaction();
         }
@@ -271,16 +248,16 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   @Override
   public Object insertSyncItems(final List<SyncQueueEntity> items,
-      final Continuation<? super Unit> $completion) {
-    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      final Continuation<? super List<Long>> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<List<Long>>() {
       @Override
       @NonNull
-      public Unit call() throws Exception {
+      public List<Long> call() throws Exception {
         __db.beginTransaction();
         try {
-          __insertionAdapterOfSyncQueueEntity.insert(items);
+          final List<Long> _result = __insertionAdapterOfSyncQueueEntity.insertAndReturnIdsList(items);
           __db.setTransactionSuccessful();
-          return Unit.INSTANCE;
+          return _result;
         } finally {
           __db.endTransaction();
         }
@@ -327,7 +304,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
   }
 
   @Override
-  public Object updateSyncStatus(final String itemId, final String status, final long timestamp,
+  public Object updateSyncStatus(final long itemId, final String status, final long timestamp,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -343,11 +320,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
         _argIndex = 2;
         _stmt.bindLong(_argIndex, timestamp);
         _argIndex = 3;
-        if (itemId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, itemId);
-        }
+        _stmt.bindLong(_argIndex, itemId);
         try {
           __db.beginTransaction();
           try {
@@ -365,7 +338,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
   }
 
   @Override
-  public Object incrementRetryCount(final String itemId, final long timestamp,
+  public Object incrementRetryCount(final long itemId, final long timestamp,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
@@ -377,11 +350,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
         _argIndex = 2;
         _stmt.bindLong(_argIndex, timestamp);
         _argIndex = 3;
-        if (itemId == null) {
-          _stmt.bindNull(_argIndex);
-        } else {
-          _stmt.bindString(_argIndex, itemId);
-        }
+        _stmt.bindLong(_argIndex, itemId);
         try {
           __db.beginTransaction();
           try {
@@ -425,16 +394,12 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
   }
 
   @Override
-  public Object getSyncItemById(final String itemId,
+  public Object getSyncItemById(final long itemId,
       final Continuation<? super SyncQueueEntity> $completion) {
-    final String _sql = "SELECT * FROM sync_queue WHERE queue_id = ?";
+    final String _sql = "SELECT * FROM sync_queue WHERE sync_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (itemId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, itemId);
-    }
+    _statement.bindLong(_argIndex, itemId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<SyncQueueEntity>() {
       @Override
@@ -442,28 +407,21 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       public SyncQueueEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final int _cursorIndexOfQueueId = CursorUtil.getColumnIndexOrThrow(_cursor, "queue_id");
+          final int _cursorIndexOfSyncId = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_id");
           final int _cursorIndexOfEntityType = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_type");
           final int _cursorIndexOfEntityId = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_id");
           final int _cursorIndexOfOperation = CursorUtil.getColumnIndexOrThrow(_cursor, "operation");
           final int _cursorIndexOfData = CursorUtil.getColumnIndexOrThrow(_cursor, "data");
-          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
-          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
           final int _cursorIndexOfRetryCount = CursorUtil.getColumnIndexOrThrow(_cursor, "retry_count");
-          final int _cursorIndexOfMaxRetries = CursorUtil.getColumnIndexOrThrow(_cursor, "max_retries");
           final int _cursorIndexOfLastAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_attempt");
-          final int _cursorIndexOfNextAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "next_attempt");
           final int _cursorIndexOfErrorMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "error_message");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final SyncQueueEntity _result;
           if (_cursor.moveToFirst()) {
-            final String _tmpQueueId;
-            if (_cursor.isNull(_cursorIndexOfQueueId)) {
-              _tmpQueueId = null;
-            } else {
-              _tmpQueueId = _cursor.getString(_cursorIndexOfQueueId);
-            }
+            final long _tmpSyncId;
+            _tmpSyncId = _cursor.getLong(_cursorIndexOfSyncId);
             final String _tmpEntityType;
             if (_cursor.isNull(_cursorIndexOfEntityType)) {
               _tmpEntityType = null;
@@ -476,46 +434,38 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
             } else {
               _tmpEntityId = _cursor.getString(_cursorIndexOfEntityId);
             }
-            final String _tmpOperation;
+            final SyncOperation _tmpOperation;
+            final String _tmp;
             if (_cursor.isNull(_cursorIndexOfOperation)) {
-              _tmpOperation = null;
+              _tmp = null;
             } else {
-              _tmpOperation = _cursor.getString(_cursorIndexOfOperation);
+              _tmp = _cursor.getString(_cursorIndexOfOperation);
             }
+            _tmpOperation = __statusConverters.toSyncOperation(_tmp);
             final String _tmpData;
             if (_cursor.isNull(_cursorIndexOfData)) {
               _tmpData = null;
             } else {
               _tmpData = _cursor.getString(_cursorIndexOfData);
             }
-            final int _tmpPriority;
-            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
-            final String _tmpStatus;
-            if (_cursor.isNull(_cursorIndexOfStatus)) {
-              _tmpStatus = null;
-            } else {
-              _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
-            }
-            final int _tmpRetryCount;
-            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
-            final int _tmpMaxRetries;
-            _tmpMaxRetries = _cursor.getInt(_cursorIndexOfMaxRetries);
-            final Date _tmpLastAttempt;
-            final Long _tmp;
-            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
-              _tmp = null;
-            } else {
-              _tmp = _cursor.getLong(_cursorIndexOfLastAttempt);
-            }
-            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp);
-            final Date _tmpNextAttempt;
-            final Long _tmp_1;
-            if (_cursor.isNull(_cursorIndexOfNextAttempt)) {
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
               _tmp_1 = null;
             } else {
-              _tmp_1 = _cursor.getLong(_cursorIndexOfNextAttempt);
+              _tmp_1 = _cursor.getString(_cursorIndexOfSyncStatus);
             }
-            _tmpNextAttempt = __dateConverters.fromTimestamp(_tmp_1);
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_1);
+            final int _tmpRetryCount;
+            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
+            final Date _tmpLastAttempt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfLastAttempt);
+            }
+            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp_2);
             final String _tmpErrorMessage;
             if (_cursor.isNull(_cursorIndexOfErrorMessage)) {
               _tmpErrorMessage = null;
@@ -523,22 +473,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
               _tmpErrorMessage = _cursor.getString(_cursorIndexOfErrorMessage);
             }
             final Date _tmpCreatedAt;
-            final Long _tmp_2;
-            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
-              _tmp_2 = null;
-            } else {
-              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
-            }
-            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
-            final Date _tmpUpdatedAt;
             final Long _tmp_3;
-            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
               _tmp_3 = null;
             } else {
-              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+              _tmp_3 = _cursor.getLong(_cursorIndexOfCreatedAt);
             }
-            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
-            _result = new SyncQueueEntity(_tmpQueueId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpPriority,_tmpStatus,_tmpRetryCount,_tmpMaxRetries,_tmpLastAttempt,_tmpNextAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_4);
+            _result = new SyncQueueEntity(_tmpSyncId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpSyncStatus,_tmpRetryCount,_tmpLastAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
           } else {
             _result = null;
           }
@@ -553,7 +503,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   @Override
   public Object getPendingSyncItems(final Continuation<? super List<SyncQueueEntity>> $completion) {
-    final String _sql = "SELECT * FROM sync_queue WHERE status = 'PENDING' ORDER BY created_at ASC";
+    final String _sql = "SELECT * FROM sync_queue WHERE sync_status = 'PENDING' ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<SyncQueueEntity>>() {
@@ -562,29 +512,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       public List<SyncQueueEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final int _cursorIndexOfQueueId = CursorUtil.getColumnIndexOrThrow(_cursor, "queue_id");
+          final int _cursorIndexOfSyncId = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_id");
           final int _cursorIndexOfEntityType = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_type");
           final int _cursorIndexOfEntityId = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_id");
           final int _cursorIndexOfOperation = CursorUtil.getColumnIndexOrThrow(_cursor, "operation");
           final int _cursorIndexOfData = CursorUtil.getColumnIndexOrThrow(_cursor, "data");
-          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
-          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
           final int _cursorIndexOfRetryCount = CursorUtil.getColumnIndexOrThrow(_cursor, "retry_count");
-          final int _cursorIndexOfMaxRetries = CursorUtil.getColumnIndexOrThrow(_cursor, "max_retries");
           final int _cursorIndexOfLastAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_attempt");
-          final int _cursorIndexOfNextAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "next_attempt");
           final int _cursorIndexOfErrorMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "error_message");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final List<SyncQueueEntity> _result = new ArrayList<SyncQueueEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final SyncQueueEntity _item;
-            final String _tmpQueueId;
-            if (_cursor.isNull(_cursorIndexOfQueueId)) {
-              _tmpQueueId = null;
-            } else {
-              _tmpQueueId = _cursor.getString(_cursorIndexOfQueueId);
-            }
+            final long _tmpSyncId;
+            _tmpSyncId = _cursor.getLong(_cursorIndexOfSyncId);
             final String _tmpEntityType;
             if (_cursor.isNull(_cursorIndexOfEntityType)) {
               _tmpEntityType = null;
@@ -597,46 +540,38 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
             } else {
               _tmpEntityId = _cursor.getString(_cursorIndexOfEntityId);
             }
-            final String _tmpOperation;
+            final SyncOperation _tmpOperation;
+            final String _tmp;
             if (_cursor.isNull(_cursorIndexOfOperation)) {
-              _tmpOperation = null;
+              _tmp = null;
             } else {
-              _tmpOperation = _cursor.getString(_cursorIndexOfOperation);
+              _tmp = _cursor.getString(_cursorIndexOfOperation);
             }
+            _tmpOperation = __statusConverters.toSyncOperation(_tmp);
             final String _tmpData;
             if (_cursor.isNull(_cursorIndexOfData)) {
               _tmpData = null;
             } else {
               _tmpData = _cursor.getString(_cursorIndexOfData);
             }
-            final int _tmpPriority;
-            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
-            final String _tmpStatus;
-            if (_cursor.isNull(_cursorIndexOfStatus)) {
-              _tmpStatus = null;
-            } else {
-              _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
-            }
-            final int _tmpRetryCount;
-            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
-            final int _tmpMaxRetries;
-            _tmpMaxRetries = _cursor.getInt(_cursorIndexOfMaxRetries);
-            final Date _tmpLastAttempt;
-            final Long _tmp;
-            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
-              _tmp = null;
-            } else {
-              _tmp = _cursor.getLong(_cursorIndexOfLastAttempt);
-            }
-            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp);
-            final Date _tmpNextAttempt;
-            final Long _tmp_1;
-            if (_cursor.isNull(_cursorIndexOfNextAttempt)) {
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
               _tmp_1 = null;
             } else {
-              _tmp_1 = _cursor.getLong(_cursorIndexOfNextAttempt);
+              _tmp_1 = _cursor.getString(_cursorIndexOfSyncStatus);
             }
-            _tmpNextAttempt = __dateConverters.fromTimestamp(_tmp_1);
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_1);
+            final int _tmpRetryCount;
+            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
+            final Date _tmpLastAttempt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfLastAttempt);
+            }
+            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp_2);
             final String _tmpErrorMessage;
             if (_cursor.isNull(_cursorIndexOfErrorMessage)) {
               _tmpErrorMessage = null;
@@ -644,22 +579,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
               _tmpErrorMessage = _cursor.getString(_cursorIndexOfErrorMessage);
             }
             final Date _tmpCreatedAt;
-            final Long _tmp_2;
-            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
-              _tmp_2 = null;
-            } else {
-              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
-            }
-            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
-            final Date _tmpUpdatedAt;
             final Long _tmp_3;
-            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
               _tmp_3 = null;
             } else {
-              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+              _tmp_3 = _cursor.getLong(_cursorIndexOfCreatedAt);
             }
-            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
-            _item = new SyncQueueEntity(_tmpQueueId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpPriority,_tmpStatus,_tmpRetryCount,_tmpMaxRetries,_tmpLastAttempt,_tmpNextAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_4);
+            _item = new SyncQueueEntity(_tmpSyncId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpSyncStatus,_tmpRetryCount,_tmpLastAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
             _result.add(_item);
           }
           return _result;
@@ -673,7 +608,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   @Override
   public Flow<List<SyncQueueEntity>> getPendingSyncItemsFlow() {
-    final String _sql = "SELECT * FROM sync_queue WHERE status = 'PENDING' ORDER BY created_at ASC";
+    final String _sql = "SELECT * FROM sync_queue WHERE sync_status = 'PENDING' ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"sync_queue"}, new Callable<List<SyncQueueEntity>>() {
       @Override
@@ -681,29 +616,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       public List<SyncQueueEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final int _cursorIndexOfQueueId = CursorUtil.getColumnIndexOrThrow(_cursor, "queue_id");
+          final int _cursorIndexOfSyncId = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_id");
           final int _cursorIndexOfEntityType = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_type");
           final int _cursorIndexOfEntityId = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_id");
           final int _cursorIndexOfOperation = CursorUtil.getColumnIndexOrThrow(_cursor, "operation");
           final int _cursorIndexOfData = CursorUtil.getColumnIndexOrThrow(_cursor, "data");
-          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
-          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
           final int _cursorIndexOfRetryCount = CursorUtil.getColumnIndexOrThrow(_cursor, "retry_count");
-          final int _cursorIndexOfMaxRetries = CursorUtil.getColumnIndexOrThrow(_cursor, "max_retries");
           final int _cursorIndexOfLastAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_attempt");
-          final int _cursorIndexOfNextAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "next_attempt");
           final int _cursorIndexOfErrorMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "error_message");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final List<SyncQueueEntity> _result = new ArrayList<SyncQueueEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final SyncQueueEntity _item;
-            final String _tmpQueueId;
-            if (_cursor.isNull(_cursorIndexOfQueueId)) {
-              _tmpQueueId = null;
-            } else {
-              _tmpQueueId = _cursor.getString(_cursorIndexOfQueueId);
-            }
+            final long _tmpSyncId;
+            _tmpSyncId = _cursor.getLong(_cursorIndexOfSyncId);
             final String _tmpEntityType;
             if (_cursor.isNull(_cursorIndexOfEntityType)) {
               _tmpEntityType = null;
@@ -716,46 +644,38 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
             } else {
               _tmpEntityId = _cursor.getString(_cursorIndexOfEntityId);
             }
-            final String _tmpOperation;
+            final SyncOperation _tmpOperation;
+            final String _tmp;
             if (_cursor.isNull(_cursorIndexOfOperation)) {
-              _tmpOperation = null;
+              _tmp = null;
             } else {
-              _tmpOperation = _cursor.getString(_cursorIndexOfOperation);
+              _tmp = _cursor.getString(_cursorIndexOfOperation);
             }
+            _tmpOperation = __statusConverters.toSyncOperation(_tmp);
             final String _tmpData;
             if (_cursor.isNull(_cursorIndexOfData)) {
               _tmpData = null;
             } else {
               _tmpData = _cursor.getString(_cursorIndexOfData);
             }
-            final int _tmpPriority;
-            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
-            final String _tmpStatus;
-            if (_cursor.isNull(_cursorIndexOfStatus)) {
-              _tmpStatus = null;
-            } else {
-              _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
-            }
-            final int _tmpRetryCount;
-            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
-            final int _tmpMaxRetries;
-            _tmpMaxRetries = _cursor.getInt(_cursorIndexOfMaxRetries);
-            final Date _tmpLastAttempt;
-            final Long _tmp;
-            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
-              _tmp = null;
-            } else {
-              _tmp = _cursor.getLong(_cursorIndexOfLastAttempt);
-            }
-            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp);
-            final Date _tmpNextAttempt;
-            final Long _tmp_1;
-            if (_cursor.isNull(_cursorIndexOfNextAttempt)) {
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
               _tmp_1 = null;
             } else {
-              _tmp_1 = _cursor.getLong(_cursorIndexOfNextAttempt);
+              _tmp_1 = _cursor.getString(_cursorIndexOfSyncStatus);
             }
-            _tmpNextAttempt = __dateConverters.fromTimestamp(_tmp_1);
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_1);
+            final int _tmpRetryCount;
+            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
+            final Date _tmpLastAttempt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfLastAttempt);
+            }
+            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp_2);
             final String _tmpErrorMessage;
             if (_cursor.isNull(_cursorIndexOfErrorMessage)) {
               _tmpErrorMessage = null;
@@ -763,22 +683,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
               _tmpErrorMessage = _cursor.getString(_cursorIndexOfErrorMessage);
             }
             final Date _tmpCreatedAt;
-            final Long _tmp_2;
-            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
-              _tmp_2 = null;
-            } else {
-              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
-            }
-            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
-            final Date _tmpUpdatedAt;
             final Long _tmp_3;
-            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
               _tmp_3 = null;
             } else {
-              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+              _tmp_3 = _cursor.getLong(_cursorIndexOfCreatedAt);
             }
-            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
-            _item = new SyncQueueEntity(_tmpQueueId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpPriority,_tmpStatus,_tmpRetryCount,_tmpMaxRetries,_tmpLastAttempt,_tmpNextAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_4);
+            _item = new SyncQueueEntity(_tmpSyncId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpSyncStatus,_tmpRetryCount,_tmpLastAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
             _result.add(_item);
           }
           return _result;
@@ -796,7 +716,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   @Override
   public Object getFailedSyncItems(final Continuation<? super List<SyncQueueEntity>> $completion) {
-    final String _sql = "SELECT * FROM sync_queue WHERE status = 'FAILED' ORDER BY retry_count ASC, created_at ASC";
+    final String _sql = "SELECT * FROM sync_queue WHERE sync_status = 'FAILED' ORDER BY retry_count ASC, created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<SyncQueueEntity>>() {
@@ -805,29 +725,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
       public List<SyncQueueEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final int _cursorIndexOfQueueId = CursorUtil.getColumnIndexOrThrow(_cursor, "queue_id");
+          final int _cursorIndexOfSyncId = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_id");
           final int _cursorIndexOfEntityType = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_type");
           final int _cursorIndexOfEntityId = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_id");
           final int _cursorIndexOfOperation = CursorUtil.getColumnIndexOrThrow(_cursor, "operation");
           final int _cursorIndexOfData = CursorUtil.getColumnIndexOrThrow(_cursor, "data");
-          final int _cursorIndexOfPriority = CursorUtil.getColumnIndexOrThrow(_cursor, "priority");
-          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
           final int _cursorIndexOfRetryCount = CursorUtil.getColumnIndexOrThrow(_cursor, "retry_count");
-          final int _cursorIndexOfMaxRetries = CursorUtil.getColumnIndexOrThrow(_cursor, "max_retries");
           final int _cursorIndexOfLastAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_attempt");
-          final int _cursorIndexOfNextAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "next_attempt");
           final int _cursorIndexOfErrorMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "error_message");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final List<SyncQueueEntity> _result = new ArrayList<SyncQueueEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final SyncQueueEntity _item;
-            final String _tmpQueueId;
-            if (_cursor.isNull(_cursorIndexOfQueueId)) {
-              _tmpQueueId = null;
-            } else {
-              _tmpQueueId = _cursor.getString(_cursorIndexOfQueueId);
-            }
+            final long _tmpSyncId;
+            _tmpSyncId = _cursor.getLong(_cursorIndexOfSyncId);
             final String _tmpEntityType;
             if (_cursor.isNull(_cursorIndexOfEntityType)) {
               _tmpEntityType = null;
@@ -840,46 +753,38 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
             } else {
               _tmpEntityId = _cursor.getString(_cursorIndexOfEntityId);
             }
-            final String _tmpOperation;
+            final SyncOperation _tmpOperation;
+            final String _tmp;
             if (_cursor.isNull(_cursorIndexOfOperation)) {
-              _tmpOperation = null;
+              _tmp = null;
             } else {
-              _tmpOperation = _cursor.getString(_cursorIndexOfOperation);
+              _tmp = _cursor.getString(_cursorIndexOfOperation);
             }
+            _tmpOperation = __statusConverters.toSyncOperation(_tmp);
             final String _tmpData;
             if (_cursor.isNull(_cursorIndexOfData)) {
               _tmpData = null;
             } else {
               _tmpData = _cursor.getString(_cursorIndexOfData);
             }
-            final int _tmpPriority;
-            _tmpPriority = _cursor.getInt(_cursorIndexOfPriority);
-            final String _tmpStatus;
-            if (_cursor.isNull(_cursorIndexOfStatus)) {
-              _tmpStatus = null;
-            } else {
-              _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
-            }
-            final int _tmpRetryCount;
-            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
-            final int _tmpMaxRetries;
-            _tmpMaxRetries = _cursor.getInt(_cursorIndexOfMaxRetries);
-            final Date _tmpLastAttempt;
-            final Long _tmp;
-            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
-              _tmp = null;
-            } else {
-              _tmp = _cursor.getLong(_cursorIndexOfLastAttempt);
-            }
-            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp);
-            final Date _tmpNextAttempt;
-            final Long _tmp_1;
-            if (_cursor.isNull(_cursorIndexOfNextAttempt)) {
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
               _tmp_1 = null;
             } else {
-              _tmp_1 = _cursor.getLong(_cursorIndexOfNextAttempt);
+              _tmp_1 = _cursor.getString(_cursorIndexOfSyncStatus);
             }
-            _tmpNextAttempt = __dateConverters.fromTimestamp(_tmp_1);
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_1);
+            final int _tmpRetryCount;
+            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
+            final Date _tmpLastAttempt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfLastAttempt);
+            }
+            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp_2);
             final String _tmpErrorMessage;
             if (_cursor.isNull(_cursorIndexOfErrorMessage)) {
               _tmpErrorMessage = null;
@@ -887,22 +792,22 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
               _tmpErrorMessage = _cursor.getString(_cursorIndexOfErrorMessage);
             }
             final Date _tmpCreatedAt;
-            final Long _tmp_2;
-            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
-              _tmp_2 = null;
-            } else {
-              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
-            }
-            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
-            final Date _tmpUpdatedAt;
             final Long _tmp_3;
-            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
               _tmp_3 = null;
             } else {
-              _tmp_3 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+              _tmp_3 = _cursor.getLong(_cursorIndexOfCreatedAt);
             }
-            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_3);
-            _item = new SyncQueueEntity(_tmpQueueId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpPriority,_tmpStatus,_tmpRetryCount,_tmpMaxRetries,_tmpLastAttempt,_tmpNextAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_4);
+            _item = new SyncQueueEntity(_tmpSyncId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpSyncStatus,_tmpRetryCount,_tmpLastAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
             _result.add(_item);
           }
           return _result;
@@ -917,7 +822,7 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
   @Override
   public Object getSyncItemCountByStatus(final String status,
       final Continuation<? super Integer> $completion) {
-    final String _sql = "SELECT COUNT(*) FROM sync_queue WHERE status = ?";
+    final String _sql = "SELECT COUNT(*) FROM sync_queue WHERE sync_status = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     if (status == null) {

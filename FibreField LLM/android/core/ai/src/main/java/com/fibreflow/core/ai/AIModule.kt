@@ -3,7 +3,7 @@ package com.fibreflow.core.ai
 import android.content.Context
 import com.fibreflow.core.ai.inference.InferenceEngine
 import com.fibreflow.core.ai.llm.LLMManager
-import com.fibreflow.core.ai.llm.Phi35Mini极M
+import com.fibreflow.core.ai.llm.Phi35MiniLLM
 import com.fibreflow.core.ai.vision.BarcodeScanner
 import com.fibreflow.core.ai.vision.ONTLightDetector
 import com.fibreflow.core.ai.vision.PhotoQualityAnalyzer

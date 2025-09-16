@@ -82,7 +82,7 @@ class LLMManager @Inject constructor(
                 if (guidance is Result.Success) {
                     return@withContext guidance
                 } else if (guidance is Result.Error) {
-                    lastException = guidance.exception
+                    lastException = guidance.exception as? Exception ?: Exception(guidance.exception)
                     Log.w(TAG, "LLM guidance attempt ${attempt + 1} failed", guidance.exception)
 
                     if (attempt < maxRetries - 1) {

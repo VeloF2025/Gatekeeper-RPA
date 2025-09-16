@@ -2,7 +2,6 @@ package com.fibreflow.core.ai.feedback
 
 import android.util.Log
 import com.fibreflow.core.common.result.Result
-import dagger.hilt.android.scopes.SingletonScoped
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

@@ -1,5 +1,7 @@
 package com.fibreflow.core.ai.pipeline
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.fibreflow.core.ai.inference.InferenceEngine
 import com.fibreflow.core.ai.inference.InferenceType
@@ -57,24 +59,28 @@ class ModelCoordinator @Inject constructor(
         try {
             Log.i(TAG, "Starting photo validation pipeline for step: ${stepContext.stepName}")
 
+            // Convert ByteArray to Bitmap for vision processing
+            val bitmap = BitmapFactory.decodeByteArray(photoData, 0, photoData.size)
+                ?: return@withContext Result.Error(IllegalArgumentException("Failed to decode image data"))
+
             val startTime = System.currentTimeMillis()
 
             // Phase 1: Parallel quality and content analysis
             val qualityAnalysis = async {
                 inferenceEngine.executeInference(InferenceType.VISION_ANALYSIS) {
-                    photoQualityAnalyzer.analyzeQuality(photoData)
+                    photoQualityAnalyzer.analyzeQuality(bitmap, stepContext.stepName)
                 }
             }
 
             val barcodeAnalysis = async {
                 inferenceEngine.executeInference(InferenceType.BARCODE_SCANNING) {
-                    barcodeScanner.scanBarcodes(photoData)
+                    barcodeScanner.scanBarcode(bitmap, stepContext.stepName)
                 }
             }
 
             val textAnalysis = async {
                 inferenceEngine.executeInference(InferenceType.TEXT_RECOGNITION) {
-                    textExtractor.extractText(photoData)
+                    textExtractor.extractText(bitmap)
                 }
             }
 

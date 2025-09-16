@@ -61,12 +61,3 @@ enum class SyncOperation {
     DELETE
 }
 
-/**
- * Sync status enum
- */
-enum class SyncStatus {
-    PENDING,
-    IN_PROGRESS,
-    COMPLETED,
-    FAILED
-}
