@@ -4,6 +4,7 @@ import com.fibreflow.core.common.result.Result
 import com.fibreflow.domain.drops.entities.Drop
 import com.fibreflow.domain.drops.entities.DropPriority
 import com.fibreflow.domain.drops.entities.DropStatus
+import com.fibreflow.domain.drops.entities.DropStatistics
 import com.fibreflow.domain.drops.entities.Location
 import com.fibreflow.domain.drops.entities.ProximityResult
 import kotlinx.coroutines.flow.Flow
@@ -92,13 +93,3 @@ interface DropRepository {
     fun observeAvailableDrops(): Flow<List<Drop>>
 }
 
-/**
- * Drop statistics data class
- */
-data class DropStatistics(
-    val totalDrops: Int,
-    val availableDrops: Int,
-    val assignedDrops: Int,
-    val completedDrops: Int,
-    val failedDrops: Int
-)

@@ -10,6 +10,15 @@ plugins {
 android {
     namespace = "com.fibreflow.domain.drops"
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -39,4 +48,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
+}
+
+// Kapt configuration for better build performance
+kapt {
+    correctErrorTypes = true
 }
