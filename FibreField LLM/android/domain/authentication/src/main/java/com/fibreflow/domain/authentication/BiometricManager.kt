@@ -219,10 +219,8 @@ class BiometricManager @Inject constructor(
                 // Don't call error for failed attempts, just retry
             }
 
-            override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence) {
-                super.onAuthenticationHelp(helpCode, helpString)
-                Log.d(TAG, "Biometric enrollment help: $helpString")
-            }
+            // onAuthenticationHelp is deprecated in newer versions of Biometric library
+            // Use onAuthenticationError for error handling instead
         })
     }
 
@@ -262,10 +260,8 @@ class BiometricManager @Inject constructor(
                 Log.d(TAG, "Biometric authentication failed, retrying")
             }
 
-            override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence) {
-                super.onAuthenticationHelp(helpCode, helpString)
-                Log.d(TAG, "Biometric authentication help: $helpString")
-            }
+            // onAuthenticationHelp is deprecated in newer versions of Biometric library
+            // Use onAuthenticationError for error handling instead
         })
 
         biometricPrompt.authenticate(promptInfo)

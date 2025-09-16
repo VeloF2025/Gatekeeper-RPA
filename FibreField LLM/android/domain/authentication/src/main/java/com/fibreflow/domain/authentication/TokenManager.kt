@@ -58,7 +58,15 @@ class TokenManager @Inject constructor(
             val expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0L)
 
             if (accessToken != null && refreshToken != null && expiresAt > 0) {
-                AuthToken(accessToken, refreshToken, expiresAt)
+                val currentTime = System.currentTimeMillis()
+                val expiresIn = maxOf(0, (expiresAt - currentTime) / 1000)
+                AuthToken(
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                    tokenType = "Bearer", // Default token type
+                    expiresIn = expiresIn,
+                    expiresAt = expiresAt
+                )
             } else {
                 null
             }
