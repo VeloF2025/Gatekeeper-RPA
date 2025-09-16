@@ -21,6 +21,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
+    // Biometric authentication
+    implementation(libs.androidx.biometric)
+
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

@@ -58,6 +58,10 @@ class ValidationPipeline @Inject constructor(
                     Log.w(TAG, "AI validation failed, attempting fallback", aiValidation.exception)
                     return@withContext handleValidationFailure(aiValidation.exception, stepContext, options)
                 }
+                else -> {
+                    Log.w(TAG, "Unexpected AI validation result type")
+                    return@withContext handleValidationFailure(RuntimeException("Unexpected validation result"), stepContext, options)
+                }
             }
 
             // Phase 2: Confidence Assessment
@@ -138,6 +142,7 @@ class ValidationPipeline @Inject constructor(
                                     ValidationStage.CONTENT_ANALYSIS -> PipelineStage.CONTENT_ANALYSIS
                                     ValidationStage.EQUIPMENT_VALIDATION -> PipelineStage.EQUIPMENT_VALIDATION
                                     ValidationStage.COMPLETE -> PipelineStage.GENERATING_GUIDANCE
+                                    else -> PipelineStage.ERROR
                                 },
                                 message = feedbackResult.data.message,
                                 progress = feedbackResult.data.progress,
@@ -152,6 +157,14 @@ class ValidationPipeline @Inject constructor(
                                 message = "Analysis failed",
                                 progress = 0.0f,
                                 issues = listOf("AI analysis error occurred")
+                            )))
+                        }
+                        else -> {
+                            emit(Result.Success(ValidationProgress(
+                                stage = PipelineStage.ERROR,
+                                message = "Unknown analysis result",
+                                progress = 0.0f,
+                                issues = listOf("Unexpected analysis result type")
                             )))
                         }
                     }
@@ -186,7 +199,7 @@ class ValidationPipeline @Inject constructor(
      */
     suspend fun validateInstallationCompleteness(
         completedSteps: List<CompletedStep>,
-        installationContext: InstallationContext
+        installationContext: com.fibreflow.core.ai.llm.InstallationContext
     ): Result<CompletenessValidation> = withContext(Dispatchers.Default) {
         try {
             // This would integrate with LLM for completeness assessment
@@ -285,7 +298,7 @@ class ValidationPipeline @Inject constructor(
 
                 Result.Success(optimization)
             } else {
-                Result.Error(modelOptimization.exception ?: RuntimeException("Optimization failed"))
+                Result.Error((modelOptimization as Result.Error).exception ?: RuntimeException("Optimization failed"))
             }
 
         } catch (e: Exception) {

@@ -227,4 +227,28 @@ interface PhotoDao {
      */
     @Query("SELECT * FROM photos WHERE ai_metadata LIKE '%' || :searchText || '%' ORDER BY created_at DESC")
     suspend fun searchPhotosByExtractedText(searchText: String): List<PhotoEntity>
+
+    /**
+     * Get orphaned photos (photos referencing non-existent installations)
+     */
+    @Query("SELECT p.* FROM photos p LEFT JOIN installations i ON p.installation_id = i.installation_id WHERE i.installation_id IS NULL")
+    suspend fun getOrphanedPhotos(): List<PhotoEntity>
+
+    /**
+     * Get photos without checksum
+     */
+    @Query("SELECT * FROM photos WHERE checksum IS NULL OR checksum = ''")
+    suspend fun getPhotosWithoutChecksum(): List<PhotoEntity>
+
+    /**
+     * Update photo checksum
+     */
+    @Query("UPDATE photos SET checksum = :checksum WHERE photo_id = :photoId")
+    suspend fun updatePhotoChecksum(photoId: Long, checksum: String)
+
+    /**
+     * Delete photo by installation ID
+     */
+    @Query("DELETE FROM photos WHERE installation_id = :installationId")
+    suspend fun deletePhotoByInstallationId(installationId: Long): Int
 }

@@ -6,7 +6,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.coroutines.tasks.await
+import com.google.android.gms.tasks.Tasks
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -43,7 +43,7 @@ class BarcodeScanner @Inject constructor() {
             Timber.d("Scanning barcode from bitmap, type: $barcodeType")
 
             val inputImage = InputImage.fromBitmap(bitmap, 0)
-            val barcodeResults = scanner.process(inputImage).await()
+            val barcodeResults = Tasks.await(scanner.process(inputImage))
 
             if (barcodeResults.isEmpty()) {
                 Timber.d("No barcodes found in image")
@@ -87,9 +87,9 @@ class BarcodeScanner @Inject constructor() {
     ): Result<List<BarcodeResult>> {
         return try {
             val inputImage = InputImage.fromBitmap(bitmap, 0)
-            val barcodeResults = scanner.process(inputImage).await()
+            val barcodeResults = Tasks.await(scanner.process(inputImage))
 
-            val results = barcodeResults.map { barcode ->
+            val results = barcodeResults.map { barcode: com.google.mlkit.vision.barcode.common.Barcode ->
                 BarcodeResult(
                     barcodeType = determineBarcodeType(barcode.rawValue ?: ""),
                     value = barcode.rawValue,

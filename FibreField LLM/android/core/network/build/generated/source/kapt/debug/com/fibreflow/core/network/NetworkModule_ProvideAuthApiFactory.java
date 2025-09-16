@@ -1,11 +1,11 @@
 package com.fibreflow.core.network;
 
-import com.fibreflow.core.network.api.AuthApi;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
+import error.NonExistentClass;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 import retrofit2.Retrofit;
@@ -23,7 +23,7 @@ import retrofit2.Retrofit;
     "KotlinInternal",
     "KotlinInternalInJava"
 })
-public final class NetworkModule_ProvideAuthApiFactory implements Factory<AuthApi> {
+public final class NetworkModule_ProvideAuthApiFactory implements Factory<NonExistentClass> {
   private final Provider<Retrofit> retrofitProvider;
 
   public NetworkModule_ProvideAuthApiFactory(Provider<Retrofit> retrofitProvider) {
@@ -31,7 +31,7 @@ public final class NetworkModule_ProvideAuthApiFactory implements Factory<AuthAp
   }
 
   @Override
-  public AuthApi get() {
+  public NonExistentClass get() {
     return provideAuthApi(retrofitProvider.get());
   }
 
@@ -39,7 +39,7 @@ public final class NetworkModule_ProvideAuthApiFactory implements Factory<AuthAp
     return new NetworkModule_ProvideAuthApiFactory(retrofitProvider);
   }
 
-  public static AuthApi provideAuthApi(Retrofit retrofit) {
+  public static NonExistentClass provideAuthApi(Retrofit retrofit) {
     return Preconditions.checkNotNullFromProvides(NetworkModule.INSTANCE.provideAuthApi(retrofit));
   }
 }

@@ -11,7 +11,7 @@ import retrofit2.http.POST
  * Authentication API endpoints
  * Handles login, token refresh, and logout operations
  */
-interface AuthApi {
+interface AuthenticationAPI {
 
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>

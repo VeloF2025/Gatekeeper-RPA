@@ -226,4 +226,37 @@ interface DropDao {
      */
     @Query("SELECT AVG(completed_at - assigned_at) FROM drops WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL")
     suspend fun getAverageCompletionTime(): Long?
+
+    /**
+     * Get drops with invalid status values
+     */
+    @Query("SELECT * FROM drops WHERE status NOT IN ('AVAILABLE', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'FAILED', 'REMEDIATION_REQUIRED', 'BLOCKED')")
+    suspend fun getDropsWithInvalidStatus(): List<DropEntity>
+
+    /**
+     * Check if drop exists
+     */
+    @Query("SELECT COUNT(*) FROM drops WHERE drop_number = :dropNumber")
+    suspend fun dropExists(dropNumber: String): Boolean
+
+    /**
+     * Delete drop by number
+     */
+    @Query("DELETE FROM drops WHERE drop_number = :dropNumber")
+    suspend fun deleteDropByNumber(dropNumber: String): Int
+
+    /**
+     * Get duplicate drops (same drop number)
+     */
+    @Query("SELECT drop_number, COUNT(*) as count, GROUP_CONCAT(drop_number) as ids FROM drops GROUP BY drop_number HAVING COUNT(*) > 1")
+    suspend fun getDuplicateDrops(): List<DropDuplicateResult>
 }
+
+/**
+ * Result class for duplicate drop query
+ */
+data class DropDuplicateResult(
+    val dropNumber: String,
+    val count: Int,
+    val ids: String
+)

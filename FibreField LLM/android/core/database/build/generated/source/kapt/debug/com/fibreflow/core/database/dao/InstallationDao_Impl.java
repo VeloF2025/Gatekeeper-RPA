@@ -19,6 +19,7 @@ import com.fibreflow.core.database.converters.LocationConverters;
 import com.fibreflow.core.database.converters.StatusConverters;
 import com.fibreflow.core.database.entities.InstallationEntity;
 import com.fibreflow.core.database.entities.InstallationStatus;
+import java.lang.Boolean;
 import java.lang.Class;
 import java.lang.Exception;
 import java.lang.Integer;
@@ -68,6 +69,8 @@ public final class InstallationDao_Impl implements InstallationDao {
   private final SharedSQLiteStatement __preparedStmtOfDeleteOldCompletedInstallations;
 
   private final SharedSQLiteStatement __preparedStmtOfUpdateValidationIssuesFlag;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteInstallationByDropNumber;
 
   public InstallationDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
@@ -308,6 +311,14 @@ public final class InstallationDao_Impl implements InstallationDao {
       @NonNull
       public String createQuery() {
         final String _query = "UPDATE installations SET validation_errors = ?, updated_at = ? WHERE installation_id = ?";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteInstallationByDropNumber = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM installations WHERE drop_number = ?";
         return _query;
       }
     };
@@ -632,6 +643,36 @@ public final class InstallationDao_Impl implements InstallationDao {
           }
         } finally {
           __preparedStmtOfUpdateValidationIssuesFlag.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteInstallationByDropNumber(final String dropNumber,
+      final Continuation<? super Integer> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteInstallationByDropNumber.acquire();
+        int _argIndex = 1;
+        if (dropNumber == null) {
+          _stmt.bindNull(_argIndex);
+        } else {
+          _stmt.bindString(_argIndex, dropNumber);
+        }
+        try {
+          __db.beginTransaction();
+          try {
+            final Integer _result = _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return _result;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteInstallationByDropNumber.release(_stmt);
         }
       }
     }, $completion);
@@ -2773,6 +2814,208 @@ public final class InstallationDao_Impl implements InstallationDao {
               _tmp = _cursor.getLong(0);
             }
             _result = _tmp;
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getOrphanedInstallations(
+      final Continuation<? super List<InstallationEntity>> $completion) {
+    final String _sql = "SELECT i.* FROM installations i LEFT JOIN drops d ON i.drop_number = d.drop_number WHERE d.drop_number IS NULL";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<InstallationEntity>>() {
+      @Override
+      @NonNull
+      public List<InstallationEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfDropNumber = CursorUtil.getColumnIndexOrThrow(_cursor, "drop_number");
+          final int _cursorIndexOfTechnicianId = CursorUtil.getColumnIndexOrThrow(_cursor, "technician_id");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfStartTime = CursorUtil.getColumnIndexOrThrow(_cursor, "start_time");
+          final int _cursorIndexOfEndTime = CursorUtil.getColumnIndexOrThrow(_cursor, "end_time");
+          final int _cursorIndexOfOntSerial = CursorUtil.getColumnIndexOrThrow(_cursor, "ont_serial");
+          final int _cursorIndexOfSpeedTestResults = CursorUtil.getColumnIndexOrThrow(_cursor, "speed_test_results");
+          final int _cursorIndexOfPhotos = CursorUtil.getColumnIndexOrThrow(_cursor, "photos");
+          final int _cursorIndexOfCompletedSteps = CursorUtil.getColumnIndexOrThrow(_cursor, "completed_steps");
+          final int _cursorIndexOfCurrentStep = CursorUtil.getColumnIndexOrThrow(_cursor, "current_step");
+          final int _cursorIndexOfTotalSteps = CursorUtil.getColumnIndexOrThrow(_cursor, "total_steps");
+          final int _cursorIndexOfValidationErrors = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_errors");
+          final int _cursorIndexOfAiGuidanceUsed = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_guidance_used");
+          final int _cursorIndexOfManualOverrideUsed = CursorUtil.getColumnIndexOrThrow(_cursor, "manual_override_used");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<InstallationEntity> _result = new ArrayList<InstallationEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final InstallationEntity _item;
+            final long _tmpInstallationId;
+            _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            final String _tmpDropNumber;
+            if (_cursor.isNull(_cursorIndexOfDropNumber)) {
+              _tmpDropNumber = null;
+            } else {
+              _tmpDropNumber = _cursor.getString(_cursorIndexOfDropNumber);
+            }
+            final String _tmpTechnicianId;
+            if (_cursor.isNull(_cursorIndexOfTechnicianId)) {
+              _tmpTechnicianId = null;
+            } else {
+              _tmpTechnicianId = _cursor.getString(_cursorIndexOfTechnicianId);
+            }
+            final InstallationStatus _tmpStatus;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfStatus)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfStatus);
+            }
+            _tmpStatus = __statusConverters.toInstallationStatus(_tmp);
+            final Date _tmpStartTime;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfStartTime)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfStartTime);
+            }
+            _tmpStartTime = __dateConverters.fromTimestamp(_tmp_1);
+            final Date _tmpEndTime;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfEndTime)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfEndTime);
+            }
+            _tmpEndTime = __dateConverters.fromTimestamp(_tmp_2);
+            final String _tmpOntSerial;
+            if (_cursor.isNull(_cursorIndexOfOntSerial)) {
+              _tmpOntSerial = null;
+            } else {
+              _tmpOntSerial = _cursor.getString(_cursorIndexOfOntSerial);
+            }
+            final String _tmpSpeedTestResults;
+            if (_cursor.isNull(_cursorIndexOfSpeedTestResults)) {
+              _tmpSpeedTestResults = null;
+            } else {
+              _tmpSpeedTestResults = _cursor.getString(_cursorIndexOfSpeedTestResults);
+            }
+            final List<Long> _tmpPhotos;
+            final String _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfPhotos)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getString(_cursorIndexOfPhotos);
+            }
+            _tmpPhotos = __locationConverters.fromLongList(_tmp_3);
+            final String _tmpCompletedSteps;
+            if (_cursor.isNull(_cursorIndexOfCompletedSteps)) {
+              _tmpCompletedSteps = null;
+            } else {
+              _tmpCompletedSteps = _cursor.getString(_cursorIndexOfCompletedSteps);
+            }
+            final int _tmpCurrentStep;
+            _tmpCurrentStep = _cursor.getInt(_cursorIndexOfCurrentStep);
+            final int _tmpTotalSteps;
+            _tmpTotalSteps = _cursor.getInt(_cursorIndexOfTotalSteps);
+            final String _tmpValidationErrors;
+            if (_cursor.isNull(_cursorIndexOfValidationErrors)) {
+              _tmpValidationErrors = null;
+            } else {
+              _tmpValidationErrors = _cursor.getString(_cursorIndexOfValidationErrors);
+            }
+            final boolean _tmpAiGuidanceUsed;
+            final int _tmp_4;
+            _tmp_4 = _cursor.getInt(_cursorIndexOfAiGuidanceUsed);
+            _tmpAiGuidanceUsed = _tmp_4 != 0;
+            final boolean _tmpManualOverrideUsed;
+            final int _tmp_5;
+            _tmp_5 = _cursor.getInt(_cursorIndexOfManualOverrideUsed);
+            _tmpManualOverrideUsed = _tmp_5 != 0;
+            final Date _tmpCreatedAt;
+            final Long _tmp_6;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_6 = null;
+            } else {
+              _tmp_6 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_6);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_7;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_7 = null;
+            } else {
+              _tmp_7 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_7);
+            _item = new InstallationEntity(_tmpInstallationId,_tmpDropNumber,_tmpTechnicianId,_tmpStatus,_tmpStartTime,_tmpEndTime,_tmpOntSerial,_tmpSpeedTestResults,_tmpPhotos,_tmpCompletedSteps,_tmpCurrentStep,_tmpTotalSteps,_tmpValidationErrors,_tmpAiGuidanceUsed,_tmpManualOverrideUsed,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getRecordsWithFutureTimestamps(final long currentTime,
+      final Continuation<? super List<InstallationEntity>> $completion) {
+    final String _sql = "SELECT * FROM installations WHERE started_at > ? OR completed_at > ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, currentTime);
+    _argIndex = 2;
+    _statement.bindLong(_argIndex, currentTime);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<InstallationEntity>>() {
+      @Override
+      @NonNull
+      public List<InstallationEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object installationExists(final long installationId,
+      final Continuation<? super Boolean> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM installations WHERE installation_id = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, installationId);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Boolean>() {
+      @Override
+      @NonNull
+      public Boolean call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Boolean _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp == null ? null : _tmp != 0;
           } else {
             _result = null;
           }

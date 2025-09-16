@@ -24,20 +24,26 @@ import javax.inject.Provider;
 public final class SpeechRecognizer_Factory implements Factory<SpeechRecognizer> {
   private final Provider<Context> contextProvider;
 
-  public SpeechRecognizer_Factory(Provider<Context> contextProvider) {
+  private final Provider<VoiceCommandProcessor> voiceCommandProcessorProvider;
+
+  public SpeechRecognizer_Factory(Provider<Context> contextProvider,
+      Provider<VoiceCommandProcessor> voiceCommandProcessorProvider) {
     this.contextProvider = contextProvider;
+    this.voiceCommandProcessorProvider = voiceCommandProcessorProvider;
   }
 
   @Override
   public SpeechRecognizer get() {
-    return newInstance(contextProvider.get());
+    return newInstance(contextProvider.get(), voiceCommandProcessorProvider.get());
   }
 
-  public static SpeechRecognizer_Factory create(Provider<Context> contextProvider) {
-    return new SpeechRecognizer_Factory(contextProvider);
+  public static SpeechRecognizer_Factory create(Provider<Context> contextProvider,
+      Provider<VoiceCommandProcessor> voiceCommandProcessorProvider) {
+    return new SpeechRecognizer_Factory(contextProvider, voiceCommandProcessorProvider);
   }
 
-  public static SpeechRecognizer newInstance(Context context) {
-    return new SpeechRecognizer(context);
+  public static SpeechRecognizer newInstance(Context context,
+      VoiceCommandProcessor voiceCommandProcessor) {
+    return new SpeechRecognizer(context, voiceCommandProcessor);
   }
 }

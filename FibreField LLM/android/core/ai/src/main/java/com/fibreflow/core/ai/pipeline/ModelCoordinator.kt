@@ -123,8 +123,7 @@ class ModelCoordinator @Inject constructor(
                 installationContext = com.fibreflow.core.ai.llm.InstallationContext(
                     currentStep = stepContext.stepName,
                     equipmentType = stepContext.equipmentType,
-                    location = stepContext.location,
-                    previousIssues = validationResult.issues
+                    location = stepContext.location
                 )
             )
 
@@ -149,8 +148,19 @@ class ModelCoordinator @Inject constructor(
                 progress = 0.2f
             )))
 
+            val bitmap = BitmapFactory.decodeByteArray(photoData, 0, photoData.size)
+                ?: run {
+                    emit(Result.Success(ValidationFeedback(
+                        stage = ValidationStage.QUALITY_CHECK,
+                        message = "Failed to decode image",
+                        progress = 0.2f,
+                        issues = listOf("Invalid image data")
+                    )))
+                    return@flow
+                }
+            
             val qualityResult = inferenceEngine.executeInference(InferenceType.VISION_ANALYSIS) {
-                photoQualityAnalyzer.analyzeQuality(photoData)
+                photoQualityAnalyzer.analyzeQuality(bitmap, stepContext.stepName)
             }
 
             if (qualityResult is Result.Error) {
@@ -177,11 +187,11 @@ class ModelCoordinator @Inject constructor(
             )))
 
             val barcodeResult = inferenceEngine.executeInference(InferenceType.BARCODE_SCANNING) {
-                barcodeScanner.scanBarcodes(photoData)
+                barcodeScanner.scanMultipleBarcodes(bitmap)
             }
 
             val textResult = inferenceEngine.executeInference(InferenceType.TEXT_RECOGNITION) {
-                textExtractor.extractText(photoData)
+                textExtractor.extractText(bitmap)
             }
 
             emit(Result.Success(ValidationFeedback(
@@ -225,6 +235,14 @@ class ModelCoordinator @Inject constructor(
                         message = "Validation error occurred",
                         progress = 1.0f,
                         issues = listOf("Validation process failed")
+                    )))
+                }
+                else -> {
+                    emit(Result.Success(ValidationFeedback(
+                        stage = ValidationStage.COMPLETE,
+                        message = "Validation status unknown",
+                        progress = 1.0f,
+                        issues = listOf("Unexpected validation result")
                     )))
                 }
             }
@@ -301,9 +319,9 @@ class ModelCoordinator @Inject constructor(
 
     private suspend fun validateONTInstallation(
         photoData: ByteArray,
-        qualityResult: Result<PhotoQualityResult>,
-        barcodeResult: Result<BarcodeScanResult>,
-        textResult: Result<TextExtractionResult>
+        qualityResult: Result<com.fibreflow.core.ai.vision.PhotoQualityAnalysis>,
+        barcodeResult: Result<com.fibreflow.core.ai.vision.BarcodeResult>,
+        textResult: Result<com.fibreflow.core.ai.vision.TextExtractionResult>
     ): Result<PhotoValidationResult> = withContext(Dispatchers.Default) {
         val issues = mutableListOf<String>()
         val recommendations = mutableListOf<String>()
@@ -316,7 +334,11 @@ class ModelCoordinator @Inject constructor(
 
         // Check for ONT barcode
         if (barcodeResult is Result.Success) {
-            val ontBarcode = barcodeResult.data.barcodes.find { it.contains("ONT") || it.contains("ONU") }
+            val ontBarcode = if (barcodeResult is Result.Success) {
+                barcodeResult.data.value?.contains("ONT") == true || barcodeResult.data.value?.contains("ONU") == true
+            } else {
+                false
+            }
             if (ontBarcode == null) {
                 issues.add("ONT barcode not found in photo")
                 recommendations.add("Ensure ONT barcode is visible in the photo")
@@ -325,25 +347,28 @@ class ModelCoordinator @Inject constructor(
 
         // Check for serial number in text
         if (textResult is Result.Success) {
-            val hasSerial = textResult.data.extractedText.any { text ->
-                text.contains("SN:", ignoreCase = true) ||
-                text.matches(Regex("\\b[A-Z0-9]{8,}\\b")) // Serial number pattern
-            }
+            val hasSerial = textResult.data.fullText.contains("SN:", ignoreCase = true) ||
+                           textResult.data.fullText.matches(Regex(".*\\b[A-Z0-9]{8,}\\b.*")) // Serial number pattern
             if (!hasSerial) {
                 issues.add("ONT serial number not detected")
                 recommendations.add("Ensure ONT serial number label is visible")
             }
         }
 
-        // ONT light detection
-        val lightResult = inferenceEngine.executeInference(InferenceType.LIGHT_DETECTION) {
-            ontLightDetector.detectLights(photoData)
+        // ONT light detection - convert ByteArray to Bitmap first
+        val bitmap = BitmapFactory.decodeByteArray(photoData, 0, photoData.size)
+        val lightResult = if (bitmap != null) {
+            inferenceEngine.executeInference(InferenceType.LIGHT_DETECTION) {
+                ontLightDetector.detectLights(bitmap)
+            }
+        } else {
+            Result.Error(IllegalArgumentException("Failed to decode image for light detection"))
         }
 
         if (lightResult is Result.Success) {
-            val lights = lightResult.data
-            val powerLight = lights.find { it.type == LightType.POWER }
-            if (powerLight == null || !powerLight.isOn) {
+            val lights = lightResult.data.detectedLights
+            val powerLight = lights.find { it.lightType == com.fibreflow.core.ai.vision.LightType.POWER }
+            if (powerLight == null || powerLight.detectedState != com.fibreflow.core.ai.vision.LightState.ON) {
                 issues.add("ONT power light not detected or not illuminated")
                 recommendations.add("Verify ONT is powered on and power light is green")
             }
@@ -360,14 +385,14 @@ class ModelCoordinator @Inject constructor(
 
     private suspend fun validateCableConnection(
         photoData: ByteArray,
-        qualityResult: Result<PhotoQualityResult>,
-        barcodeResult: Result<BarcodeScanResult>
+        qualityResult: Result<com.fibreflow.core.ai.vision.PhotoQualityAnalysis>,
+        barcodeResult: Result<com.fibreflow.core.ai.vision.BarcodeResult>
     ): Result<PhotoValidationResult> {
         // Simplified cable validation - focus on barcode detection
         val issues = mutableListOf<String>()
         val recommendations = mutableListOf<String>()
 
-        if (barcodeResult is Result.Success && barcodeResult.data.barcodes.isEmpty()) {
+        if (barcodeResult is Result.Success && barcodeResult.data.value.isNullOrBlank()) {
             issues.add("No cable barcodes detected")
             recommendations.add("Ensure cable labels are visible in the photo")
         }
@@ -377,24 +402,22 @@ class ModelCoordinator @Inject constructor(
             confidence = calculateConfidence(issues.size),
             issues = issues,
             recommendations = recommendations,
-            extractedData = mapOf("cable_barcodes" to (barcodeResult as? Result.Success)?.data?.barcodes ?: emptyList())
+            extractedData = mapOf("cable_barcodes" to listOfNotNull((barcodeResult as? Result.Success)?.data?.value))
         ))
     }
 
     private suspend fun validatePowerVerification(
         photoData: ByteArray,
-        qualityResult: Result<PhotoQualityResult>,
-        textResult: Result<TextExtractionResult>
+        qualityResult: Result<com.fibreflow.core.ai.vision.PhotoQualityAnalysis>,
+        textResult: Result<com.fibreflow.core.ai.vision.TextExtractionResult>
     ): Result<PhotoValidationResult> {
         // Check for power meter readings
         val issues = mutableListOf<String>()
         val recommendations = mutableListOf<String>()
 
         if (textResult is Result.Success) {
-            val hasPowerReading = textResult.data.extractedText.any { text ->
-                text.matches(Regex("\\b\\d+(\\.\\d+)?\\s*(dBm|dbm|dB)\\b")) ||
-                text.contains("power", ignoreCase = true)
-            }
+            val hasPowerReading = textResult.data.fullText.contains(Regex("\\b\\d+(\\.\\d+)?\\s*(dBm|dbm|dB)\\b")) ||
+                                 textResult.data.fullText.contains("power", ignoreCase = true)
 
             if (!hasPowerReading) {
                 issues.add("Power meter reading not detected")
@@ -407,15 +430,15 @@ class ModelCoordinator @Inject constructor(
             confidence = calculateConfidence(issues.size),
             issues = issues,
             recommendations = recommendations,
-            extractedData = extractPowerData(textResult)
+            extractedData = extractPowerData(textResult) as Map<String, Any>
         ))
     }
 
     private suspend fun validateGenericStep(
         photoData: ByteArray,
-        qualityResult: Result<PhotoQualityResult>,
-        barcodeResult: Result<BarcodeScanResult>,
-        textResult: Result<TextExtractionResult>
+        qualityResult: Result<com.fibreflow.core.ai.vision.PhotoQualityAnalysis>,
+        barcodeResult: Result<com.fibreflow.core.ai.vision.BarcodeResult>,
+        textResult: Result<com.fibreflow.core.ai.vision.TextExtractionResult>
     ): Result<PhotoValidationResult> {
         // Basic validation for unspecified steps
         val issues = mutableListOf<String>()
@@ -429,7 +452,7 @@ class ModelCoordinator @Inject constructor(
             confidence = calculateConfidence(issues.size),
             issues = issues,
             recommendations = if (issues.isNotEmpty()) listOf("Review photo and retake if needed") else emptyList(),
-            extractedData = emptyMap()
+            extractedData = emptyMap<String, Any>()
         ))
     }
 
@@ -445,27 +468,27 @@ class ModelCoordinator @Inject constructor(
     }
 
     private fun extractONTData(
-        barcodeResult: Result<BarcodeScanResult>,
-        textResult: Result<TextExtractionResult>
+        barcodeResult: Result<com.fibreflow.core.ai.vision.BarcodeResult>,
+        textResult: Result<com.fibreflow.core.ai.vision.TextExtractionResult>
     ): Map<String, Any> {
         val data = mutableMapOf<String, Any>()
 
         if (barcodeResult is Result.Success) {
-            data["ont_barcodes"] = barcodeResult.data.barcodes
+            data["ont_barcodes"] = listOf(barcodeResult.data.value ?: "")
         }
 
         if (textResult is Result.Success) {
-            data["extracted_text"] = textResult.data.extractedText
+            data["extracted_text"] = textResult.data.fullText
         }
 
         return data
     }
 
-    private fun extractPowerData(textResult: Result<TextExtractionResult>): Map<String, Any> {
+    private fun extractPowerData(textResult: Result<com.fibreflow.core.ai.vision.TextExtractionResult>): Map<String, Any> {
         val data = mutableMapOf<String, Any>()
 
         if (textResult is Result.Success) {
-            val powerReadings = textResult.data.extractedText.filter { text ->
+            val powerReadings = textResult.data.fullText.split("\\s+".toRegex()).filter { text ->
                 text.matches(Regex("\\b\\d+(\\.\\d+)?\\s*(dBm|dbm|dB)\\b"))
             }
             data["power_readings"] = powerReadings
@@ -547,10 +570,3 @@ data class ModelOptimization(
     val disableLLMGuidance: Boolean,
     val optimizations: List<String>
 )
-
-// Placeholder data classes (would be defined in respective modules)
-data class PhotoQualityResult(val isAcceptable: Boolean, val score: Float)
-data class BarcodeScanResult(val barcodes: List<String>)
-data class TextExtractionResult(val extractedText: List<String>)
-enum class LightType { POWER, LOS, PON, LAN }
-data class LightDetectionResult(val type: LightType, val isOn: Boolean)

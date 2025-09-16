@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
     // Hilt
     implementation(libs.hilt.android)
@@ -28,6 +29,8 @@ dependencies {
     // ML Kit for computer vision
     implementation(libs.mlkit.text.recognition)
     implementation(libs.mlkit.barcode.scanning)
+    implementation("com.google.android.gms:play-services-tasks:18.1.0")
+    implementation("com.google.android.gms:play-services-tasks:18.1.0")
 
     // TensorFlow Lite for custom models
     implementation(libs.tensorflow.lite)

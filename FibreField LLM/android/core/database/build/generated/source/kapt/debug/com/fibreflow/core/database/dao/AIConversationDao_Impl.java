@@ -155,7 +155,7 @@ public final class AIConversationDao_Impl implements AIConversationDao {
 
   @Override
   public Object insertConversation(final AIConversationEntity conversation,
-      final Continuation<? super Long> $completion) {
+      final Continuation<? super Long> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -169,12 +169,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object insertConversations(final List<AIConversationEntity> conversations,
-      final Continuation<? super List<Long>> $completion) {
+      final Continuation<? super List<Long>> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<List<Long>>() {
       @Override
       @NonNull
@@ -188,12 +188,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object deleteConversation(final AIConversationEntity conversation,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -207,12 +207,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object updateConversation(final AIConversationEntity conversation,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -226,12 +226,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object deleteOldConversations(final long cutoffDate,
-      final Continuation<? super Integer> $completion) {
+      final Continuation<? super Integer> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
@@ -252,12 +252,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           __preparedStmtOfDeleteOldConversations.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object getConversationById(final long conversationId,
-      final Continuation<? super AIConversationEntity> $completion) {
+      final Continuation<? super AIConversationEntity> arg1) {
     final String _sql = "SELECT * FROM ai_conversations WHERE conversation_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -321,12 +321,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object getConversationsByInstallation(final long installationId,
-      final Continuation<? super List<AIConversationEntity>> $completion) {
+      final Continuation<? super List<AIConversationEntity>> arg1) {
     final String _sql = "SELECT * FROM ai_conversations WHERE installation_id = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -390,7 +390,7 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -467,7 +467,7 @@ public final class AIConversationDao_Impl implements AIConversationDao {
 
   @Override
   public Object getRecentConversations(final int limit,
-      final Continuation<? super List<AIConversationEntity>> $completion) {
+      final Continuation<? super List<AIConversationEntity>> arg1) {
     final String _sql = "SELECT * FROM ai_conversations ORDER BY created_at DESC LIMIT ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -531,11 +531,11 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object getTotalConversationCount(final Continuation<? super Integer> $completion) {
+  public Object getTotalConversationCount(final Continuation<? super Integer> arg0) {
     final String _sql = "SELECT COUNT(*) FROM ai_conversations";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -563,7 +563,7 @@ public final class AIConversationDao_Impl implements AIConversationDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @NonNull

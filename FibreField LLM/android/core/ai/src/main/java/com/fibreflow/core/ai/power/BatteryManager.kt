@@ -150,7 +150,7 @@ class BatteryManager @Inject constructor(
 
         // Estimate daily drain
         val estimatedDailyDrain = if (drainRate > 0) {
-            drainRate * 24 // hours in a day
+            drainRate * 24f // hours in a day
         } else {
             dailyDrainEstimate
         }
@@ -312,10 +312,10 @@ class BatteryManager @Inject constructor(
         val first = sortedReadings.first()
         val last = sortedReadings.last()
 
-        val timeDiffHours = (last.timestamp - first.timestamp) / (1000.0 * 60.0 * 60.0)
+        val timeDiffHours = (last.timestamp - first.timestamp) / (1000.0f * 60.0f * 60.0f)
         val levelDiff = first.level - last.level
 
-        return if (timeDiffHours > 0) levelDiff / timeDiffHours else 0f
+        return if (timeDiffHours > 0) (levelDiff.toFloat() / timeDiffHours) else 0f
     }
 
     private fun cleanupOldReadings() {
@@ -331,11 +331,11 @@ class BatteryManager @Inject constructor(
 
     private fun recordSessionEnd() {
         val sessionEndLevel = _batteryState.value.level
-        val sessionDurationHours = (System.currentTimeMillis() - sessionStartTime) / (1000.0 * 60.0 * 60.0)
+        val sessionDurationHours = (System.currentTimeMillis() - sessionStartTime) / (1000.0f * 60.0f * 60.0f)
 
         if (sessionDurationHours > 0 && sessionStartLevel > 0) {
             val sessionDrain = sessionStartLevel - sessionEndLevel
-            dailyDrainEstimate = sessionDrain / sessionDurationHours * 24 // Extrapolate to daily
+            dailyDrainEstimate = (sessionDrain.toFloat() / sessionDurationHours) * 24f // Extrapolate to daily
         }
     }
 

@@ -30,7 +30,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class SpeechRecognizer @Inject constructor(
-    private val context: Context
+    private val context: Context,
+    private val voiceCommandProcessor: VoiceCommandProcessor
 ) {
 
     companion object {
@@ -232,8 +233,8 @@ class SpeechRecognizer @Inject constructor(
      */
     private fun processRecognizedSpeech(text: String, confidence: Float) {
         try {
-            val command = VoiceCommandProcessor.parseCommand(text, confidence)
-            Timber.i("$TAG: Processed command: ${command.type} (confidence: ${confidence * 100}%)")
+            val command = voiceCommandProcessor.parseCommand(text, confidence)
+            Timber.i("$TAG: Processed command: ${command.originalText} (confidence: ${confidence * 100}%)")
 
             // Here you would typically emit the command to a flow or callback
             // For now, we'll just log it

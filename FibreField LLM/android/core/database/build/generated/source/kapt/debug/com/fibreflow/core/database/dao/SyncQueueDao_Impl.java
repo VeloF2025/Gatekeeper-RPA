@@ -57,6 +57,8 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
 
   private final SharedSQLiteStatement __preparedStmtOfDeleteCompletedItems;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteSyncEntry;
+
   public SyncQueueDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfSyncQueueEntity = new EntityInsertionAdapter<SyncQueueEntity>(__db) {
@@ -225,6 +227,14 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
         return _query;
       }
     };
+    this.__preparedStmtOfDeleteSyncEntry = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM sync_queue WHERE sync_id = ?";
+        return _query;
+      }
+    };
   }
 
   @Override
@@ -388,6 +398,32 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
           }
         } finally {
           __preparedStmtOfDeleteCompletedItems.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteSyncEntry(final long syncId,
+      final Continuation<? super Integer> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteSyncEntry.acquire();
+        int _argIndex = 1;
+        _stmt.bindLong(_argIndex, syncId);
+        try {
+          __db.beginTransaction();
+          try {
+            final Integer _result = _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return _result;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteSyncEntry.release(_stmt);
         }
       }
     }, $completion);
@@ -848,6 +884,112 @@ public final class SyncQueueDao_Impl implements SyncQueueDao {
             _result = _tmp;
           } else {
             _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getOrphanedSyncEntries(
+      final Continuation<? super List<SyncQueueEntity>> $completion) {
+    final String _sql = "SELECT s.* FROM sync_queue s LEFT JOIN installations i ON s.entity_id = i.installation_id WHERE s.entity_type = 'INSTALLATION' AND i.installation_id IS NULL";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<SyncQueueEntity>>() {
+      @Override
+      @NonNull
+      public List<SyncQueueEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfSyncId = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_id");
+          final int _cursorIndexOfEntityType = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_type");
+          final int _cursorIndexOfEntityId = CursorUtil.getColumnIndexOrThrow(_cursor, "entity_id");
+          final int _cursorIndexOfOperation = CursorUtil.getColumnIndexOrThrow(_cursor, "operation");
+          final int _cursorIndexOfData = CursorUtil.getColumnIndexOrThrow(_cursor, "data");
+          final int _cursorIndexOfSyncStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "sync_status");
+          final int _cursorIndexOfRetryCount = CursorUtil.getColumnIndexOrThrow(_cursor, "retry_count");
+          final int _cursorIndexOfLastAttempt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_attempt");
+          final int _cursorIndexOfErrorMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "error_message");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
+          final List<SyncQueueEntity> _result = new ArrayList<SyncQueueEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SyncQueueEntity _item;
+            final long _tmpSyncId;
+            _tmpSyncId = _cursor.getLong(_cursorIndexOfSyncId);
+            final String _tmpEntityType;
+            if (_cursor.isNull(_cursorIndexOfEntityType)) {
+              _tmpEntityType = null;
+            } else {
+              _tmpEntityType = _cursor.getString(_cursorIndexOfEntityType);
+            }
+            final String _tmpEntityId;
+            if (_cursor.isNull(_cursorIndexOfEntityId)) {
+              _tmpEntityId = null;
+            } else {
+              _tmpEntityId = _cursor.getString(_cursorIndexOfEntityId);
+            }
+            final SyncOperation _tmpOperation;
+            final String _tmp;
+            if (_cursor.isNull(_cursorIndexOfOperation)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getString(_cursorIndexOfOperation);
+            }
+            _tmpOperation = __statusConverters.toSyncOperation(_tmp);
+            final String _tmpData;
+            if (_cursor.isNull(_cursorIndexOfData)) {
+              _tmpData = null;
+            } else {
+              _tmpData = _cursor.getString(_cursorIndexOfData);
+            }
+            final SyncStatus _tmpSyncStatus;
+            final String _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfSyncStatus)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getString(_cursorIndexOfSyncStatus);
+            }
+            _tmpSyncStatus = __statusConverters.toSyncStatus(_tmp_1);
+            final int _tmpRetryCount;
+            _tmpRetryCount = _cursor.getInt(_cursorIndexOfRetryCount);
+            final Date _tmpLastAttempt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfLastAttempt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfLastAttempt);
+            }
+            _tmpLastAttempt = __dateConverters.fromTimestamp(_tmp_2);
+            final String _tmpErrorMessage;
+            if (_cursor.isNull(_cursorIndexOfErrorMessage)) {
+              _tmpErrorMessage = null;
+            } else {
+              _tmpErrorMessage = _cursor.getString(_cursorIndexOfErrorMessage);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp_3;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_3 = null;
+            } else {
+              _tmp_3 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_3);
+            final Date _tmpUpdatedAt;
+            final Long _tmp_4;
+            if (_cursor.isNull(_cursorIndexOfUpdatedAt)) {
+              _tmp_4 = null;
+            } else {
+              _tmp_4 = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            }
+            _tmpUpdatedAt = __dateConverters.fromTimestamp(_tmp_4);
+            _item = new SyncQueueEntity(_tmpSyncId,_tmpEntityType,_tmpEntityId,_tmpOperation,_tmpData,_tmpSyncStatus,_tmpRetryCount,_tmpLastAttempt,_tmpErrorMessage,_tmpCreatedAt,_tmpUpdatedAt);
+            _result.add(_item);
           }
           return _result;
         } finally {

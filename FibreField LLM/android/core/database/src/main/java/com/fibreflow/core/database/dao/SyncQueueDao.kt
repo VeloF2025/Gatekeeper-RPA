@@ -46,4 +46,16 @@ interface SyncQueueDao {
 
     @Query("SELECT COUNT(*) FROM sync_queue WHERE sync_status = :status")
     suspend fun getSyncItemCountByStatus(status: String): Int
+
+    /**
+     * Get orphaned sync entries (entries referencing non-existent installations)
+     */
+    @Query("SELECT s.* FROM sync_queue s LEFT JOIN installations i ON s.entity_id = i.installation_id WHERE s.entity_type = 'INSTALLATION' AND i.installation_id IS NULL")
+    suspend fun getOrphanedSyncEntries(): List<SyncQueueEntity>
+
+    /**
+     * Delete sync entry by ID
+     */
+    @Query("DELETE FROM sync_queue WHERE sync_id = :syncId")
+    suspend fun deleteSyncEntry(syncId: Long): Int
 }

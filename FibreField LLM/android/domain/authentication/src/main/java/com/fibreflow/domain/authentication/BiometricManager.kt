@@ -45,7 +45,7 @@ class BiometricManager @Inject constructor(
      * Check if biometric authentication is available on this device
      */
     fun isBiometricAvailable(): Boolean {
-        return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+        return when (biometricManager.canAuthenticate(BiometricPrompt.Authenticators.BIOMETRIC_STRONG)) {
             BiometricManager.BIOMETRIC_SUCCESS -> true
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> false
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> false
@@ -58,7 +58,7 @@ class BiometricManager @Inject constructor(
      * Get biometric availability status
      */
     fun getBiometricAvailabilityStatus(): BiometricAvailability {
-        val status = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+        val status = biometricManager.canAuthenticate(BiometricPrompt.Authenticators.BIOMETRIC_STRONG)
 
         return when (status) {
             BiometricManager.BIOMETRIC_SUCCESS -> BiometricAvailability.Available

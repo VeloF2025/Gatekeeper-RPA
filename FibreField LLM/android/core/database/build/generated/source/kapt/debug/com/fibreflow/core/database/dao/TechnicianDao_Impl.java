@@ -264,7 +264,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
 
   @Override
   public Object insertTechnician(final TechnicianEntity technician,
-      final Continuation<? super Long> $completion) {
+      final Continuation<? super Long> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -278,12 +278,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object insertTechnicians(final List<TechnicianEntity> technicians,
-      final Continuation<? super List<Long>> $completion) {
+      final Continuation<? super List<Long>> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<List<Long>>() {
       @Override
       @NonNull
@@ -297,12 +297,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object deleteTechnician(final TechnicianEntity technician,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -316,12 +316,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object updateTechnician(final TechnicianEntity technician,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -335,12 +335,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object updateTechnicianActiveStatus(final String technicianId, final boolean active,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg2) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -368,12 +368,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __preparedStmtOfUpdateTechnicianActiveStatus.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg2);
   }
 
   @Override
   public Object updateLastLoginTime(final String technicianId, final long timestamp,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg2) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -400,12 +400,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __preparedStmtOfUpdateLastLoginTime.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg2);
   }
 
   @Override
   public Object updateLastSyncTime(final String technicianId, final long timestamp,
-      final Continuation<? super Unit> $completion) {
+      final Continuation<? super Unit> arg2) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -432,12 +432,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __preparedStmtOfUpdateLastSyncTime.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg2);
   }
 
   @Override
   public Object deleteInactiveTechnicians(final long cutoffDate,
-      final Continuation<? super Integer> $completion) {
+      final Continuation<? super Integer> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
@@ -458,12 +458,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           __preparedStmtOfDeleteInactiveTechnicians.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object getTechnicianById(final String technicianId,
-      final Continuation<? super TechnicianEntity> $completion) {
+      final Continuation<? super TechnicianEntity> arg1) {
     final String _sql = "SELECT * FROM technicians WHERE technician_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -584,7 +584,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -717,7 +717,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
 
   @Override
   public Object getTechnicianByEmail(final String email,
-      final Continuation<? super TechnicianEntity> $completion) {
+      final Continuation<? super TechnicianEntity> arg1) {
     final String _sql = "SELECT * FROM technicians WHERE email = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -838,11 +838,11 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object getAllTechnicians(final Continuation<? super List<TechnicianEntity>> $completion) {
+  public Object getAllTechnicians(final Continuation<? super List<TechnicianEntity>> arg0) {
     final String _sql = "SELECT * FROM technicians ORDER BY name ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -957,7 +957,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
@@ -1083,8 +1083,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
   }
 
   @Override
-  public Object getActiveTechnicians(
-      final Continuation<? super List<TechnicianEntity>> $completion) {
+  public Object getActiveTechnicians(final Continuation<? super List<TechnicianEntity>> arg0) {
     final String _sql = "SELECT * FROM technicians WHERE active = 1 ORDER BY name ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1199,7 +1198,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
@@ -1326,7 +1325,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
 
   @Override
   public Object getTechniciansByRole(final String role,
-      final Continuation<? super List<TechnicianEntity>> $completion) {
+      final Continuation<? super List<TechnicianEntity>> arg1) {
     final String _sql = "SELECT * FROM technicians WHERE role = ? ORDER BY name ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -1447,7 +1446,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -1579,7 +1578,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
   }
 
   @Override
-  public Object getActiveTechnicianCount(final Continuation<? super Integer> $completion) {
+  public Object getActiveTechnicianCount(final Continuation<? super Integer> arg0) {
     final String _sql = "SELECT COUNT(*) FROM technicians WHERE active = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1607,11 +1606,11 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
-  public Object getTotalTechnicianCount(final Continuation<? super Integer> $completion) {
+  public Object getTotalTechnicianCount(final Continuation<? super Integer> arg0) {
     final String _sql = "SELECT COUNT(*) FROM technicians";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1639,12 +1638,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
   public Object getTechnicianCountByRole(final String role,
-      final Continuation<? super Integer> $completion) {
+      final Continuation<? super Integer> arg1) {
     final String _sql = "SELECT COUNT(*) FROM technicians WHERE role = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -1678,12 +1677,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object searchTechnicians(final String query,
-      final Continuation<? super List<TechnicianEntity>> $completion) {
+      final Continuation<? super List<TechnicianEntity>> arg1) {
     final String _sql = "SELECT * FROM technicians WHERE name LIKE '%' || ? || '%' OR email LIKE '%' || ? || '%' ORDER BY name ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
@@ -1810,12 +1809,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object getTechniciansByLastLoginRange(final long startTime, final long endTime,
-      final Continuation<? super List<TechnicianEntity>> $completion) {
+      final Continuation<? super List<TechnicianEntity>> arg2) {
     final String _sql = "SELECT * FROM technicians WHERE last_login BETWEEN ? AND ? ORDER BY last_login DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
@@ -1934,12 +1933,12 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg2);
   }
 
   @Override
   public Object getRecentlyActiveTechnicianCount(final long cutoffTime,
-      final Continuation<? super Integer> $completion) {
+      final Continuation<? super Integer> arg1) {
     final String _sql = "SELECT COUNT(*) FROM technicians WHERE last_login > ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -1969,11 +1968,11 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object getBasicTechnicianCount(final Continuation<? super Integer> $completion) {
+  public Object getBasicTechnicianCount(final Continuation<? super Integer> arg0) {
     final String _sql = "SELECT COUNT(*) FROM technicians WHERE role = 'TECHNICIAN'";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -2001,7 +2000,7 @@ public final class TechnicianDao_Impl implements TechnicianDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @NonNull

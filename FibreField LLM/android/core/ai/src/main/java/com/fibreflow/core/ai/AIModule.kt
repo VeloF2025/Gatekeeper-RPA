@@ -88,7 +88,7 @@ object AIModule {
 
     @Provides
     @Singleton
-    fun provideSpeechRecognizer(@ApplicationContext context: Context): SpeechRecognizer {
-        return SpeechRecognizer(context)
+    fun provideSpeechRecognizer(@ApplicationContext context: Context, voiceCommandProcessor: VoiceCommandProcessor): SpeechRecognizer {
+        return SpeechRecognizer(context, voiceCommandProcessor)
     }
 }

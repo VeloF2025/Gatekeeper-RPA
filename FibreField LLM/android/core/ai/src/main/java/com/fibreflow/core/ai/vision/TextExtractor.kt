@@ -3,9 +3,10 @@ package com.fibreflow.core.ai.vision
 import android.graphics.Bitmap
 import com.fibreflow.core.common.result.Result
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import kotlinx.coroutines.tasks.await
+import com.google.android.gms.tasks.Tasks
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,23 +31,23 @@ class TextExtractor @Inject constructor() {
             Timber.d("Extracting text from bitmap, type: $textType")
 
             val inputImage = InputImage.fromBitmap(bitmap, 0)
-            val visionText = textRecognizer.process(inputImage).await()
+            val visionText = Tasks.await(textRecognizer.process(inputImage))
 
             val extractedText = visionText.text
-            val textBlocks = visionText.textBlocks.map { block ->
+            val textBlocks = visionText.textBlocks.map { block: Text.TextBlock ->
                 TextBlock(
                     text = block.text,
-                    confidence = block.confidence,
+                    confidence = 1.0f,
                     boundingBox = block.boundingBox,
-                    lines = block.lines.map { line ->
+                    lines = block.lines.map { line: Text.Line ->
                         TextLine(
                             text = line.text,
-                            confidence = line.confidence,
+                            confidence = 1.0f,
                             boundingBox = line.boundingBox,
-                            elements = line.elements.map { element ->
+                            elements = line.elements.map { element: Text.Element ->
                                 TextElement(
                                     text = element.text,
-                                    confidence = element.confidence,
+                                    confidence = 1.0f,
                                     boundingBox = element.boundingBox
                                 )
                             }
@@ -87,7 +88,7 @@ class TextExtractor @Inject constructor() {
             val extractionResult = textResult as Result.Success
             val fullText = extractionResult.data.fullText
 
-            val extractedData = when (dataType) {
+            val extractedData: List<DataItem> = when (dataType) {
                 "POWER_METER_READING" -> extractPowerMeterReading(fullText)
                 "DROP_NUMBER" -> extractDropNumber(fullText)
                 "SERIAL_NUMBER" -> extractSerialNumber(fullText)
@@ -220,7 +221,7 @@ class TextExtractor @Inject constructor() {
             }
         }
 
-        return dropNumbers.distinctBy { it.value }
+        return dropNumbers.distinctBy { it: DataItem -> it.value }
     }
 
     /**
@@ -244,7 +245,7 @@ class TextExtractor @Inject constructor() {
             }
         }
 
-        return serialNumbers.distinctBy { it.value }
+        return serialNumbers.distinctBy { it: DataItem -> it.value }
     }
 
     /**

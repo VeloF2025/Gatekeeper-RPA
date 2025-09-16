@@ -4,6 +4,23 @@
             "outputFile": "com.fibreflow.technician.app-mergeDebugResources-2:/values-fr-rCA/values-fr-rCA.xml",
             "map": [
                 {
+                    "source": "C:\\Users\\HeinvanVuuren\\.gradle\\caches\\8.13\\transforms\\6738a2fcfad621f89027834f069ab842\\transformed\\jetified-play-services-basement-18.3.0\\res\\values-fr-rCA\\values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "199",
+                        "endColumns": "156",
+                        "endOffsets": "355"
+                    },
+                    "to": {
+                        "startLines": "46",
+                        "startColumns": "4",
+                        "startOffsets": "4828",
+                        "endColumns": "160",
+                        "endOffsets": "4984"
+                    }
+                },
+                {
                     "source": "C:\\Users\\HeinvanVuuren\\.gradle\\caches\\8.13\\transforms\\23dbb3c5e42bf89d88fa3cb5c88dd8d0\\transformed\\appcompat-1.6.1\\res\\values-fr-rCA\\values-fr-rCA.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
@@ -120,23 +137,6 @@
                         "startOffsets": "8275,8422,8567,8689,8837,8963,9057,9169,9311,9430,9589,9673,9774,9875,9976,10097,10232,10338,10488,10634,10770,10972,11101,11219,11342,11475,11577,11682,11806,11934,12036,12148,12253,12398,12550,12659,12768,12846,12939,13034,13124,13210,13317,13397,13482,13579,13690,13783,13887,13975,14091,14192,14301,14423,14503,14613",
                         "endColumns": "146,144,121,147,125,93,111,141,118,158,83,100,100,100,120,134,105,149,145,135,201,128,117,122,132,101,104,123,127,101,111,104,144,151,108,108,77,92,94,89,85,106,79,84,96,110,92,103,87,115,100,108,121,79,109,96",
                         "endOffsets": "8417,8562,8684,8832,8958,9052,9164,9306,9425,9584,9668,9769,9870,9971,10092,10227,10333,10483,10629,10765,10967,11096,11214,11337,11470,11572,11677,11801,11929,12031,12143,12248,12393,12545,12654,12763,12841,12934,13029,13119,13205,13312,13392,13477,13574,13685,13778,13882,13970,14086,14187,14296,14418,14498,14608,14705"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\HeinvanVuuren\\.gradle\\caches\\8.13\\transforms\\43a3f88d0e8349947a4efe8276750bac\\transformed\\jetified-play-services-basement-18.1.0\\res\\values-fr-rCA\\values.xml",
-                    "from": {
-                        "startLines": "4",
-                        "startColumns": "0",
-                        "startOffsets": "199",
-                        "endColumns": "156",
-                        "endOffsets": "355"
-                    },
-                    "to": {
-                        "startLines": "46",
-                        "startColumns": "4",
-                        "startOffsets": "4828",
-                        "endColumns": "160",
-                        "endOffsets": "4984"
                     }
                 }
             ]

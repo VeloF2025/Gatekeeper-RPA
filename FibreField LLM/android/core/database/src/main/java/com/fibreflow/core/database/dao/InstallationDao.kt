@@ -196,4 +196,28 @@ interface InstallationDao {
      */
     @Query("UPDATE installations SET ai_guidance_used = 0, updated_at = :timestamp WHERE installation_id IN (:installationIds)")
     suspend fun markInstallationsSynced(installationIds: List<Long>, timestamp: Long = System.currentTimeMillis())
+
+    /**
+     * Get orphaned installations (installations referencing non-existent drops)
+     */
+    @Query("SELECT i.* FROM installations i LEFT JOIN drops d ON i.drop_number = d.drop_number WHERE d.drop_number IS NULL")
+    suspend fun getOrphanedInstallations(): List<InstallationEntity>
+
+    /**
+     * Get records with future timestamps
+     */
+    @Query("SELECT * FROM installations WHERE started_at > :currentTime OR completed_at > :currentTime")
+    suspend fun getRecordsWithFutureTimestamps(currentTime: Long = System.currentTimeMillis()): List<InstallationEntity>
+
+    /**
+     * Check if installation exists
+     */
+    @Query("SELECT COUNT(*) FROM installations WHERE installation_id = :installationId")
+    suspend fun installationExists(installationId: Long): Boolean
+
+    /**
+     * Delete installation by drop number
+     */
+    @Query("DELETE FROM installations WHERE drop_number = :dropNumber")
+    suspend fun deleteInstallationByDropNumber(dropNumber: String): Int
 }
