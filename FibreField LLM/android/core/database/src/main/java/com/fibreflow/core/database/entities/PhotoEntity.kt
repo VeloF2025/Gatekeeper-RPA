@@ -85,7 +85,10 @@ data class PhotoEntity(
     val createdAt: Date,
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Date
+    val updatedAt: Date,
+
+    @ColumnInfo(name = "checksum")
+    val checksum: String? = null
 ) {
 
     /**
