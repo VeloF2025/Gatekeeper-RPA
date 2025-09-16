@@ -7,6 +7,7 @@ import android.util.Log
 import com.fibreflow.core.common.result.Result
 import com.fibreflow.core.database.dao.*
 import com.fibreflow.infrastructure.sync.conflict.ConflictResolver
+import com.fibreflow.infrastructure.sync.models.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,11 +41,11 @@ class SyncManager @Inject constructor(
     private val managerScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // Sync state
-    private val _syncState = MutableStateFlow(SyncState.IDLE)
-    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
+    private val _syncState = MutableStateFlow(models.SyncState.IDLE)
+    val syncState: StateFlow<models.SyncState> = _syncState.asStateFlow()
 
-    private val _syncProgress = MutableStateFlow(SyncProgress())
-    val syncProgress: StateFlow<SyncProgress> = _syncProgress.asStateFlow()
+    private val _syncProgress = MutableStateFlow(models.SyncProgress())
+    val syncProgress: StateFlow<models.SyncProgress> = _syncProgress.asStateFlow()
 
     // Sync job
     private var syncJob: Job? = null
@@ -97,8 +98,8 @@ class SyncManager @Inject constructor(
 
             stopNetworkMonitoring()
 
-            _syncState.value = SyncState.IDLE
-            _syncProgress.value = SyncProgress()
+            _syncState.value = models.SyncState.IDLE
+            _syncProgress.value = models.SyncProgress()
 
             Log.i(TAG, "Automatic synchronization stopped")
             Result.Success(Unit)
@@ -112,7 +113,7 @@ class SyncManager @Inject constructor(
     /**
      * Perform immediate synchronization
      */
-    suspend fun performImmediateSync(): Result<SyncResult> = withContext(Dispatchers.IO) {
+    suspend fun performImmediateSync(): Result<models.SyncResult> = withContext(Dispatchers.IO) {
         try {
             if (!isNetworkAvailable()) {
                 return@withContext Result.Error(RuntimeException("Network not available"))
@@ -178,8 +179,8 @@ class SyncManager @Inject constructor(
     // Private implementation methods
 
     private suspend fun performFullSync(): Result<SyncResult> {
-        _syncState.value = SyncState.SYNCING
-        _syncProgress.value = SyncProgress(totalItems = 0, completedItems = 0)
+        _syncState.value = models.SyncState.SYNCING
+        _syncProgress.value = models.SyncProgress(totalItems = 0, completedItems = 0)
 
         try {
             Log.i(TAG, "Starting full synchronization")
@@ -208,15 +209,15 @@ class SyncManager @Inject constructor(
                 errors = collectErrors(dropResult, installationResult, photoResult)
             )
 
-            _syncState.value = if (hasErrors) SyncState.ERROR else SyncState.IDLE
-            _syncProgress.value = SyncProgress(totalItems = totalSynced, completedItems = totalSynced)
+            _syncState.value = if (hasErrors) models.SyncState.ERROR else models.SyncState.IDLE
+            _syncProgress.value = models.SyncProgress(totalItems = totalSynced, completedItems = totalSynced)
 
             Log.i(TAG, "Full synchronization completed in ${syncTime}ms, synced $totalSynced items")
             Result.Success(result)
 
         } catch (e: Exception) {
             Log.e(TAG, "Full synchronization failed", e)
-            _syncState.value = SyncState.ERROR
+            _syncState.value = models.SyncState.ERROR
             Result.Error(e)
         }
     }

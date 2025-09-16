@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Read(//c/Jarvis/AI Workspace/Archon/**)"
     ],
     "deny": [],
     "ask": []
