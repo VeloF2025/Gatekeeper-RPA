@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Read(//c/Jarvis/AI Workspace/Archon/**)"
+      "Read(//c/Jarvis/AI Workspace/Archon/**)",
+      "Bash(chmod:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

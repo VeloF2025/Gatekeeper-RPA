@@ -251,4 +251,10 @@ interface PhotoDao {
      */
     @Query("DELETE FROM photos WHERE installation_id = :installationId")
     suspend fun deletePhotoByInstallationId(installationId: Long): Int
+
+    /**
+     * Get all photos
+     */
+    @Query("SELECT * FROM photos ORDER BY created_at DESC")
+    suspend fun getAllPhotos(): List<PhotoEntity>
 }

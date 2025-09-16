@@ -168,23 +168,23 @@ class MultiDeviceSync @Inject constructor(
                 drops = database.dropDao().getAllDrops(),
                 installations = database.installationDao().getAllInstallations(),
                 photos = database.photoDao().getAllPhotos(),
-                syncQueue = database.syncQueueDao().getAllPendingSync()
+                syncQueue = database.syncQueueDao().getPendingSyncItems()
             )
         }
     }
 
     private suspend fun collectLocalChanges(): List<SyncChange> {
         return withContext(Dispatchers.IO) {
-            val pendingSync = database.syncQueueDao().getAllPendingSync()
+            val pendingSync = database.syncQueueDao().getPendingSyncItems()
 
             pendingSync.map { syncItem ->
                 SyncChange(
-                    id = syncItem.id.toString(),
-                    type = SyncChangeType.valueOf(syncItem.operationType),
+                    id = syncItem.syncId.toString(),
+                    type = SyncChangeType.valueOf(syncItem.operation.name),
                     entityType = syncItem.entityType,
                     entityId = syncItem.entityId,
                     data = syncItem.data,
-                    timestamp = syncItem.timestamp,
+                    timestamp = syncItem.createdAt.time,
                     deviceId = deviceId
                 )
             }

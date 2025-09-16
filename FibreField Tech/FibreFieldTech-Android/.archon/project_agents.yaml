@@ -1,0 +1,290 @@
+# FibreField Tech Android App - Project-Specific Agents Configuration
+# Generated: 2025-09-16
+# Project Complexity: 9/10 (Very Complex with AI/ML Integration)
+
+project:
+  name: "FibreField Tech Android"
+  type: "android-app"
+  complexity_score: 9
+  description: "Fiber optic installation technician app with AI/ML capabilities"
+  technologies:
+    - "Android SDK (minSdk 24, targetSdk 35)"
+    - "Jetpack Compose"
+    - "Material Design 3"
+    - "Hilt Dependency Injection"
+    - "Room Database with SQLCipher"
+    - "TensorFlow Lite (Phi-3.5 Mini LLM)"
+    - "CameraX"
+    - "WorkManager"
+    - "Biometric Authentication"
+    - "ML Kit"
+    - "Kotlin Coroutines"
+    - "Firebase"
+  architecture_patterns:
+    - "Clean Architecture"
+    - "MVVM"
+    - "Repository Pattern"
+    - "Dependency Injection"
+    - "Offline-First"
+    - "AI/ML Integration"
+
+specialized_agents:
+  # Android Compose + AI Integration Specialist
+  - name: "android-compose-ai-specialist"
+    activation_command: "@android-compose-ai"
+    description: "Expert in Jetpack Compose UI development with AI/ML integration"
+    skills:
+      - "Jetpack Compose with Material 3"
+      - "AI/ML model integration in Android"
+      - "Phi-3.5 Mini LLM implementation"
+      - "Reactive UI patterns with StateFlow"
+      - "Custom Composables for high-tech UI"
+      - "Animation and transitions"
+      - "Accessibility in Compose"
+    quality_gates:
+      - "Zero Android compilation errors"
+      - "100% Compose best practices"
+      - "AI model optimization for mobile"
+      - "Memory efficiency in Compose"
+      - "60fps UI rendering"
+    validation_rules:
+      - "Validate AI model initialization"
+      - "Check Compose performance"
+      - "Verify ML inference on main thread"
+      - "Ensure proper state management"
+      - "Accessibility compliance"
+
+  # ML & Computer Vision Architect
+  - name: "ml-computer-vision-architect"
+    activation_command: "@ml-cv-architect"
+    description: "Computer vision and ML model optimization specialist"
+    skills:
+      - "TensorFlow Lite optimization"
+      - "ONNX model conversion"
+      - "CameraX + ML Kit integration"
+      - "ONT light detection algorithms"
+      - "Model quantization and pruning"
+      - "Real-time inference optimization"
+      - "Edge AI deployment"
+    quality_gates:
+      - "ML inference <100ms"
+      - "Model size <50MB"
+      - "Accuracy >95% for detection"
+      - "Battery impact <5% per inference"
+      - "Memory usage <100MB for ML"
+    validation_rules:
+      - "Validate model performance"
+      - "Check camera integration"
+      - "Verify ONT detection accuracy"
+      - "Ensure thread safety"
+      - "Model version management"
+
+  # Offline-First Database Expert
+  - name: "offline-first-database-expert"
+    activation_command: "@offline-db-expert"
+    description: "Room database with synchronization patterns specialist"
+    skills:
+      - "Room with SQLCipher encryption"
+      - "Offline-first architecture"
+      - "Conflict resolution strategies"
+      - "Data synchronization algorithms"
+      - "Database indexing optimization"
+      - "Data migration strategies"
+      - "Paging 3 implementation"
+    quality_gates:
+      - "Database queries <50ms"
+      - "Sync efficiency >99%"
+      - "Data integrity guaranteed"
+      - "Encryption at rest"
+      - "Zero data loss scenarios"
+    validation_rules:
+      - "Validate database schema"
+      - "Check sync conflicts"
+      - "Verify encryption"
+      - "Ensure backup/restore"
+      - "Performance testing"
+
+  # Camera Workflow Engineer
+  - name: "camera-workflow-engineer"
+    activation_command: "@camera-workflow"
+    description: "9-step photo capture workflow specialist"
+    skills:
+      - "CameraX advanced features"
+      - "Multi-step workflow state management"
+      - "Image processing and compression"
+      - "Geotagging and metadata"
+      - "Quality assurance automation"
+      - "Error handling in camera flow"
+      - "Progress indicators"
+    quality_gates:
+      - "Capture time <2s per photo"
+      - "Image quality validation"
+      - "Workflow completion rate >98%"
+      - "GPS accuracy <5m"
+      - "Storage optimization"
+    validation_rules:
+      - "Validate camera permissions"
+      - "Check image quality"
+      - "Verify workflow states"
+      - "Ensure error recovery"
+      - "Storage management"
+
+  # Material You High-Tech UI Designer
+  - name: "material-you-high-tech-ui-designer"
+    activation_command: "@high-tech-ui"
+    description: "Futuristic UI/UX specialist for field technician apps"
+    skills:
+      - "Material You dynamic theming"
+      - "High-tech visual design"
+      - "Dark mode optimization"
+      - "Responsive layouts for tablets"
+      - "Custom animations and transitions"
+      - "Accessibility (WCAG 2.1)"
+      - "Component design system"
+    quality_gates:
+      - "100% Material Design 3 compliance"
+      - "Dynamic color adaptation"
+      - "Accessibility AA compliance"
+      - "Loading states for all operations"
+      - "Consistent design language"
+    validation_rules:
+      - "Validate design system"
+      - "Check color contrast"
+      - "Verify responsive behavior"
+      - "Ensure animations performant"
+      - "Accessibility testing"
+
+  # Android Performance Optimization Expert
+  - name: "android-performance-optimization-expert"
+    activation_command: "@android-perf"
+    description: "Memory and battery optimization specialist"
+    skills:
+      - "Memory leak detection"
+      - "Battery optimization techniques"
+      - "Background task optimization"
+      - "App startup time reduction"
+      - "Network request optimization"
+      - "UI performance profiling"
+      - "Thermal management"
+    quality_gates:
+      - "App startup <1.5s"
+      - "Memory usage <500MB peak"
+      - "Battery impact <15%/hour"
+      - "ANR rate <0.1%"
+      - "Crash rate <0.5%"
+    validation_rules:
+      - "Validate memory usage"
+      - "Check battery drain"
+      - "Verify startup time"
+      - "Ensure no memory leaks"
+      - "Performance profiling"
+
+  # Biometric Security Architect
+  - name: "biometric-security-architect"
+    activation_command: "@bio-security"
+    description: "Security and authentication specialist"
+    skills:
+      - "Biometric authentication"
+      - "Device encryption"
+      - "Secure data storage"
+      - "Network security"
+      - "Authentication flows"
+      - "Session management"
+      - "Security auditing"
+    quality_gates:
+      - "100% secure authentication"
+      - "Zero plaintext sensitive data"
+      - "Biometric fallback options"
+      - "Session timeout enforcement"
+      - "Security audit passed"
+    validation_rules:
+      - "Validate encryption"
+      - "Check authentication flows"
+      - "Verify secure storage"
+      - "Ensure network security"
+      - "Penetration testing"
+
+  # Android Testing Specialist
+  - name: "android-testing-specialist"
+    activation_command: "@android-test"
+    description: "Comprehensive testing for complex Android apps"
+    skills:
+      - "JUnit 5 + MockK"
+      - "Espresso UI testing"
+      - "Compose UI testing"
+      - "Instrumentation tests"
+      - "MockWebServer integration"
+      - "Test data management"
+      - "Performance testing"
+    quality_gates:
+      - "95%+ code coverage"
+      - "All critical paths tested"
+      - "UI test stability >99%"
+      - "Integration test coverage"
+      - "Performance benchmarks"
+    validation_rules:
+      - "Validate test coverage"
+      - "Check test stability"
+      - "Verify edge cases"
+      - "Ensure mock accuracy"
+      - "Performance test results"
+
+global_quality_rules:
+  - "Zero Kotlin compilation errors"
+  - "Zero Android lint warnings"
+  - "95%+ test coverage mandatory"
+  - "Proper error handling for all operations"
+  - "Logging with Timber (no println)"
+  - "Coroutine scope management"
+  - "Resource cleanup in disposables"
+  - "Null safety with Kotlin"
+  - "Immutable data classes where possible"
+  - "Dependency injection with Hilt"
+
+android_specific_rules:
+  - "Follow Android architecture guidelines"
+  - "Use Jetpack libraries exclusively"
+  - "Proper lifecycle awareness"
+  - "Configuration changes handled"
+  - "Background work with WorkManager"
+  - "Permissions handling with accompanist"
+  - "Deep linking implementation"
+  - "App shortcuts support"
+  - "Notification channels"
+  - "Adaptive icons"
+
+ai_ml_specific_rules:
+  - "ML models optimized for mobile"
+  - "On-device inference preferred"
+  - "Model versioning and updates"
+  - "Fallback for model failures"
+  - "Privacy-first AI features"
+  - "User control over AI features"
+  - "Explainable AI decisions"
+  - "Fairness and bias checking"
+
+activation_commands:
+  standard: "@Archon <task>"
+  status: "@Archon status"
+  agents: "@Archon agents"
+  review: "@Archon review"
+
+workflow_enforcement:
+  - "All agents must validate before coding"
+  - "Documentation-driven development"
+  - "Code review mandatory"
+  - "Test coverage validation"
+  - "Performance benchmarks"
+  - "Security audit"
+  - "Accessibility testing"
+  - "Device compatibility testing"
+
+notes: |
+  This is a high-complexity Android application with AI/ML capabilities.
+  Special attention required for:
+  - Offline-first architecture with reliable sync
+  - AI model performance and battery impact
+  - Camera workflow reliability in field conditions
+  - Security for sensitive installation data
+  - Performance on mid-range devices
+  - Robust error handling for field use

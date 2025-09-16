@@ -2,6 +2,11 @@ package com.fibreflow.infrastructure.sync
 
 import android.content.Context
 import com.fibreflow.core.database.FibreFieldDatabase
+import com.fibreflow.core.database.dao.*
+import com.fibreflow.core.network.api.InstallationAPI
+import com.fibreflow.core.network.api.PhotoUploadService
+import com.fibreflow.core.network.api.DropAPI
+import com.fibreflow.core.network.api.ProjectAPI
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,18 +55,24 @@ object SyncModule {
     @Singleton
     fun provideSyncManager(
         @ApplicationContext context: Context,
-        database: FibreFieldDatabase,
-        offlineToOnlineSync: OfflineToOnlineSync
+        installationDao: InstallationDao,
+        photoDao: PhotoDao,
+        dropDao: DropDao,
+        syncQueueDao: SyncQueueDao,
+        conflictResolver: ConflictResolver
     ): SyncManager {
-        return SyncManager(context, database, offlineToOnlineSync)
+        return SyncManager(context, installationDao, photoDao, dropDao, syncQueueDao, conflictResolver)
     }
 
     @Provides
     @Singleton
     fun provideSyncService(
-        database: FibreFieldDatabase,
+        installationApi: InstallationAPI,
+        photoUploadService: PhotoUploadService,
+        dropApi: DropAPI,
+        projectApi: ProjectAPI,
         conflictResolver: ConflictResolver
     ): SyncService {
-        return SyncService(database, conflictResolver)
+        return SyncService(installationApi, photoUploadService, dropApi, projectApi, conflictResolver)
     }
 }

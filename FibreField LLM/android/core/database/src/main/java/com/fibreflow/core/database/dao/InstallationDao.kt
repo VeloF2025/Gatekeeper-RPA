@@ -220,4 +220,10 @@ interface InstallationDao {
      */
     @Query("DELETE FROM installations WHERE drop_number = :dropNumber")
     suspend fun deleteInstallationByDropNumber(dropNumber: String): Int
+
+    /**
+     * Get all installations
+     */
+    @Query("SELECT * FROM installations ORDER BY created_at DESC")
+    suspend fun getAllInstallations(): List<InstallationEntity>
 }
