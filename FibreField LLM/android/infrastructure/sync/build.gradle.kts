@@ -45,7 +45,7 @@ dependencies {
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.livedata)
-    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime)
 
     // Room Database (explicit for sync module)
