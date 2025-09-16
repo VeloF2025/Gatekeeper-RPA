@@ -35,4 +35,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
+
+    // Test dependencies for other modules
+    testImplementation(project(":core:database"))
+    testImplementation(project(":core:network"))
 }
