@@ -52,12 +52,3 @@ data class SyncQueueEntity(
     val updatedAt: Date
 )
 
-/**
- * Sync operation enum
- */
-enum class SyncOperation {
-    CREATE,
-    UPDATE,
-    DELETE
-}
-

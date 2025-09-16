@@ -61,36 +61,3 @@ data class RemediationEntity(
     @ColumnInfo(name = "updated_at")
     val updatedAt: Date
 )
-
-/**
- * Remediation type enum
- */
-enum class RemediationType {
-    HARDWARE_ISSUE,
-    CONFIGURATION_ERROR,
-    NETWORK_PROBLEM,
-    PHOTO_VALIDATION_FAILED,
-    GPS_ACCURACY_ISSUE,
-    MANUAL_OVERRIDE_NEEDED,
-    OTHER
-}
-
-/**
- * Remediation severity enum
- */
-enum class RemediationSeverity {
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL
-}
-
-/**
- * Remediation status enum
- */
-enum class RemediationStatus {
-    PENDING,
-    IN_PROGRESS,
-    RESOLVED,
-    CANCELLED
-}
