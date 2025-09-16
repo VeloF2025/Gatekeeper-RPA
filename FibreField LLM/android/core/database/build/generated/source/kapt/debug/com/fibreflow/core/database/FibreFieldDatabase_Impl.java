@@ -101,7 +101,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_installations_technician_id` ON `installations` (`technician_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_installations_status` ON `installations` (`status`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_installations_created_at` ON `installations` (`created_at`)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `photos` (`photo_id` INTEGER NOT NULL, `installation_id` INTEGER NOT NULL, `photo_type` TEXT NOT NULL, `file_path` TEXT NOT NULL, `file_size_bytes` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `validation_status` TEXT NOT NULL, `validation_confidence` REAL, `ai_metadata` TEXT, `manual_override` INTEGER NOT NULL, `override_reason` TEXT, `override_by` TEXT, `override_at` INTEGER, `upload_status` TEXT NOT NULL, `upload_attempts` INTEGER NOT NULL, `last_upload_attempt` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`photo_id`), FOREIGN KEY(`installation_id`) REFERENCES `installations`(`installation_id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `photos` (`photo_id` INTEGER NOT NULL, `installation_id` INTEGER NOT NULL, `photo_type` TEXT NOT NULL, `file_path` TEXT NOT NULL, `file_size_bytes` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `validation_status` TEXT NOT NULL, `validation_confidence` REAL, `ai_metadata` TEXT, `manual_override` INTEGER NOT NULL, `override_reason` TEXT, `override_by` TEXT, `override_at` INTEGER, `upload_status` TEXT NOT NULL, `upload_attempts` INTEGER NOT NULL, `last_upload_attempt` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `checksum` TEXT, PRIMARY KEY(`photo_id`), FOREIGN KEY(`installation_id`) REFERENCES `installations`(`installation_id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_photos_installation_id` ON `photos` (`installation_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_photos_photo_type` ON `photos` (`photo_type`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_photos_validation_status` ON `photos` (`validation_status`)");
@@ -131,7 +131,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_config_key` ON `configuration` (`config_key`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_configuration_updated_at` ON `configuration` (`updated_at`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d2f854056888621dbd9ac752c65e41c')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b50ceb9fdededa64df790d5ef596eed5')");
       }
 
       @Override
@@ -322,7 +322,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
                   + " Expected:\n" + _infoInstallations + "\n"
                   + " Found:\n" + _existingInstallations);
         }
-        final HashMap<String, TableInfo.Column> _columnsPhotos = new HashMap<String, TableInfo.Column>(19);
+        final HashMap<String, TableInfo.Column> _columnsPhotos = new HashMap<String, TableInfo.Column>(20);
         _columnsPhotos.put("photo_id", new TableInfo.Column("photo_id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPhotos.put("installation_id", new TableInfo.Column("installation_id", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPhotos.put("photo_type", new TableInfo.Column("photo_type", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -342,6 +342,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         _columnsPhotos.put("last_upload_attempt", new TableInfo.Column("last_upload_attempt", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPhotos.put("created_at", new TableInfo.Column("created_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsPhotos.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsPhotos.put("checksum", new TableInfo.Column("checksum", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysPhotos = new HashSet<TableInfo.ForeignKey>(1);
         _foreignKeysPhotos.add(new TableInfo.ForeignKey("installations", "CASCADE", "NO ACTION", Arrays.asList("installation_id"), Arrays.asList("installation_id")));
         final HashSet<TableInfo.Index> _indicesPhotos = new HashSet<TableInfo.Index>(4);
@@ -503,7 +504,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "7d2f854056888621dbd9ac752c65e41c", "6b9f722429478aac961f8ebcd6dcd13e");
+    }, "b50ceb9fdededa64df790d5ef596eed5", "cb4d035fa67af5edbcd2c2bbde2332a4");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

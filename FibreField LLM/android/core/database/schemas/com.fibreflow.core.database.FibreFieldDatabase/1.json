@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7d2f854056888621dbd9ac752c65e41c",
+    "identityHash": "b50ceb9fdededa64df790d5ef596eed5",
     "entities": [
       {
         "tableName": "projects",
@@ -690,7 +690,7 @@
       },
       {
         "tableName": "photos",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photo_id` INTEGER NOT NULL, `installation_id` INTEGER NOT NULL, `photo_type` TEXT NOT NULL, `file_path` TEXT NOT NULL, `file_size_bytes` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `validation_status` TEXT NOT NULL, `validation_confidence` REAL, `ai_metadata` TEXT, `manual_override` INTEGER NOT NULL, `override_reason` TEXT, `override_by` TEXT, `override_at` INTEGER, `upload_status` TEXT NOT NULL, `upload_attempts` INTEGER NOT NULL, `last_upload_attempt` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`photo_id`), FOREIGN KEY(`installation_id`) REFERENCES `installations`(`installation_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photo_id` INTEGER NOT NULL, `installation_id` INTEGER NOT NULL, `photo_type` TEXT NOT NULL, `file_path` TEXT NOT NULL, `file_size_bytes` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `validation_status` TEXT NOT NULL, `validation_confidence` REAL, `ai_metadata` TEXT, `manual_override` INTEGER NOT NULL, `override_reason` TEXT, `override_by` TEXT, `override_at` INTEGER, `upload_status` TEXT NOT NULL, `upload_attempts` INTEGER NOT NULL, `last_upload_attempt` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `checksum` TEXT, PRIMARY KEY(`photo_id`), FOREIGN KEY(`installation_id`) REFERENCES `installations`(`installation_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "photoId",
@@ -805,6 +805,12 @@
             "columnName": "updated_at",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "checksum",
+            "columnName": "checksum",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1483,7 +1489,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d2f854056888621dbd9ac752c65e41c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b50ceb9fdededa64df790d5ef596eed5')"
     ]
   }
 }
