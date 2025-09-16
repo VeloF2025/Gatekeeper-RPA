@@ -31,9 +31,7 @@ import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
 import kotlin.Unit;
@@ -2756,36 +2754,27 @@ public final class InstallationDao_Impl implements InstallationDao {
   }
 
   @Override
-  public Object getAverageInstallationTimeByEquipment(
-      final Continuation<? super Map<String, Long>> $completion) {
-    final String _sql = "\n"
-            + "        SELECT ont_serial, AVG(end_time - start_time) as avgTime\n"
-            + "        FROM installations\n"
-            + "        WHERE status = 'COMPLETED' AND ont_serial IS NOT NULL\n"
-            + "        GROUP BY ont_serial\n"
-            + "        ORDER BY avgTime ASC\n"
-            + "    ";
+  public Object getAverageInstallationTime(final Continuation<? super Long> $completion) {
+    final String _sql = "SELECT AVG(end_time - start_time) FROM installations WHERE status = 'COMPLETED' AND end_time IS NOT NULL";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Long>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Long>() {
       @Override
-      @NonNull
-      public Map<String, Long> call() throws Exception {
+      @Nullable
+      public Long call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final Map<String, Long> _result = new LinkedHashMap<String, Long>();
-          while (_cursor.moveToNext()) {
-            final String _key;
-            _key = new String();
-            if () {
-              _result.put(_key, null);
-              continue;
+          final Long _result;
+          if (_cursor.moveToFirst()) {
+            final Long _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(0);
             }
-            final Long _value;
-            _value = new Long();
-            if (!_result.containsKey(_key)) {
-              _result.put(_key, _value);
-            }
+            _result = _tmp;
+          } else {
+            _result = null;
           }
           return _result;
         } finally {

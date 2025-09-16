@@ -35,9 +35,7 @@ import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
 import kotlin.Unit;
@@ -4047,35 +4045,27 @@ public final class DropDao_Impl implements DropDao {
   }
 
   @Override
-  public Object getDropStatusStatistics(
-      final Continuation<? super Map<String, Integer>> $completion) {
-    final String _sql = "\n"
-            + "        SELECT status, COUNT(*) as count\n"
-            + "        FROM drops\n"
-            + "        GROUP BY status\n"
-            + "        ORDER BY count DESC\n"
-            + "    ";
+  public Object getAvailableDropCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM drops WHERE status = 'AVAILABLE'";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Integer>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
       @Override
       @NonNull
-      public Map<String, Integer> call() throws Exception {
+      public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final Map<String, Integer> _result = new LinkedHashMap<String, Integer>();
-          while (_cursor.moveToNext()) {
-            final String _key;
-            _key = new String();
-            if () {
-              _result.put(_key, null);
-              continue;
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
             }
-            final Integer _value;
-            _value = new Integer();
-            if (!_result.containsKey(_key)) {
-              _result.put(_key, _value);
-            }
+            _result = _tmp;
+          } else {
+            _result = null;
           }
           return _result;
         } finally {
@@ -4087,36 +4077,27 @@ public final class DropDao_Impl implements DropDao {
   }
 
   @Override
-  public Object getAverageCompletionTimeByPriority(
-      final Continuation<? super Map<Integer, Long>> $completion) {
-    final String _sql = "\n"
-            + "        SELECT priority, AVG(completed_at - assigned_at) as avgCompletionTime\n"
-            + "        FROM drops\n"
-            + "        WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL\n"
-            + "        GROUP BY priority\n"
-            + "        ORDER BY priority DESC\n"
-            + "    ";
+  public Object getAverageCompletionTime(final Continuation<? super Long> $completion) {
+    final String _sql = "SELECT AVG(completed_at - assigned_at) FROM drops WHERE status = 'COMPLETED' AND assigned_at IS NOT NULL AND completed_at IS NOT NULL";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<Integer, Long>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Long>() {
       @Override
-      @NonNull
-      public Map<Integer, Long> call() throws Exception {
+      @Nullable
+      public Long call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final Map<Integer, Long> _result = new LinkedHashMap<Integer, Long>();
-          while (_cursor.moveToNext()) {
-            final Integer _key;
-            _key = new Integer();
-            if () {
-              _result.put(_key, null);
-              continue;
+          final Long _result;
+          if (_cursor.moveToFirst()) {
+            final Long _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(0);
             }
-            final Long _value;
-            _value = new Long();
-            if (!_result.containsKey(_key)) {
-              _result.put(_key, _value);
-            }
+            _result = _tmp;
+          } else {
+            _result = null;
           }
           return _result;
         } finally {

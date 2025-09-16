@@ -26,9 +26,7 @@ import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
 import kotlin.Unit;
@@ -965,30 +963,34 @@ public final class SessionDao_Impl implements SessionDao {
   }
 
   @Override
-  public Object getSessionCountByTechnician(
-      final Continuation<? super Map<String, Integer>> $completion) {
-    final String _sql = "SELECT technician_id, COUNT(*) as sessionCount FROM sessions GROUP BY technician_id ORDER BY sessionCount DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+  public Object getSessionCountForTechnician(final String technicianId,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM sessions WHERE technician_id = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    if (technicianId == null) {
+      _statement.bindNull(_argIndex);
+    } else {
+      _statement.bindString(_argIndex, technicianId);
+    }
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Integer>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
       @Override
       @NonNull
-      public Map<String, Integer> call() throws Exception {
+      public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
-          final Map<String, Integer> _result = new LinkedHashMap<String, Integer>();
-          while (_cursor.moveToNext()) {
-            final String _key;
-            _key = new String();
-            if () {
-              _result.put(_key, null);
-              continue;
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
             }
-            final Integer _value;
-            _value = new Integer();
-            if (!_result.containsKey(_key)) {
-              _result.put(_key, _value);
-            }
+            _result = _tmp;
+          } else {
+            _result = null;
           }
           return _result;
         } finally {

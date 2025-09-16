@@ -28,9 +28,7 @@ import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
 import kotlin.Unit;
@@ -1684,41 +1682,6 @@ public final class TechnicianDao_Impl implements TechnicianDao {
   }
 
   @Override
-  public Object getTechnicianCountByRole(
-      final Continuation<? super Map<String, Integer>> $completion) {
-    final String _sql = "SELECT role, COUNT(*) as count FROM technicians GROUP BY role ORDER BY count DESC";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
-    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Integer>>() {
-      @Override
-      @NonNull
-      public Map<String, Integer> call() throws Exception {
-        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
-        try {
-          final Map<String, Integer> _result = new LinkedHashMap<String, Integer>();
-          while (_cursor.moveToNext()) {
-            final String _key;
-            _key = new String();
-            if () {
-              _result.put(_key, null);
-              continue;
-            }
-            final Integer _value;
-            _value = new Integer();
-            if (!_result.containsKey(_key)) {
-              _result.put(_key, _value);
-            }
-          }
-          return _result;
-        } finally {
-          _cursor.close();
-          _statement.release();
-        }
-      }
-    }, $completion);
-  }
-
-  @Override
   public Object searchTechnicians(final String query,
       final Continuation<? super List<TechnicianEntity>> $completion) {
     final String _sql = "SELECT * FROM technicians WHERE name LIKE '%' || ? || '%' OR email LIKE '%' || ? || '%' ORDER BY name ASC";
@@ -1975,16 +1938,63 @@ public final class TechnicianDao_Impl implements TechnicianDao {
   }
 
   @Override
-  public Object getAverageTimeSinceLastLogin(final Continuation<? super Long> $completion) {
-    final String _sql = "SELECT AVG(System.currentTimeMillis() - last_login) FROM technicians WHERE active = 1 AND last_login IS NOT NULL";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+  public Object getRecentlyActiveTechnicianCount(final long cutoffTime,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM technicians WHERE last_login > ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, cutoffTime);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Long>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
       @Override
-      @Nullable
-      public Long call() throws Exception {
+      @NonNull
+      public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getBasicTechnicianCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM technicians WHERE role = 'TECHNICIAN'";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();

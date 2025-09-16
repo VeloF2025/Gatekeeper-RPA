@@ -10,6 +10,7 @@ import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
+import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import com.fibreflow.core.database.converters.DateConverters;
@@ -22,7 +23,9 @@ import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
@@ -130,7 +133,7 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "DELETE FROM validation_results WHERE timestamp < ?";
+        final String _query = "DELETE FROM validation_results WHERE created_at < ?";
         return _query;
       }
     };
@@ -239,16 +242,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
   }
 
   @Override
-  public Object getValidationResultById(final String resultId,
+  public Object getValidationResultById(final long resultId,
       final Continuation<? super ValidationResultEntity> $completion) {
-    final String _sql = "SELECT * FROM validation_results WHERE id = ?";
+    final String _sql = "SELECT * FROM validation_results WHERE validation_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (resultId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, resultId);
-    }
+    _statement.bindLong(_argIndex, resultId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<ValidationResultEntity>() {
       @Override
@@ -256,6 +255,49 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       public ValidationResultEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfValidationId = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_id");
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfValidationType = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_type");
+          final int _cursorIndexOfIsValid = CursorUtil.getColumnIndexOrThrow(_cursor, "is_valid");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfValidationData = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_data");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final ValidationResultEntity _result;
+          if (_cursor.moveToFirst()) {
+            final long _tmpValidationId;
+            _tmpValidationId = _cursor.getLong(_cursorIndexOfValidationId);
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final String _tmpValidationType;
+            if (_cursor.isNull(_cursorIndexOfValidationType)) {
+              _tmpValidationType = null;
+            } else {
+              _tmpValidationType = _cursor.getString(_cursorIndexOfValidationType);
+            }
+            final boolean _tmpIsValid;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsValid);
+            _tmpIsValid = _tmp != 0;
+            final float _tmpConfidenceScore;
+            _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            final String _tmpValidationData;
+            if (_cursor.isNull(_cursorIndexOfValidationData)) {
+              _tmpValidationData = null;
+            } else {
+              _tmpValidationData = _cursor.getString(_cursorIndexOfValidationData);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_1);
+            _result = new ValidationResultEntity(_tmpValidationId,_tmpPhotoId,_tmpValidationType,_tmpIsValid,_tmpConfidenceScore,_tmpValidationData,_tmpCreatedAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -266,16 +308,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
   }
 
   @Override
-  public Object getValidationResultsByPhoto(final String photoId,
+  public Object getValidationResultsByPhoto(final long photoId,
       final Continuation<? super List<ValidationResultEntity>> $completion) {
-    final String _sql = "SELECT * FROM validation_results WHERE photoId = ? ORDER BY timestamp DESC";
+    final String _sql = "SELECT * FROM validation_results WHERE photo_id = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (photoId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, photoId);
-    }
+    _statement.bindLong(_argIndex, photoId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<ValidationResultEntity>>() {
       @Override
@@ -283,6 +321,49 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       public List<ValidationResultEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfValidationId = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_id");
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfValidationType = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_type");
+          final int _cursorIndexOfIsValid = CursorUtil.getColumnIndexOrThrow(_cursor, "is_valid");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfValidationData = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_data");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<ValidationResultEntity> _result = new ArrayList<ValidationResultEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final ValidationResultEntity _item;
+            final long _tmpValidationId;
+            _tmpValidationId = _cursor.getLong(_cursorIndexOfValidationId);
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final String _tmpValidationType;
+            if (_cursor.isNull(_cursorIndexOfValidationType)) {
+              _tmpValidationType = null;
+            } else {
+              _tmpValidationType = _cursor.getString(_cursorIndexOfValidationType);
+            }
+            final boolean _tmpIsValid;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsValid);
+            _tmpIsValid = _tmp != 0;
+            final float _tmpConfidenceScore;
+            _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            final String _tmpValidationData;
+            if (_cursor.isNull(_cursorIndexOfValidationData)) {
+              _tmpValidationData = null;
+            } else {
+              _tmpValidationData = _cursor.getString(_cursorIndexOfValidationData);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_1);
+            _item = new ValidationResultEntity(_tmpValidationId,_tmpPhotoId,_tmpValidationType,_tmpIsValid,_tmpConfidenceScore,_tmpValidationData,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -293,16 +374,12 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
   }
 
   @Override
-  public Object getValidationResultsByInstallation(final String installationId,
+  public Object getValidationResultsByInstallation(final long installationId,
       final Continuation<? super List<ValidationResultEntity>> $completion) {
-    final String _sql = "SELECT * FROM validation_results WHERE installationId = ? ORDER BY timestamp DESC";
+    final String _sql = "SELECT * FROM validation_results WHERE photo_id IN (SELECT photo_id FROM photos WHERE installation_id = ?) ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<ValidationResultEntity>>() {
       @Override
@@ -310,6 +387,49 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       public List<ValidationResultEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfValidationId = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_id");
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfValidationType = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_type");
+          final int _cursorIndexOfIsValid = CursorUtil.getColumnIndexOrThrow(_cursor, "is_valid");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfValidationData = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_data");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<ValidationResultEntity> _result = new ArrayList<ValidationResultEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final ValidationResultEntity _item;
+            final long _tmpValidationId;
+            _tmpValidationId = _cursor.getLong(_cursorIndexOfValidationId);
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final String _tmpValidationType;
+            if (_cursor.isNull(_cursorIndexOfValidationType)) {
+              _tmpValidationType = null;
+            } else {
+              _tmpValidationType = _cursor.getString(_cursorIndexOfValidationType);
+            }
+            final boolean _tmpIsValid;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsValid);
+            _tmpIsValid = _tmp != 0;
+            final float _tmpConfidenceScore;
+            _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            final String _tmpValidationData;
+            if (_cursor.isNull(_cursorIndexOfValidationData)) {
+              _tmpValidationData = null;
+            } else {
+              _tmpValidationData = _cursor.getString(_cursorIndexOfValidationData);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp_1;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_1);
+            _item = new ValidationResultEntity(_tmpValidationId,_tmpPhotoId,_tmpValidationType,_tmpIsValid,_tmpConfidenceScore,_tmpValidationData,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -320,16 +440,13 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
   }
 
   @Override
-  public Object getValidationResultsByStatus(final String status,
+  public Object getValidationResultsByStatus(final boolean isValid,
       final Continuation<? super List<ValidationResultEntity>> $completion) {
-    final String _sql = "SELECT * FROM validation_results WHERE validationStatus = ? ORDER BY timestamp DESC";
+    final String _sql = "SELECT * FROM validation_results WHERE is_valid = ? ORDER BY created_at DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (status == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, status);
-    }
+    final int _tmp = isValid ? 1 : 0;
+    _statement.bindLong(_argIndex, _tmp);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<ValidationResultEntity>>() {
       @Override
@@ -337,6 +454,49 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       public List<ValidationResultEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfValidationId = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_id");
+          final int _cursorIndexOfPhotoId = CursorUtil.getColumnIndexOrThrow(_cursor, "photo_id");
+          final int _cursorIndexOfValidationType = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_type");
+          final int _cursorIndexOfIsValid = CursorUtil.getColumnIndexOrThrow(_cursor, "is_valid");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfValidationData = CursorUtil.getColumnIndexOrThrow(_cursor, "validation_data");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<ValidationResultEntity> _result = new ArrayList<ValidationResultEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final ValidationResultEntity _item;
+            final long _tmpValidationId;
+            _tmpValidationId = _cursor.getLong(_cursorIndexOfValidationId);
+            final long _tmpPhotoId;
+            _tmpPhotoId = _cursor.getLong(_cursorIndexOfPhotoId);
+            final String _tmpValidationType;
+            if (_cursor.isNull(_cursorIndexOfValidationType)) {
+              _tmpValidationType = null;
+            } else {
+              _tmpValidationType = _cursor.getString(_cursorIndexOfValidationType);
+            }
+            final boolean _tmpIsValid;
+            final int _tmp_1;
+            _tmp_1 = _cursor.getInt(_cursorIndexOfIsValid);
+            _tmpIsValid = _tmp_1 != 0;
+            final float _tmpConfidenceScore;
+            _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            final String _tmpValidationData;
+            if (_cursor.isNull(_cursorIndexOfValidationData)) {
+              _tmpValidationData = null;
+            } else {
+              _tmpValidationData = _cursor.getString(_cursorIndexOfValidationData);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp_2;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp_2 = null;
+            } else {
+              _tmp_2 = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp_2);
+            _item = new ValidationResultEntity(_tmpValidationId,_tmpPhotoId,_tmpValidationType,_tmpIsValid,_tmpConfidenceScore,_tmpValidationData,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -347,16 +507,13 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
   }
 
   @Override
-  public Object getValidationResultCountByStatus(final String status,
+  public Object getValidationResultCountByStatus(final boolean isValid,
       final Continuation<? super Integer> $completion) {
-    final String _sql = "SELECT COUNT(*) FROM validation_results WHERE validationStatus = ?";
+    final String _sql = "SELECT COUNT(*) FROM validation_results WHERE is_valid = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (status == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, status);
-    }
+    final int _tmp = isValid ? 1 : 0;
+    _statement.bindLong(_argIndex, _tmp);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
       @Override
@@ -364,6 +521,18 @@ public final class ValidationResultDao_Impl implements ValidationResultDao {
       public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp_1;
+            if (_cursor.isNull(0)) {
+              _tmp_1 = null;
+            } else {
+              _tmp_1 = _cursor.getInt(0);
+            }
+            _result = _tmp_1;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();

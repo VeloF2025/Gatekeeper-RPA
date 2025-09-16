@@ -10,19 +10,23 @@ import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
+import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import com.fibreflow.core.database.converters.DateConverters;
 import com.fibreflow.core.database.entities.AIConversationEntity;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
@@ -143,7 +147,7 @@ public final class AIConversationDao_Impl implements AIConversationDao {
       @Override
       @NonNull
       public String createQuery() {
-        final String _query = "DELETE FROM ai_conversations WHERE timestamp < ?";
+        final String _query = "DELETE FROM ai_conversations WHERE created_at < ?";
         return _query;
       }
     };
@@ -252,16 +256,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
   }
 
   @Override
-  public Object getConversationById(final String conversationId,
+  public Object getConversationById(final long conversationId,
       final Continuation<? super AIConversationEntity> $completion) {
-    final String _sql = "SELECT * FROM ai_conversations WHERE id = ?";
+    final String _sql = "SELECT * FROM ai_conversations WHERE conversation_id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (conversationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, conversationId);
-    }
+    _statement.bindLong(_argIndex, conversationId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<AIConversationEntity>() {
       @Override
@@ -269,6 +269,52 @@ public final class AIConversationDao_Impl implements AIConversationDao {
       public AIConversationEntity call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfConversationId = CursorUtil.getColumnIndexOrThrow(_cursor, "conversation_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfUserMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "user_message");
+          final int _cursorIndexOfAiResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_response");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final AIConversationEntity _result;
+          if (_cursor.moveToFirst()) {
+            final long _tmpConversationId;
+            _tmpConversationId = _cursor.getLong(_cursorIndexOfConversationId);
+            final Long _tmpInstallationId;
+            if (_cursor.isNull(_cursorIndexOfInstallationId)) {
+              _tmpInstallationId = null;
+            } else {
+              _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            }
+            final String _tmpUserMessage;
+            if (_cursor.isNull(_cursorIndexOfUserMessage)) {
+              _tmpUserMessage = null;
+            } else {
+              _tmpUserMessage = _cursor.getString(_cursorIndexOfUserMessage);
+            }
+            final String _tmpAiResponse;
+            if (_cursor.isNull(_cursorIndexOfAiResponse)) {
+              _tmpAiResponse = null;
+            } else {
+              _tmpAiResponse = _cursor.getString(_cursorIndexOfAiResponse);
+            }
+            final Float _tmpConfidenceScore;
+            if (_cursor.isNull(_cursorIndexOfConfidenceScore)) {
+              _tmpConfidenceScore = null;
+            } else {
+              _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp);
+            _result = new AIConversationEntity(_tmpConversationId,_tmpInstallationId,_tmpUserMessage,_tmpAiResponse,_tmpConfidenceScore,_tmpCreatedAt);
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -279,16 +325,12 @@ public final class AIConversationDao_Impl implements AIConversationDao {
   }
 
   @Override
-  public Object getConversationsByInstallation(final String installationId,
+  public Object getConversationsByInstallation(final long installationId,
       final Continuation<? super List<AIConversationEntity>> $completion) {
-    final String _sql = "SELECT * FROM ai_conversations WHERE installationId = ? ORDER BY timestamp ASC";
+    final String _sql = "SELECT * FROM ai_conversations WHERE installation_id = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<AIConversationEntity>>() {
       @Override
@@ -296,6 +338,52 @@ public final class AIConversationDao_Impl implements AIConversationDao {
       public List<AIConversationEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfConversationId = CursorUtil.getColumnIndexOrThrow(_cursor, "conversation_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfUserMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "user_message");
+          final int _cursorIndexOfAiResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_response");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<AIConversationEntity> _result = new ArrayList<AIConversationEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final AIConversationEntity _item;
+            final long _tmpConversationId;
+            _tmpConversationId = _cursor.getLong(_cursorIndexOfConversationId);
+            final Long _tmpInstallationId;
+            if (_cursor.isNull(_cursorIndexOfInstallationId)) {
+              _tmpInstallationId = null;
+            } else {
+              _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            }
+            final String _tmpUserMessage;
+            if (_cursor.isNull(_cursorIndexOfUserMessage)) {
+              _tmpUserMessage = null;
+            } else {
+              _tmpUserMessage = _cursor.getString(_cursorIndexOfUserMessage);
+            }
+            final String _tmpAiResponse;
+            if (_cursor.isNull(_cursorIndexOfAiResponse)) {
+              _tmpAiResponse = null;
+            } else {
+              _tmpAiResponse = _cursor.getString(_cursorIndexOfAiResponse);
+            }
+            final Float _tmpConfidenceScore;
+            if (_cursor.isNull(_cursorIndexOfConfidenceScore)) {
+              _tmpConfidenceScore = null;
+            } else {
+              _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp);
+            _item = new AIConversationEntity(_tmpConversationId,_tmpInstallationId,_tmpUserMessage,_tmpAiResponse,_tmpConfidenceScore,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -307,21 +395,63 @@ public final class AIConversationDao_Impl implements AIConversationDao {
 
   @Override
   public Flow<List<AIConversationEntity>> getConversationsByInstallationFlow(
-      final String installationId) {
-    final String _sql = "SELECT * FROM ai_conversations WHERE installationId = ? ORDER BY timestamp ASC";
+      final long installationId) {
+    final String _sql = "SELECT * FROM ai_conversations WHERE installation_id = ? ORDER BY created_at ASC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (installationId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, installationId);
-    }
+    _statement.bindLong(_argIndex, installationId);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"ai_conversations"}, new Callable<List<AIConversationEntity>>() {
       @Override
       @NonNull
       public List<AIConversationEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfConversationId = CursorUtil.getColumnIndexOrThrow(_cursor, "conversation_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfUserMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "user_message");
+          final int _cursorIndexOfAiResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_response");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<AIConversationEntity> _result = new ArrayList<AIConversationEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final AIConversationEntity _item;
+            final long _tmpConversationId;
+            _tmpConversationId = _cursor.getLong(_cursorIndexOfConversationId);
+            final Long _tmpInstallationId;
+            if (_cursor.isNull(_cursorIndexOfInstallationId)) {
+              _tmpInstallationId = null;
+            } else {
+              _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            }
+            final String _tmpUserMessage;
+            if (_cursor.isNull(_cursorIndexOfUserMessage)) {
+              _tmpUserMessage = null;
+            } else {
+              _tmpUserMessage = _cursor.getString(_cursorIndexOfUserMessage);
+            }
+            final String _tmpAiResponse;
+            if (_cursor.isNull(_cursorIndexOfAiResponse)) {
+              _tmpAiResponse = null;
+            } else {
+              _tmpAiResponse = _cursor.getString(_cursorIndexOfAiResponse);
+            }
+            final Float _tmpConfidenceScore;
+            if (_cursor.isNull(_cursorIndexOfConfidenceScore)) {
+              _tmpConfidenceScore = null;
+            } else {
+              _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp);
+            _item = new AIConversationEntity(_tmpConversationId,_tmpInstallationId,_tmpUserMessage,_tmpAiResponse,_tmpConfidenceScore,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -336,17 +466,11 @@ public final class AIConversationDao_Impl implements AIConversationDao {
   }
 
   @Override
-  public Object getRecentConversationsByTechnician(final String technicianId, final int limit,
+  public Object getRecentConversations(final int limit,
       final Continuation<? super List<AIConversationEntity>> $completion) {
-    final String _sql = "SELECT * FROM ai_conversations WHERE technicianId = ? ORDER BY timestamp DESC LIMIT ?";
-    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    final String _sql = "SELECT * FROM ai_conversations ORDER BY created_at DESC LIMIT ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
-    if (technicianId == null) {
-      _statement.bindNull(_argIndex);
-    } else {
-      _statement.bindString(_argIndex, technicianId);
-    }
-    _argIndex = 2;
     _statement.bindLong(_argIndex, limit);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<AIConversationEntity>>() {
@@ -355,6 +479,52 @@ public final class AIConversationDao_Impl implements AIConversationDao {
       public List<AIConversationEntity> call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final int _cursorIndexOfConversationId = CursorUtil.getColumnIndexOrThrow(_cursor, "conversation_id");
+          final int _cursorIndexOfInstallationId = CursorUtil.getColumnIndexOrThrow(_cursor, "installation_id");
+          final int _cursorIndexOfUserMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "user_message");
+          final int _cursorIndexOfAiResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "ai_response");
+          final int _cursorIndexOfConfidenceScore = CursorUtil.getColumnIndexOrThrow(_cursor, "confidence_score");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "created_at");
+          final List<AIConversationEntity> _result = new ArrayList<AIConversationEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final AIConversationEntity _item;
+            final long _tmpConversationId;
+            _tmpConversationId = _cursor.getLong(_cursorIndexOfConversationId);
+            final Long _tmpInstallationId;
+            if (_cursor.isNull(_cursorIndexOfInstallationId)) {
+              _tmpInstallationId = null;
+            } else {
+              _tmpInstallationId = _cursor.getLong(_cursorIndexOfInstallationId);
+            }
+            final String _tmpUserMessage;
+            if (_cursor.isNull(_cursorIndexOfUserMessage)) {
+              _tmpUserMessage = null;
+            } else {
+              _tmpUserMessage = _cursor.getString(_cursorIndexOfUserMessage);
+            }
+            final String _tmpAiResponse;
+            if (_cursor.isNull(_cursorIndexOfAiResponse)) {
+              _tmpAiResponse = null;
+            } else {
+              _tmpAiResponse = _cursor.getString(_cursorIndexOfAiResponse);
+            }
+            final Float _tmpConfidenceScore;
+            if (_cursor.isNull(_cursorIndexOfConfidenceScore)) {
+              _tmpConfidenceScore = null;
+            } else {
+              _tmpConfidenceScore = _cursor.getFloat(_cursorIndexOfConfidenceScore);
+            }
+            final Date _tmpCreatedAt;
+            final Long _tmp;
+            if (_cursor.isNull(_cursorIndexOfCreatedAt)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(_cursorIndexOfCreatedAt);
+            }
+            _tmpCreatedAt = __dateConverters.fromTimestamp(_tmp);
+            _item = new AIConversationEntity(_tmpConversationId,_tmpInstallationId,_tmpUserMessage,_tmpAiResponse,_tmpConfidenceScore,_tmpCreatedAt);
+            _result.add(_item);
+          }
           return _result;
         } finally {
           _cursor.close();

@@ -34,10 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.processing.Generated;
-import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import kotlinx.coroutines.flow.Flow;
@@ -2883,23 +2881,28 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object getAverageQualityByStep(
-      final Continuation<? super Map<String, Pair<Float, Integer>>> $completion) {
-    final String _sql = "\n"
-            + "        SELECT photo_type, AVG(validation_confidence) as avgQuality, COUNT(*) as photoCount\n"
-            + "        FROM photos\n"
-            + "        WHERE validation_confidence IS NOT NULL\n"
-            + "        GROUP BY photo_type\n"
-            + "        ORDER BY avgQuality DESC\n"
-            + "    ";
+  public Object getAveragePhotoQuality(final Continuation<? super Float> $completion) {
+    final String _sql = "SELECT AVG(validation_confidence) FROM photos WHERE validation_confidence IS NOT NULL";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Pair<Float, Integer>>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Float>() {
       @Override
-      @NonNull
-      public Map<String, Pair<Float, Integer>> call() throws Exception {
+      @Nullable
+      public Float call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Float _result;
+          if (_cursor.moveToFirst()) {
+            final Float _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getFloat(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
@@ -2910,23 +2913,28 @@ public final class PhotoDao_Impl implements PhotoDao {
   }
 
   @Override
-  public Object getValidationStatistics(
-      final Continuation<? super Map<String, Pair<Integer, Float>>> $completion) {
-    final String _sql = "\n"
-            + "        SELECT validation_status, COUNT(*) as count,\n"
-            + "               AVG(validation_confidence) as avgConfidence\n"
-            + "        FROM photos\n"
-            + "        WHERE validation_status IS NOT NULL\n"
-            + "        GROUP BY validation_status\n"
-            + "    ";
+  public Object getPassedValidationCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM photos WHERE validation_status = 'PASSED'";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
-    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Map<String, Pair<Integer, Float>>>() {
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
       @Override
       @NonNull
-      public Map<String, Pair<Integer, Float>> call() throws Exception {
+      public Integer call() throws Exception {
         final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
         try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
           return _result;
         } finally {
           _cursor.close();
