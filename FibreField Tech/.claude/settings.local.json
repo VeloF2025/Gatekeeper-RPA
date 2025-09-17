@@ -31,7 +31,10 @@
       "Bash(cd:*)",
       "Bash(gradle:*)",
       "Bash(dir:*)",
-      "Bash(java:*)"
+      "Bash(java:*)",
+      "Bash(.gradlew test:*)",
+      "Bash(.gradlew.bat:*)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []

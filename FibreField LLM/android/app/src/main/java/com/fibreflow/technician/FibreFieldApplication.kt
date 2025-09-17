@@ -388,15 +388,14 @@ class FibreFieldApplication : Application(), Configuration.Provider {
     /**
      * WorkManager configuration provider
      */
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .setMinimumLoggingLevel(
-                if (BuildConfig.DEBUG) android.util.Log.DEBUG 
+                if (BuildConfig.DEBUG) android.util.Log.DEBUG
                 else android.util.Log.INFO
             )
             .build()
-    }
     
     /**
      * Application lifecycle callbacks

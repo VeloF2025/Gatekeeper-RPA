@@ -160,6 +160,7 @@ dependencies {
     // Infrastructure modules
     implementation(project(":infrastructure:sync"))
     implementation(project(":infrastructure:offline"))
+    implementation(project(":infrastructure:security"))
     
     // Core Android libraries
     implementation(libs.androidx.core.ktx)
@@ -179,7 +180,9 @@ dependencies {
     
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
     kapt(libs.hilt.compiler)
+    kapt(libs.hilt.work.compiler)
     
     // Room Database
     implementation(libs.bundles.room)

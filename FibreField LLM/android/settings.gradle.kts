@@ -39,3 +39,4 @@ include(":feature:installation")
 // Infrastructure modules - system services
 include(":infrastructure:sync")
 include(":infrastructure:offline")
+include(":infrastructure:security")

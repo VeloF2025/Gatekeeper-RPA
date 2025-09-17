@@ -9,6 +9,7 @@ import com.fibreflow.core.ai.vision.ONTLightDetector
 import com.fibreflow.core.ai.vision.PhotoQualityAnalyzer
 import com.fibreflow.core.ai.vision.TextExtractor
 import com.fibreflow.core.ai.voice.SpeechRecognizer
+import com.fibreflow.core.ai.performance.AIPerformanceMonitor
 import com.fibreflow.core.ai.voice.TextToSpeech
 import com.fibreflow.core.ai.voice.VoiceCommandProcessor
 import dagger.Module
@@ -90,5 +91,41 @@ object AIModule {
     @Singleton
     fun provideSpeechRecognizer(@ApplicationContext context: Context, voiceCommandProcessor: VoiceCommandProcessor): SpeechRecognizer {
         return SpeechRecognizer(context, voiceCommandProcessor)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAIPerformanceMonitor(@ApplicationContext context: Context): AIPerformanceMonitor {
+        return AIPerformanceMonitor(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAIManager(
+        @ApplicationContext context: Context,
+        inferenceEngine: InferenceEngine,
+        llmManager: LLMManager,
+        performanceMonitor: AIPerformanceMonitor,
+        barcodeScanner: BarcodeScanner,
+        textExtractor: TextExtractor,
+        ontLightDetector: ONTLightDetector,
+        photoQualityAnalyzer: PhotoQualityAnalyzer,
+        voiceCommandProcessor: VoiceCommandProcessor,
+        textToSpeech: TextToSpeech,
+        speechRecognizer: SpeechRecognizer
+    ): AIManager {
+        return AIManager(
+            context = context,
+            inferenceEngine = inferenceEngine,
+            llmManager = llmManager,
+            performanceMonitor = performanceMonitor,
+            barcodeScanner = barcodeScanner,
+            textExtractor = textExtractor,
+            ontLightDetector = ontLightDetector,
+            photoQualityAnalyzer = photoQualityAnalyzer,
+            voiceCommandProcessor = voiceCommandProcessor,
+            textToSpeech = textToSpeech,
+            speechRecognizer = speechRecognizer
+        )
     }
 }
