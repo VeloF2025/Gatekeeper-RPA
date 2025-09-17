@@ -30,9 +30,44 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+
+            // Debug AI/ML settings
+            buildConfigField("String", "AI_MODEL_VERSION", "\"phi-3.5-mini-debug\"")
+            buildConfigField("boolean", "ENABLE_AI_OPTIMIZATIONS", "false")
+            buildConfigField("String", "API_BASE_URL", "\"https://dev-api.fibreflow.tech\"")
+            buildConfigField("boolean", "ENABLE_CRASHLYTICS", "false")
+            buildConfigField("boolean", "ENABLE_ANALYTICS", "false")
+            buildConfigField("boolean", "ENABLE_DETAILED_LOGGING", "true")
+            buildConfigField("String", "ENVIRONMENT", "\"development\"")
+        }
+
+        staging {
+            initWith(debug)
+            applicationIdSuffix = ".staging"
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = false
+
+            // Staging configuration
+            buildConfigField("String", "AI_MODEL_VERSION", "\"phi-3.5-mini-staging\"")
+            buildConfigField("boolean", "ENABLE_AI_OPTIMIZATIONS", "true")
+            buildConfigField("String", "API_BASE_URL", "\"https://staging-api.fibreflow.tech\"")
+            buildConfigField("boolean", "ENABLE_CRASHLYTICS", "true")
+            buildConfigField("boolean", "ENABLE_ANALYTICS", "true")
+            buildConfigField("boolean", "ENABLE_DETAILED_LOGGING", "true")
+            buildConfigField("String", "ENVIRONMENT", "\"staging\"")
+            buildConfigField("boolean", "ENABLE_TESTING_FEATURES", "true")
+
+            matchingFallbacks += listOf("release")
+        }
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,15 +76,12 @@ android {
             // AI/ML optimizations for release
             buildConfigField("String", "AI_MODEL_VERSION", "\"phi-3.5-mini-3.8b\"")
             buildConfigField("boolean", "ENABLE_AI_OPTIMIZATIONS", "true")
-        }
-
-        debug {
-            applicationIdSuffix = ".debug"
-            isDebuggable = true
-
-            // Debug AI/ML settings
-            buildConfigField("String", "AI_MODEL_VERSION", "\"phi-3.5-mini-debug\"")
-            buildConfigField("boolean", "ENABLE_AI_OPTIMIZATIONS", "false")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.fibreflow.tech\"")
+            buildConfigField("boolean", "ENABLE_CRASHLYTICS", "true")
+            buildConfigField("boolean", "ENABLE_ANALYTICS", "true")
+            buildConfigField("boolean", "ENABLE_DETAILED_LOGGING", "false")
+            buildConfigField("String", "ENVIRONMENT", "\"production\"")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_MONITORING", "true")
         }
     }
 
@@ -67,6 +99,60 @@ android {
             "-opt-in=androidx.camera.core.ExperimentalGetImage",
             "-opt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi"
         )
+    }
+
+    signingConfigs {
+        create("release") {
+            // These should be set via environment variables or secure properties
+            storeFile = file(System.getenv("KEYSTORE_PATH") ?: "keystore/fibreflow.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "store123"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "fibreflow"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "key123"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
+
+    flavorDimensions += listOf("environment", "tier")
+
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "FibreField Dev")
+            buildConfigField("boolean", "IS_DEV_BUILD", "true")
+        }
+
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            resValue("string", "app_name", "FibreField Staging")
+            buildConfigField("boolean", "IS_DEV_BUILD", "false")
+        }
+
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "FibreField")
+            buildConfigField("boolean", "IS_DEV_BUILD", "false")
+        }
+
+        create("standard") {
+            dimension = "tier"
+            resValue("string", "app_tier", "Standard")
+            buildConfigField("boolean", "IS_ENTERPRISE", "false")
+        }
+
+        create("enterprise") {
+            dimension = "tier"
+            applicationIdSuffix = ".enterprise"
+            versionNameSuffix = "-enterprise"
+            resValue("string", "app_tier", "Enterprise")
+            buildConfigField("boolean", "IS_ENTERPRISE", "true")
+        }
     }
 
     buildFeatures {
@@ -227,4 +313,118 @@ dependencies {
 
     // Memory monitoring
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.13")
+}
+
+// Deployment tasks
+tasks.register("deployDevelopment") {
+    group = "deployment"
+    description = "Deploy to development environment"
+    dependsOn("assembleDevDebug")
+    doLast {
+        println("Deploying to development environment...")
+        // Add deployment logic here
+    }
+}
+
+tasks.register("deployStaging") {
+    group = "deployment"
+    description = "Deploy to staging environment"
+    dependsOn("assembleStagingRelease")
+    doLast {
+        println("Deploying to staging environment...")
+        // Add deployment logic here
+    }
+}
+
+tasks.register("deployProduction") {
+    group = "deployment"
+    description = "Deploy to production environment"
+    dependsOn("bundleProdRelease")
+    doLast {
+        println("Deploying to production environment...")
+        // Add deployment logic here
+    }
+}
+
+tasks.register("runAllTests") {
+    group = "verification"
+    description = "Run all tests including unit, integration, and UI tests"
+    dependsOn("test")
+    dependsOn("connectedCheck")
+    dependsOn("connectedAndroidTest")
+}
+
+tasks.register("generateTestReport") {
+    group = "reporting"
+    description = "Generate comprehensive test coverage report"
+    dependsOn("testDebugUnitTestCoverage")
+    dependsOn("connectedCheck")
+    doLast {
+        println("Generating comprehensive test report...")
+        // Add report generation logic here
+    }
+}
+
+tasks.register("securityScan") {
+    group = "security"
+    description = "Run security vulnerability scan"
+    dependsOn("assembleDebug")
+    doLast {
+        println("Running security scan...")
+        // Add security scanning logic here
+    }
+}
+
+tasks.register("performanceTest") {
+    group = "verification"
+    description = "Run performance tests"
+    dependsOn("assembleDebug")
+    doLast {
+        println("Running performance tests...")
+        // Add performance testing logic here
+    }
+}
+
+// Custom build info task
+tasks.register("buildInfo") {
+    group = "build"
+    description = "Display build information"
+    doLast {
+        println("=== Build Information ===")
+        println("Application ID: ${android.defaultConfig.applicationId}")
+        println("Version Code: ${android.defaultConfig.versionCode}")
+        println("Version Name: ${android.defaultConfig.versionName}")
+        println("Build Time: ${java.time.Instant.now()}")
+        println("Build Host: ${System.getProperty("user.name")}")
+        println("Git Branch: ${providers.exec { commandLine("git", "branch", "--show-current") }.standardOutput.asText.get().trim()}")
+        println("Git Commit: ${providers.exec { commandLine("git", "rev-parse", "HEAD") }.standardOutput.asText.get().trim()}")
+    }
+}
+
+// Environment-specific tasks
+tasks.register("developmentEnvironmentCheck") {
+    group = "verification"
+    description = "Check development environment configuration"
+    doLast {
+        println("Checking development environment...")
+        // Add environment validation logic here
+    }
+}
+
+tasks.register("stagingEnvironmentCheck") {
+    group = "verification"
+    description = "Check staging environment configuration"
+    doLast {
+        println("Checking staging environment...")
+        // Add environment validation logic here
+    }
+}
+
+tasks.register("productionEnvironmentCheck") {
+    group = "verification"
+    description = "Check production environment configuration"
+    doLast {
+        println("Checking production environment...")
+        // Add environment validation logic here
+    }
 }
