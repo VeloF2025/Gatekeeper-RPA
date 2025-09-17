@@ -3,9 +3,11 @@ package com.fibreflow.core.common
 import android.graphics.Bitmap
 import android.graphics.Color
 import com.fibreflow.core.database.entities.DropEntity
-import com.fibreflow.domain.drops.entities.DropStatus
+import com.fibreflow.core.database.entities.DropStatus
 import com.fibreflow.core.network.models.request.LoginRequest
 import com.fibreflow.core.network.models.response.AuthResponse
+import com.fibreflow.core.network.models.response.UserInfo
+import java.util.Date
 
 /**
  * Test utilities for creating test data and common test operations
@@ -14,28 +16,26 @@ object TestUtils {
 
     // Test data generators
     fun createTestDrop(
-        id: Long = 1L,
-        projectId: Long = 1L,
+        dropNumber: String = "DROP-001",
+        projectId: Int = 1,
         customerName: String = "Test Customer",
         address: String = "123 Test Street, Cape Town",
         latitude: Double = -33.9249,
         longitude: Double = 18.4241,
         status: DropStatus = DropStatus.AVAILABLE,
-        estimatedInstallTime: Int = 120,
         notes: String = "Test drop for unit testing",
         needsSync: Boolean = false,
-        createdAt: Long = System.currentTimeMillis(),
-        updatedAt: Long = System.currentTimeMillis()
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
     ): DropEntity {
         return DropEntity(
-            id = id,
+            dropNumber = dropNumber,
             projectId = projectId,
-            customerName = customerName,
-            address = address,
             latitude = latitude,
             longitude = longitude,
+            address = address,
             status = status,
-            estimatedInstallTime = estimatedInstallTime,
+            customerName = customerName,
             notes = notes,
             needsSync = needsSync,
             createdAt = createdAt,
@@ -46,14 +46,34 @@ object TestUtils {
     fun createTestAuthResponse(
         accessToken: String = "test-access-token-123",
         refreshToken: String = "test-refresh-token-456",
-        expiresIn: Int = 3600,
-        tokenType: String = "Bearer"
+        expiresIn: Long = 3600L,
+        tokenType: String = "Bearer",
+        user: UserInfo = createTestUserInfo()
     ): AuthResponse {
         return AuthResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
             expiresIn = expiresIn,
-            tokenType = tokenType
+            tokenType = tokenType,
+            user = user
+        )
+    }
+
+    fun createTestUserInfo(
+        id: String = "user-123",
+        username: String = "testuser",
+        email: String = "test@example.com",
+        fullName: String = "Test User",
+        role: String = "technician",
+        isActive: Boolean = true
+    ): UserInfo {
+        return UserInfo(
+            id = id,
+            username = username,
+            email = email,
+            fullName = fullName,
+            role = role,
+            isActive = isActive
         )
     }
 

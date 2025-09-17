@@ -10,7 +10,8 @@
       "Bash(gradle test:*)",
       "Bash(curl:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

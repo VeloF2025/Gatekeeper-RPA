@@ -1,0 +1,29 @@
+2025-09-16 23:21:33,891 - __main__ - INFO - Database initialized successfully
+2025-09-16 23:21:33,899 - __main__ - INFO - Loaded 8 agents from configuration
+2025-09-16 23:21:33,908 - implementation_tracker_agent - INFO - Database initialized successfully
+2025-09-16 23:21:33,942 - implementation_tracker_agent - INFO - Loaded 10 implementation tasks
+2025-09-16 23:21:33,969 - implementation_tracker_agent - INFO - Initialized 8 developers
+2025-09-16 23:21:33,969 - __main__ - INFO - Connected to implementation tracker
+2025-09-16 23:21:33,969 - __main__ - INFO - TDD Parallel Execution System initialized
+2025-09-16 23:21:33,970 - __main__ - INFO - Starting TDD Parallel Execution System
+2025-09-16 23:21:33,970 - __main__ - INFO - Starting parallel TDD execution for 1 features
+2025-09-16 23:21:33,974 - __main__ - INFO - Created test specification: test_database_schema,networking_layer,security_framework_1758057693
+2025-09-16 23:21:33,976 - __main__ - INFO - Created test specification: test_database_schema,networking_layer,security_framework_1758057693
+2025-09-16 23:21:35,488 - __main__ - INFO - Created git worktree: C:\Jarvis\AI Workspace\FibreField Tech\FibreFieldTech-Android\git_worktrees\database_schema,networking_layer,security_framework\worktree_database_schema,networking_layer,security_framework_1758057693
+2025-09-16 23:21:35,488 - __main__ - ERROR - Error in TDD system: WorktreeTask.__init__() missing 1 required positional argument: 'assigned_agent'
+2025-09-16 23:21:35,488 - __main__ - INFO - Cleaning up git worktrees...
+2025-09-16 23:22:32,432 - __main__ - INFO - Database initialized successfully
+2025-09-16 23:22:32,441 - __main__ - INFO - Loaded 8 agents from configuration
+2025-09-16 23:22:32,446 - implementation_tracker_agent - INFO - Database initialized successfully
+2025-09-16 23:22:32,483 - implementation_tracker_agent - INFO - Loaded 10 implementation tasks
+2025-09-16 23:22:32,511 - implementation_tracker_agent - INFO - Initialized 8 developers
+2025-09-16 23:22:32,511 - __main__ - INFO - Connected to implementation tracker
+2025-09-16 23:22:32,511 - __main__ - INFO - TDD Parallel Execution System initialized
+2025-09-16 23:22:32,512 - __main__ - INFO - Starting TDD Parallel Execution System
+2025-09-16 23:22:32,512 - __main__ - INFO - Starting parallel TDD execution for 1 features
+2025-09-16 23:22:32,515 - __main__ - INFO - Created test specification: test_database_schema_1758057752
+2025-09-16 23:22:32,518 - __main__ - INFO - Created test specification: test_database_schema_1758057752
+2025-09-16 23:22:33,723 - __main__ - INFO - Created git worktree: C:\Jarvis\AI Workspace\FibreField Tech\FibreFieldTech-Android\git_worktrees\database_schema\worktree_database_schema_1758057752
+2025-09-16 23:22:33,724 - __main__ - ERROR - Error in TDD system: Object of type TaskType is not JSON serializable
+2025-09-16 23:22:33,724 - __main__ - INFO - Cleaning up git worktrees...
+2025-09-16 23:22:35,208 - __main__ - ERROR - Failed to cleanup worktree worktree_database_schema_1758057752: Command '['git', 'worktree', 'remove', 'C:\\Jarvis\\AI Workspace\\FibreField Tech\\FibreFieldTech-Android\\git_worktrees\\database_schema\\worktree_database_schema_1758057752']' returned non-zero exit status 255.
