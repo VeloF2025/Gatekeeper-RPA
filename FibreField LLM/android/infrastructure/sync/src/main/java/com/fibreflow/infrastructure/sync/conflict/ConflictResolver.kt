@@ -209,14 +209,14 @@ class ConflictResolver @Inject constructor() {
      * Resolve sync change conflict
      */
     suspend fun resolveChangeConflict(
-        conflict: com.fibreflow.infrastructure.sync.SyncConflict
-    ): Result<com.fibreflow.infrastructure.sync.SyncChange> = withContext(Dispatchers.Default) {
+        conflict: com.fibreflow.infrastructure.sync.models.SyncConflict
+    ): Result<com.fibreflow.infrastructure.sync.models.SyncChange> = withContext(Dispatchers.Default) {
         try {
             Log.d(TAG, "Resolving sync change conflict for entity: ${conflict.entityType} ${conflict.entityId}")
             
             // For sync changes, we typically use timestamp-based resolution
-            val localChange = conflict.localData as com.fibreflow.infrastructure.sync.SyncChange
-            val remoteChange = conflict.remoteData as com.fibreflow.infrastructure.sync.SyncChange
+            val localChange = conflict.localData as com.fibreflow.infrastructure.sync.models.SyncChange
+            val remoteChange = conflict.remoteData as com.fibreflow.infrastructure.sync.models.SyncChange
             
             val resolvedChange = if (localChange.timestamp > remoteChange.timestamp) {
                 localChange

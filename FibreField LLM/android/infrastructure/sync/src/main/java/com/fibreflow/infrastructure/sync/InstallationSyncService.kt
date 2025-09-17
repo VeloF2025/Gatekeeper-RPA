@@ -4,6 +4,8 @@ import com.fibreflow.core.common.result.Result
 import com.fibreflow.core.network.api.InstallationAPI
 import com.fibreflow.domain.drops.entities.Drop
 import com.fibreflow.feature.installation.workflow.InstallationSession
+import com.fibreflow.infrastructure.sync.data.InstallationCompletionData
+import com.fibreflow.infrastructure.sync.data.InstallationFailureData
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -55,9 +57,9 @@ class InstallationSyncService @Inject constructor(
                 Result.Success(Unit)
             } else {
                 // Add to offline queue for retry
-                Timber.w(syncResult.exception, "Failed to sync completion, queuing for retry")
+                Timber.w((syncResult as com.fibreflow.core.common.result.Result.Error).exception, "Failed to sync completion, queuing for retry")
                 offlineQueue.addToQueue(completionData)
-                Result.Error(syncResult.exception)
+                syncResult
             }
 
         } catch (e: Exception) {
@@ -95,9 +97,9 @@ class InstallationSyncService @Inject constructor(
                 Timber.d("Installation failure synced successfully for drop: ${drop.dropNumber}")
                 Result.Success(Unit)
             } else {
-                Timber.w(syncResult.exception, "Failed to sync failure, queuing for retry")
+                Timber.w((syncResult as com.fibreflow.core.common.result.Result.Error).exception, "Failed to sync failure, queuing for retry")
                 offlineQueue.addToQueue(failureData)
-                Result.Error(syncResult.exception)
+                syncResult
             }
 
         } catch (e: Exception) {
@@ -122,8 +124,14 @@ class InstallationSyncService @Inject constructor(
 
             for (item in queuedItems) {
                 val retryResult = when (item) {
-                    is InstallationCompletionData -> performSync(item.copy(syncAttempt = item.syncAttempt + 1))
-                    is InstallationFailureData -> performFailureSync(item.copy(syncAttempt = item.syncAttempt + 1))
+                    is InstallationCompletionData -> {
+                        val updatedItem = item.copy(syncAttempt = item.syncAttempt + 1)
+                        performSync(updatedItem)
+                    }
+                    is InstallationFailureData -> {
+                        val updatedItem = item.copy(syncAttempt = item.syncAttempt + 1)
+                        performFailureSync(updatedItem)
+                    }
                     else -> continue
                 }
 
@@ -132,8 +140,12 @@ class InstallationSyncService @Inject constructor(
                     successCount++
                 } else {
                     failureCount++
-                    // Update retry count
-                    offlineQueue.updateRetryCount(item, item.syncAttempt + 1)
+                    // Update retry count based on item type
+                    when (item) {
+                        is InstallationCompletionData -> offlineQueue.updateRetryCount(item, item.syncAttempt + 1)
+                        is InstallationFailureData -> offlineQueue.updateRetryCount(item, item.syncAttempt + 1)
+                        else -> Unit // Do nothing for unknown types
+                    }
                 }
             }
 

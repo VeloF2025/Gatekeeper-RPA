@@ -11,7 +11,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.fibreflow.core.common.result.Result
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,16 +18,14 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Camera manager for photo capture during installation workflow
  * Handles CameraX integration with real-time validation feedback
  */
-@Singleton
-class CameraManager @Inject constructor(
-    @ApplicationContext private val context: Context
+@OptIn(ExperimentalGetImage::class)
+class CameraManager(
+    private val context: Context
 ) {
 
     private var cameraProvider: ProcessCameraProvider? = null
@@ -220,6 +217,7 @@ class CameraManager @Inject constructor(
     /**
      * Convert ImageProxy to Bitmap for analysis
      */
+    @OptIn(ExperimentalGetImage::class)
     private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
         val image = imageProxy.image ?: throw IllegalStateException("Image is null")
 

@@ -6,17 +6,14 @@ import com.fibreflow.domain.drops.entities.DropStatus
 import com.fibreflow.feature.installation.workflow.InstallationSession
 import com.fibreflow.feature.installation.workflow.InstallationSessionManager
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manages installation completion process
  * Handles final validations, status updates, and completion workflows
  */
-@Singleton
-class CompletionManager @Inject constructor(
-    private val sessionManager: InstallationSessionManager,
-    private val syncService: InstallationSyncService
+class CompletionManager(
+    private val sessionManager: InstallationSessionManager = InstallationSessionManager(),
+    private val syncService: InstallationSyncService = InstallationSyncService()
 ) {
 
     /**

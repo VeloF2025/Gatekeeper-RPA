@@ -41,11 +41,11 @@ class SyncManager @Inject constructor(
     private val managerScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // Sync state
-    private val _syncState = MutableStateFlow(models.SyncState.IDLE)
-    val syncState: StateFlow<models.SyncState> = _syncState.asStateFlow()
+    private val _syncState = MutableStateFlow(SyncState.IDLE)
+    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
-    private val _syncProgress = MutableStateFlow(models.SyncProgress())
-    val syncProgress: StateFlow<models.SyncProgress> = _syncProgress.asStateFlow()
+    private val _syncProgress = MutableStateFlow(SyncProgress())
+    val syncProgress: StateFlow<SyncProgress> = _syncProgress.asStateFlow()
 
     // Sync job
     private var syncJob: Job? = null
@@ -98,8 +98,8 @@ class SyncManager @Inject constructor(
 
             stopNetworkMonitoring()
 
-            _syncState.value = models.SyncState.IDLE
-            _syncProgress.value = models.SyncProgress()
+            _syncState.value = SyncState.IDLE
+            _syncProgress.value = SyncProgress()
 
             Log.i(TAG, "Automatic synchronization stopped")
             Result.Success(Unit)
@@ -113,7 +113,7 @@ class SyncManager @Inject constructor(
     /**
      * Perform immediate synchronization
      */
-    suspend fun performImmediateSync(): Result<models.SyncResult> = withContext(Dispatchers.IO) {
+    suspend fun performImmediateSync(): Result<SyncResult> = withContext(Dispatchers.IO) {
         try {
             if (!isNetworkAvailable()) {
                 return@withContext Result.Error(RuntimeException("Network not available"))
@@ -154,6 +154,7 @@ class SyncManager @Inject constructor(
                 SyncDataType.PHOTOS -> syncPhotos()
                 SyncDataType.DROPS -> syncDrops()
                 SyncDataType.ALL -> performFullSync()
+                else -> Result.Error(RuntimeException("Unsupported data type: $dataType"))
             }
 
         } catch (e: Exception) {
@@ -179,8 +180,8 @@ class SyncManager @Inject constructor(
     // Private implementation methods
 
     private suspend fun performFullSync(): Result<SyncResult> {
-        _syncState.value = models.SyncState.SYNCING
-        _syncProgress.value = models.SyncProgress(totalItems = 0, completedItems = 0)
+        _syncState.value = SyncState.SYNCING
+        _syncProgress.value = SyncProgress(totalItems = 0, completedItems = 0)
 
         try {
             Log.i(TAG, "Starting full synchronization")
@@ -192,9 +193,9 @@ class SyncManager @Inject constructor(
             val installationResult = syncInstallations()
             val photoResult = syncPhotos()
 
-            val totalSynced = (dropResult as? Result.Success)?.data?.itemsSynced ?: 0 +
-                             (installationResult as? Result.Success)?.data?.itemsSynced ?: 0 +
-                             (photoResult as? Result.Success)?.data?.itemsSynced ?: 0
+            val totalSynced = ((dropResult as? Result.Success)?.data?.syncedItems ?: 0) +
+                             ((installationResult as? Result.Success)?.data?.syncedItems ?: 0) +
+                             ((photoResult as? Result.Success)?.data?.syncedItems ?: 0)
 
             val hasErrors = dropResult is Result.Error ||
                            installationResult is Result.Error ||
@@ -204,20 +205,21 @@ class SyncManager @Inject constructor(
 
             val result = SyncResult(
                 success = !hasErrors,
-                itemsSynced = totalSynced,
-                syncTimeMs = syncTime,
-                errors = collectErrors(dropResult, installationResult, photoResult)
+                syncedItems = totalSynced,
+                failedItems = collectErrors(dropResult, installationResult, photoResult).size,
+                conflicts = 0,
+                durationMs = syncTime
             )
 
-            _syncState.value = if (hasErrors) models.SyncState.ERROR else models.SyncState.IDLE
-            _syncProgress.value = models.SyncProgress(totalItems = totalSynced, completedItems = totalSynced)
+            _syncState.value = if (hasErrors) SyncState.ERROR else SyncState.IDLE
+            _syncProgress.value = SyncProgress(totalItems = totalSynced, completedItems = totalSynced)
 
             Log.i(TAG, "Full synchronization completed in ${syncTime}ms, synced $totalSynced items")
             Result.Success(result)
 
         } catch (e: Exception) {
             Log.e(TAG, "Full synchronization failed", e)
-            _syncState.value = models.SyncState.ERROR
+            _syncState.value = SyncState.ERROR
             Result.Error(e)
         }
     }
@@ -227,7 +229,7 @@ class SyncManager @Inject constructor(
             val pendingInstallations = installationDao.getInstallationsNeedingSync()
 
             if (pendingInstallations.isEmpty()) {
-                return Result.Success(SyncResult(success = true, itemsSynced = 0, syncTimeMs = 0))
+                return Result.Success(SyncResult(success = true, syncedItems = 0, failedItems = 0, conflicts = 0, durationMs = 0))
             }
 
             Log.d(TAG, "Syncing ${pendingInstallations.size} installations")
@@ -240,14 +242,14 @@ class SyncManager @Inject constructor(
                 // Simulate API sync - in real implementation would call actual API
                 delay(100) // Simulate network delay
 
-                val syncedIds = batch.map { it.id }
+                val syncedIds = batch.map { it.installationId }
                 installationDao.markInstallationsSynced(syncedIds)
 
                 totalSynced += batch.size
                 _syncProgress.value = _syncProgress.value.copy(completedItems = _syncProgress.value.completedItems + batch.size)
             }
 
-            Result.Success(SyncResult(success = true, itemsSynced = totalSynced, syncTimeMs = 0))
+            Result.Success(SyncResult(success = true, syncedItems = totalSynced, failedItems = 0, conflicts = 0, durationMs = 0))
 
         } catch (e: Exception) {
             Log.e(TAG, "Installation sync failed", e)
@@ -260,7 +262,7 @@ class SyncManager @Inject constructor(
             val pendingPhotos = photoDao.getPhotosNeedingSync()
 
             if (pendingPhotos.isEmpty()) {
-                return Result.Success(SyncResult(success = true, itemsSynced = 0, syncTimeMs = 0))
+                return Result.Success(SyncResult(success = true, syncedItems = 0, failedItems = 0, conflicts = 0, durationMs = 0))
             }
 
             Log.d(TAG, "Syncing ${pendingPhotos.size} photos")
@@ -273,14 +275,14 @@ class SyncManager @Inject constructor(
                 // Simulate API sync
                 delay(150) // Photos take longer to upload
 
-                val syncedIds = batch.map { it.id }
+                val syncedIds = batch.map { it.photoId }
                 photoDao.markPhotosSynced(syncedIds)
 
                 totalSynced += batch.size
                 _syncProgress.value = _syncProgress.value.copy(completedItems = _syncProgress.value.completedItems + batch.size)
             }
 
-            Result.Success(SyncResult(success = true, itemsSynced = totalSynced, syncTimeMs = 0))
+            Result.Success(SyncResult(success = true, syncedItems = totalSynced, failedItems = 0, conflicts = 0, durationMs = 0))
 
         } catch (e: Exception) {
             Log.e(TAG, "Photo sync failed", e)
@@ -293,7 +295,7 @@ class SyncManager @Inject constructor(
             val pendingDrops = dropDao.getDropsNeedingSync()
 
             if (pendingDrops.isEmpty()) {
-                return Result.Success(SyncResult(success = true, itemsSynced = 0, syncTimeMs = 0))
+                return Result.Success(SyncResult(success = true, syncedItems = 0, failedItems = 0, conflicts = 0, durationMs = 0))
             }
 
             Log.d(TAG, "Syncing ${pendingDrops.size} drops")
@@ -306,14 +308,14 @@ class SyncManager @Inject constructor(
                 // Simulate API sync
                 delay(50) // Drops sync quickly
 
-                val syncedIds = batch.map { it.id }
+                val syncedIds = batch.map { it.dropNumber }
                 dropDao.markDropsSynced(syncedIds)
 
                 totalSynced += batch.size
                 _syncProgress.value = _syncProgress.value.copy(completedItems = _syncProgress.value.completedItems + batch.size)
             }
 
-            Result.Success(SyncResult(success = true, itemsSynced = totalSynced, syncTimeMs = 0))
+            Result.Success(SyncResult(success = true, syncedItems = totalSynced, failedItems = 0, conflicts = 0, durationMs = 0))
 
         } catch (e: Exception) {
             Log.e(TAG, "Drop sync failed", e)

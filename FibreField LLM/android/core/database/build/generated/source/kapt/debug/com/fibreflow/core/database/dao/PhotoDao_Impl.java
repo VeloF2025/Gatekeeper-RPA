@@ -8,6 +8,7 @@ import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
+import androidx.room.RoomDatabaseKt;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
@@ -466,6 +467,12 @@ public final class PhotoDao_Impl implements PhotoDao {
         }
       }
     }, $completion);
+  }
+
+  @Override
+  public Object insertOrUpdatePhoto(final PhotoEntity photo,
+      final Continuation<? super Unit> $completion) {
+    return RoomDatabaseKt.withTransaction(__db, (__cont) -> PhotoDao.DefaultImpls.insertOrUpdatePhoto(PhotoDao_Impl.this, photo, __cont), $completion);
   }
 
   @Override

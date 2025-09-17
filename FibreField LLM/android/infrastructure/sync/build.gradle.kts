@@ -28,6 +28,9 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:authentication"))
+    implementation(project(":domain:drops"))
+    implementation(project(":domain:authentication"))
+    implementation(project(":feature:installation"))
 
     // AndroidX
     implementation(libs.androidx.core.ktx)

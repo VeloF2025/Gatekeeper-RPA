@@ -53,4 +53,13 @@ class ConflictResolver @Inject constructor(
     fun getConflictStatistics(): com.fibreflow.infrastructure.sync.conflict.ConflictStatistics {
         return internalResolver.getConflictStatistics()
     }
+
+    /**
+     * Resolve sync change conflict
+     */
+    suspend fun resolveChangeConflict(
+        conflict: com.fibreflow.infrastructure.sync.models.SyncConflict
+    ): Result<com.fibreflow.infrastructure.sync.models.SyncChange> {
+        return internalResolver.resolveChangeConflict(conflict)
+    }
 }

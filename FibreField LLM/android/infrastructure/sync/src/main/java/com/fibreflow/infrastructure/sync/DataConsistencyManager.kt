@@ -272,7 +272,7 @@ class DataConsistencyManager @Inject constructor(
                         field = "drop_number",
                         value = duplicate.dropNumber,
                         count = duplicate.count,
-                        recordIds = duplicate.ids
+                        recordIds = duplicate.ids.split(",")
                     )
                 )
             }
@@ -292,7 +292,7 @@ class DataConsistencyManager @Inject constructor(
                 failures.add(
                     ChecksumFailure(
                         table = "installation_photos",
-                        recordId = photo.id.toString(),
+                        recordId = photo.photoId.toString(),
                         expectedChecksum = "N/A",
                         actualChecksum = "Missing",
                         reason = "Checksum not calculated"
@@ -309,7 +309,7 @@ class DataConsistencyManager @Inject constructor(
 
     private suspend fun validateDropIntegrity(dropNumber: String): EntityValidationResult {
         return withContext(Dispatchers.IO) {
-            val drop = database.dropDao().getDropByNumber(dropNumber)
+            val drop = database.dropDao().getDropById(dropNumber)
 
             if (drop == null) {
                 return@withContext EntityValidationResult(
@@ -330,7 +330,7 @@ class DataConsistencyManager @Inject constructor(
             }
 
             // Validate status transitions
-            if (!isValidDropStatus(drop.status)) {
+            if (!isValidDropStatus(drop.status.name)) {
                 issues.add("Invalid drop status: ${drop.status}")
             }
 
@@ -357,8 +357,8 @@ class DataConsistencyManager @Inject constructor(
             val issues = mutableListOf<String>()
 
             // Validate timestamps
-            if (installation.completedAt != null &&
-                installation.completedAt!! < installation.startedAt) {
+            if (installation.endTime != null &&
+                installation.endTime!! < installation.startTime) {
                 issues.add("Completion time is before start time")
             }
 
@@ -479,8 +479,8 @@ class DataConsistencyManager @Inject constructor(
                         val file = java.io.File(photo.filePath)
                         if (file.exists()) {
                             val checksum = generateChecksum(file.readText())
-                            database.photoDao().updatePhotoChecksum(photo.id, checksum)
-                            updated.add("Updated checksum for photo ${photo.id}")
+                            database.photoDao().updatePhotoChecksum(photo.photoId, checksum)
+                            updated.add("Updated checksum for photo ${photo.photoId}")
                         }
                     }
                 }

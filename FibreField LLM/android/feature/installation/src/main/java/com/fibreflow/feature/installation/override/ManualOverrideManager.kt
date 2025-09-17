@@ -4,12 +4,11 @@ import android.util.Log
 import com.fibreflow.core.ai.pipeline.ValidationOutcome
 import com.fibreflow.core.ai.pipeline.ValidationStatus
 import com.fibreflow.core.common.result.Result
-import dagger.hilt.android.scopes.ViewModelScoped
+import com.fibreflow.core.ai.feedback.FeedbackCollector
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import javax.inject.Inject
 
 /**
  * Manual Override Manager for FibreField
@@ -22,9 +21,8 @@ import javax.inject.Inject
  *
  * Ensures <10% override rate target through continuous improvement.
  */
-@ViewModelScoped
-class ManualOverrideManager @Inject constructor(
-    private val feedbackCollector: FeedbackCollector
+class ManualOverrideManager(
+    private val feedbackCollector: FeedbackCollector = FeedbackCollector()
 ) {
 
     companion object {
@@ -151,7 +149,7 @@ class ManualOverrideManager @Inject constructor(
                 commonReasons.forEach { reason ->
                     suggestions.add(ImprovementSuggestion(
                         type = SuggestionType.PHOTO_IMPROVEMENT,
-                        title = "Improve photo quality for ${reason.category}",
+                        title = "Improve photo quality for ${reason.reason}",
                         description = "Address ${reason.reason} issues to reduce overrides",
                         impact = SuggestionImpact.HIGH
                     ))

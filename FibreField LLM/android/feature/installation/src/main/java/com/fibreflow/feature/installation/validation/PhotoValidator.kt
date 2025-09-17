@@ -5,16 +5,13 @@ import com.fibreflow.core.common.result.Result
 import com.fibreflow.core.database.entities.PhotoEntity
 import com.fibreflow.core.database.entities.ValidationStatus
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Photo validator for installation workflow
  * Validates captured photos against quality requirements and AI analysis
  */
-@Singleton
-class PhotoValidator @Inject constructor(
-    private val qualityAnalyzer: PhotoQualityAnalyzer
+class PhotoValidator(
+    private val qualityAnalyzer: PhotoQualityAnalyzer = PhotoQualityAnalyzer()
 ) {
 
     /**
@@ -46,7 +43,7 @@ class PhotoValidator @Inject constructor(
             val overallValid = qualityValid && aiValidationResult.isValid
             val validationStatus = when {
                 !overallValid -> ValidationStatus.FAILED
-                qualityAnalysis.confidence < 0.8f -> ValidationStatus.REQUIRES_REVIEW
+                qualityAnalysis.confidence < 0.8f -> ValidationStatus.MANUAL_REVIEW
                 else -> ValidationStatus.PASSED
             }
 

@@ -1,19 +1,16 @@
-package com.fibreflow.core.performance
+package com.fibreflow.feature.installation.performance
 
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Camera Performance Monitor for tracking camera-related operations
  * Monitors photo capture, processing, and upload performance
  */
-@Singleton
-class CameraPerformance @Inject constructor(
-    private val performanceMonitor: PerformanceMonitor,
-    private val uiPerformanceMonitor: UIPerformanceMonitor
+class CameraPerformance(
+    private val performanceMonitor: PerformanceMonitor = PerformanceMonitor(),
+    private val uiPerformanceMonitor: UIPerformanceMonitor = UIPerformanceMonitor()
 ) {
 
     companion object {
@@ -25,7 +22,7 @@ class CameraPerformance @Inject constructor(
         private const val PHOTO_SIZE_CRITICAL_MB = 10.0f
     }
 
-    private val cameraMetrics = ConcurrentHashMap<String, CameraOperationMetrics>()
+    private val cameraMetrics = ConcurrentHashMap<String, Any>()
     private val photoProcessingMetrics = ConcurrentHashMap<String, PhotoProcessingMetrics>()
 
     private val totalCaptures = AtomicLong(0)

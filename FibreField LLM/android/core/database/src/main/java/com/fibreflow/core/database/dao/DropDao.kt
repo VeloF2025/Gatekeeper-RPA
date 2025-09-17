@@ -1,6 +1,7 @@
 package com.fibreflow.core.database.dao
 
 import androidx.room.*
+import androidx.room.Transaction
 import com.fibreflow.core.database.entities.DropEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -244,6 +245,19 @@ interface DropDao {
      */
     @Query("DELETE FROM drops WHERE drop_number = :dropNumber")
     suspend fun deleteDropByNumber(dropNumber: String): Int
+
+    /**
+     * Insert or update drop (convenience method)
+     */
+    @Transaction
+    suspend fun insertOrUpdateDrop(drop: DropEntity) {
+        val existing = getDropById(drop.dropNumber)
+        if (existing != null) {
+            updateDrop(drop)
+        } else {
+            insertDrop(drop)
+        }
+    }
 
     /**
      * Get duplicate drops (same drop number)

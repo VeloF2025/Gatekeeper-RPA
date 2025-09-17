@@ -1,7 +1,7 @@
 # 🟢 WORKING: Version catalog for consistent dependency management across all modules
 [versions]
 # Core versions
-kotlin = "1.9.21"
+kotlin = "1.9.22"
 android-gradle-plugin = "8.13.0"
 compose-bom = "2024.02.00"
 compose-compiler = "1.5.8"

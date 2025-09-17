@@ -3,8 +3,6 @@ package com.fibreflow.feature.installation.workflow
 import com.fibreflow.core.common.result.Result
 import com.fibreflow.domain.drops.entities.Drop
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Installation session data class
@@ -96,8 +94,7 @@ enum class SessionStatus {
  * Installation session manager
  * Handles creation, updates, and persistence of installation sessions
  */
-@Singleton
-class InstallationSessionManager @Inject constructor() {
+class InstallationSessionManager() {
 
     // In-memory storage for demo - in real app, this would use database
     private val sessions = mutableMapOf<String, InstallationSession>()

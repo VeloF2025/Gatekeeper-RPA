@@ -1,8 +1,6 @@
 package com.fibreflow.feature.installation.steps
 
 import com.fibreflow.core.common.result.Result
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Installation step data class
@@ -56,8 +54,7 @@ data class PhotoRequirement(
  * Installation step manager
  * Defines and manages the 9-step installation workflow
  */
-@Singleton
-class InstallationStepManager @Inject constructor() {
+class InstallationStepManager() {
 
     private val installationSteps = listOf(
         InstallationStep(

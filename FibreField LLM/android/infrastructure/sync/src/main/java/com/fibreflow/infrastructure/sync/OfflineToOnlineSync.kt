@@ -2,8 +2,8 @@ package com.fibreflow.infrastructure.sync
 
 import android.util.Log
 import com.fibreflow.core.common.result.Result
-import com.fibreflow.infrastructure.offline.OfflineOperationData
-import com.fibreflow.infrastructure.offline.SyncResult
+import com.fibreflow.infrastructure.sync.data.OfflineOperationData
+import com.fibreflow.infrastructure.sync.models.SyncResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -73,12 +73,12 @@ class OfflineToOnlineSync @Inject constructor(
             for (op in operationsToProcess) {
                 try {
                     val result = executeOperation(op)
-                    if (result.isSuccess) {
+                    if (result is com.fibreflow.core.common.result.Result.Success) {
                         processed++
                         Log.d(TAG, "Operation completed: ${op.type}")
                     } else {
                         failed++
-                        Log.w(TAG, "Operation failed: ${op.type}", result.exceptionOrNull())
+                        Log.w(TAG, "Operation failed: ${op.type}", (result as com.fibreflow.core.common.result.Result.Error).exception)
                         // Re-queue failed operations for retry
                         pendingOperations.add(op)
                     }
@@ -93,9 +93,11 @@ class OfflineToOnlineSync @Inject constructor(
             val syncTime = System.currentTimeMillis() - startTime
 
             val result = SyncResult(
-                operationsProcessed = processed,
-                operationsFailed = failed,
-                syncTimeMs = syncTime
+                success = failed == 0,
+                syncedItems = processed,
+                failedItems = failed,
+                conflicts = 0,
+                durationMs = syncTime
             )
 
             Log.i(TAG, "Processed $processed operations, $failed failed in ${syncTime}ms")

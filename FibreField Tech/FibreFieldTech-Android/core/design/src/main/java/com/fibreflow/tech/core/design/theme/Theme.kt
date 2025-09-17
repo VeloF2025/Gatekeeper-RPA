@@ -1,22 +1,21 @@
 package com.fibreflow.tech.core.design.theme
 
+import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-
-/**
- * FibreField Tech Theme System
- *
- * High-tech, futuristic design system with:
- * - Dark theme optimized for field use
- * - Neon accent colors for AI/ML features
- * - Glass morphism effects
- * - Dynamic colors based on Material You
- */
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 // Primary color scheme - High-tech blue/cyan
 private val DarkColorScheme = darkColorScheme(
@@ -186,15 +185,30 @@ object AppTypography {
 @Composable
 fun FibreFieldTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        DarkColorScheme
-    } else {
-        LightColorScheme
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
     }
 
     val typography = AppTypography.typography()
+
+    // Set system bars color
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -204,6 +218,7 @@ fun FibreFieldTheme(
         CompositionLocalProvider(
             LocalExtendedColors provides ExtendedColors,
             LocalAppShapes provides AppShapes,
+            LocalAppTypography provides AppTypography,
             content = content
         )
     }
@@ -212,3 +227,78 @@ fun FibreFieldTheme(
 // Local composition providers
 val LocalExtendedColors = compositionLocalOf { ExtendedColors }
 val LocalAppShapes = compositionLocalOf { AppShapes }
+val LocalAppTypography = compositionLocalOf { AppTypography }
+
+// Material You dynamic theme extensions
+object MaterialYouExtensions {
+    @Composable
+    fun getColorScheme(
+        seedColor: Color = Color(0xFF00D4FF),
+        darkTheme: Boolean = isSystemInDarkTheme()
+    ): androidx.compose.material3.ColorScheme {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        } else {
+            // Fallback to static color scheme for older Android versions
+            if (darkTheme) DarkColorScheme else LightColorScheme
+        }
+    }
+
+    @Composable
+    fun getAdaptiveShapes(): AppShapes {
+        return AppShapes
+    }
+
+    @Composable
+    fun getAdaptiveTypography(): AppTypography {
+        return AppTypography
+    }
+}
+
+// Theme extensions for component styling
+object ThemeExtensions {
+    @Composable
+    fun getCardColors(): androidx.compose.material3.CardColors {
+        val colorScheme = MaterialTheme.colorScheme
+        return androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.7f),
+            contentColor = colorScheme.onSurfaceVariant,
+            disabledContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            disabledContentColor = colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+        )
+    }
+
+    @Composable
+    fun getFloatingActionButtonColors(): androidx.compose.material3.FloatingActionButtonColors {
+        val colorScheme = MaterialTheme.colorScheme
+        return androidx.compose.material3.FloatingActionButtonDefaults.floatingActionButtonColors(
+            containerColor = colorScheme.primary,
+            contentColor = colorScheme.onPrimary,
+            disabledContainerColor = colorScheme.primary.copy(alpha = 0.3f),
+            disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.3f)
+        )
+    }
+
+    @Composable
+    fun getButtonColors(): androidx.compose.material3.ButtonColors {
+        val colorScheme = MaterialTheme.colorScheme
+        return androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = colorScheme.primary,
+            contentColor = colorScheme.onPrimary,
+            disabledContainerColor = colorScheme.primary.copy(alpha = 0.3f),
+            disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.3f)
+        )
+    }
+
+    @Composable
+    fun getExtendedButtonColors(): androidx.compose.material3.ButtonColors {
+        val colorScheme = MaterialTheme.colorScheme
+        return androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = colorScheme.secondary,
+            contentColor = colorScheme.onSecondary,
+            disabledContainerColor = colorScheme.secondary.copy(alpha = 0.3f),
+            disabledContentColor = colorScheme.onSecondary.copy(alpha = 0.3f)
+        )
+    }
+}

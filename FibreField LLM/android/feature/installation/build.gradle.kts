@@ -2,8 +2,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.kotlin.kapt)
+    // alias(libs.plugins.hilt)  // temporarily disabled
+    // alias(libs.plugins.kotlin.kapt)  // temporarily disabled
     alias(libs.plugins.kotlin.parcelize)
 }
 
@@ -36,9 +36,12 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    // Hilt - temporarily disabled to resolve KAPT issues
+    // implementation(libs.hilt.android)
+    // kapt(libs.hilt.compiler)
+
+    // Utilities
+    implementation(libs.timber)
 
     // Camera
     implementation(libs.camerax.core)
@@ -62,3 +65,4 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.mockito.kotlin)
 }
+

@@ -8,6 +8,7 @@ import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
+import androidx.room.RoomDatabaseKt;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
@@ -529,6 +530,12 @@ public final class DropDao_Impl implements DropDao {
         }
       }
     }, $completion);
+  }
+
+  @Override
+  public Object insertOrUpdateDrop(final DropEntity drop,
+      final Continuation<? super Unit> $completion) {
+    return RoomDatabaseKt.withTransaction(__db, (__cont) -> DropDao.DefaultImpls.insertOrUpdateDrop(DropDao_Impl.this, drop, __cont), $completion);
   }
 
   @Override

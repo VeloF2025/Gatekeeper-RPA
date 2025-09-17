@@ -4,22 +4,17 @@ import com.fibreflow.core.common.result.Result
 import com.fibreflow.domain.drops.entities.Drop
 import com.fibreflow.feature.installation.steps.InstallationStepManager
 import com.fibreflow.feature.installation.steps.InstallationStep
-import com.fibreflow.feature.installation.workflow.InstallationSessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
-
 /**
  * Main installation workflow orchestrator
  * Manages the complete 9-step installation process
  */
-@Singleton
-class InstallationWorkflow @Inject constructor(
-    private val stepManager: InstallationStepManager,
-    private val sessionManager: InstallationSessionManager
+class InstallationWorkflow(
+    private val stepManager: InstallationStepManager = InstallationStepManager(),
+    private val sessionManager: InstallationSessionManager = InstallationSessionManager()
 ) {
 
     private val _currentStep = MutableStateFlow<InstallationStep?>(null)

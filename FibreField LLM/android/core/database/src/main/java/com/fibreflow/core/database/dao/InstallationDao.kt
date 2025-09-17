@@ -1,6 +1,7 @@
 package com.fibreflow.core.database.dao
 
 import androidx.room.*
+import androidx.room.Transaction
 import com.fibreflow.core.database.entities.InstallationEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -226,4 +227,17 @@ interface InstallationDao {
      */
     @Query("SELECT * FROM installations ORDER BY created_at DESC")
     suspend fun getAllInstallations(): List<InstallationEntity>
+
+    /**
+     * Insert or update installation (convenience method)
+     */
+    @Transaction
+    suspend fun insertOrUpdateInstallation(installation: InstallationEntity) {
+        val existing = getInstallationById(installation.installationId)
+        if (existing != null) {
+            updateInstallation(installation)
+        } else {
+            insertInstallation(installation)
+        }
+    }
 }

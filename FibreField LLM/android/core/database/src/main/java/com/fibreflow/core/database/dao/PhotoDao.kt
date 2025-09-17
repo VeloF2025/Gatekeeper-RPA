@@ -1,6 +1,7 @@
 package com.fibreflow.core.database.dao
 
 import androidx.room.*
+import androidx.room.Transaction
 import com.fibreflow.core.database.entities.PhotoEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -257,4 +258,17 @@ interface PhotoDao {
      */
     @Query("SELECT * FROM photos ORDER BY created_at DESC")
     suspend fun getAllPhotos(): List<PhotoEntity>
+
+    /**
+     * Insert or update photo (convenience method)
+     */
+    @Transaction
+    suspend fun insertOrUpdatePhoto(photo: PhotoEntity) {
+        val existing = getPhotoById(photo.photoId)
+        if (existing != null) {
+            updatePhoto(photo)
+        } else {
+            insertPhoto(photo)
+        }
+    }
 }

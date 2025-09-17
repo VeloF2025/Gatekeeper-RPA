@@ -8,6 +8,7 @@ import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
+import androidx.room.RoomDatabaseKt;
 import androidx.room.RoomSQLiteQuery;
 import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
@@ -436,6 +437,12 @@ public final class InstallationDao_Impl implements InstallationDao {
         }
       }
     }, $completion);
+  }
+
+  @Override
+  public Object insertOrUpdateInstallation(final InstallationEntity installation,
+      final Continuation<? super Unit> $completion) {
+    return RoomDatabaseKt.withTransaction(__db, (__cont) -> InstallationDao.DefaultImpls.insertOrUpdateInstallation(InstallationDao_Impl.this, installation, __cont), $completion);
   }
 
   @Override
