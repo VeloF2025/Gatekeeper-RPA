@@ -11,7 +11,8 @@
       "Bash(curl:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git worktree:*)"
     ],
     "deny": [],
     "ask": []

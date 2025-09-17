@@ -2,7 +2,6 @@
 package com.fibreflow.domain.drops.repositories
 
 import com.fibreflow.core.common.result.Result
-import com.fibreflow.core.common.result.map
 import com.fibreflow.core.database.dao.DropDao
 import com.fibreflow.core.database.entities.DropEntity
 import com.fibreflow.core.location.ProximityDetector
@@ -87,7 +86,7 @@ class DropRepositoryImpl @Inject constructor(
         return try {
             val dropEntity = dropDao.getDropById(dropNumber)
             dropEntity?.let {
-                val updatedEntity = it.copy(status = status.name)
+                val updatedEntity = it.copy(status = status.toDatabase())
                 dropDao.updateDrop(updatedEntity)
                 Result.Success(Unit)
             } ?: Result.Error(IllegalArgumentException("Drop not found: $dropNumber"))
@@ -127,6 +126,7 @@ class DropRepositoryImpl @Inject constructor(
                         Result.Success(proximityResult)
                     }
                     is Result.Error -> Result.Error(coreResult.exception)
+                    is Result.Loading -> Result.Loading
                 }
             } ?: Result.Error(IllegalArgumentException("Drop not found: $dropNumber"))
         } catch (e: Exception) {
@@ -165,8 +165,13 @@ class DropRepositoryImpl @Inject constructor(
             val allDrops = dropDao.getAllDrops()
             val filteredDrops = allDrops.filter { drop ->
                 (query == null || drop.dropNumber.contains(query, ignoreCase = true)) &&
-                (status == null || drop.status == status.name) &&
-                (priority == null || drop.priority == priority.name) &&
+                (status == null || drop.status == status.toDatabase()) &&
+                (priority == null || drop.priority == when (priority) {
+                    DropPriority.LOW -> 0
+                    DropPriority.NORMAL -> 1
+                    DropPriority.HIGH -> 2
+                    DropPriority.CRITICAL -> 3
+                }) &&
                 (assignedTo == null || drop.assignedTechnicianId == assignedTo)
             }
             Result.Success(filteredDrops.map { it.toDomain() })
@@ -213,10 +218,10 @@ class DropRepositoryImpl @Inject constructor(
             val allDrops = dropDao.getAllDrops()
             val statistics = DropStatistics(
                 totalDrops = allDrops.size,
-                availableDrops = allDrops.count { it.status == DropStatus.AVAILABLE.name },
-                assignedDrops = allDrops.count { it.status == DropStatus.ASSIGNED.name },
-                completedDrops = allDrops.count { it.status == DropStatus.COMPLETED.name },
-                failedDrops = allDrops.count { it.status == DropStatus.FAILED.name }
+                availableDrops = allDrops.count { it.status == com.fibreflow.core.database.entities.DropStatus.AVAILABLE },
+                assignedDrops = allDrops.count { it.status == com.fibreflow.core.database.entities.DropStatus.ASSIGNED },
+                completedDrops = allDrops.count { it.status == com.fibreflow.core.database.entities.DropStatus.COMPLETED },
+                failedDrops = allDrops.count { it.status == com.fibreflow.core.database.entities.DropStatus.FAILED }
             )
             Result.Success(statistics)
         } catch (e: Exception) {
@@ -239,6 +244,36 @@ class DropRepositoryImpl @Inject constructor(
 }
 
 /**
+ * Extension function to convert database DropStatus to domain DropStatus
+ */
+private fun com.fibreflow.core.database.entities.DropStatus.toDomain(): com.fibreflow.domain.drops.entities.DropStatus {
+    return when (this) {
+        com.fibreflow.core.database.entities.DropStatus.AVAILABLE -> com.fibreflow.domain.drops.entities.DropStatus.AVAILABLE
+        com.fibreflow.core.database.entities.DropStatus.ASSIGNED -> com.fibreflow.domain.drops.entities.DropStatus.ASSIGNED
+        com.fibreflow.core.database.entities.DropStatus.IN_PROGRESS -> com.fibreflow.domain.drops.entities.DropStatus.IN_PROGRESS
+        com.fibreflow.core.database.entities.DropStatus.PENDING_VALIDATION -> com.fibreflow.domain.drops.entities.DropStatus.PENDING_VALIDATION
+        com.fibreflow.core.database.entities.DropStatus.COMPLETED -> com.fibreflow.domain.drops.entities.DropStatus.COMPLETED
+        com.fibreflow.core.database.entities.DropStatus.FAILED -> com.fibreflow.domain.drops.entities.DropStatus.FAILED
+        com.fibreflow.core.database.entities.DropStatus.CANCELLED -> com.fibreflow.domain.drops.entities.DropStatus.CANCELLED
+    }
+}
+
+/**
+ * Extension function to convert domain DropStatus to database DropStatus
+ */
+private fun com.fibreflow.domain.drops.entities.DropStatus.toDatabase(): com.fibreflow.core.database.entities.DropStatus {
+    return when (this) {
+        com.fibreflow.domain.drops.entities.DropStatus.AVAILABLE -> com.fibreflow.core.database.entities.DropStatus.AVAILABLE
+        com.fibreflow.domain.drops.entities.DropStatus.ASSIGNED -> com.fibreflow.core.database.entities.DropStatus.ASSIGNED
+        com.fibreflow.domain.drops.entities.DropStatus.IN_PROGRESS -> com.fibreflow.core.database.entities.DropStatus.IN_PROGRESS
+        com.fibreflow.domain.drops.entities.DropStatus.PENDING_VALIDATION -> com.fibreflow.core.database.entities.DropStatus.PENDING_VALIDATION
+        com.fibreflow.domain.drops.entities.DropStatus.COMPLETED -> com.fibreflow.core.database.entities.DropStatus.COMPLETED
+        com.fibreflow.domain.drops.entities.DropStatus.FAILED -> com.fibreflow.core.database.entities.DropStatus.FAILED
+        com.fibreflow.domain.drops.entities.DropStatus.CANCELLED -> com.fibreflow.core.database.entities.DropStatus.CANCELLED
+    }
+}
+
+/**
  * Extension function to convert DropEntity to Drop domain entity
  */
 private fun DropEntity.toDomain(): Drop {
@@ -247,13 +282,18 @@ private fun DropEntity.toDomain(): Drop {
         latitude = this.latitude,
         longitude = this.longitude,
         address = this.address,
-        status = DropStatus.valueOf(this.status),
-        priority = DropPriority.valueOf(this.priority),
-        estimatedInstallTime = this.estimatedInstallTime,
+        status = this.status.toDomain(),
+        priority = when (this.priority) {
+            0 -> DropPriority.LOW
+            1 -> DropPriority.NORMAL
+            2 -> DropPriority.HIGH
+            else -> DropPriority.CRITICAL
+        },
+        estimatedInstallTime = null, // DropEntity doesn't have this field
         notes = this.notes,
         assignedTo = this.assignedTechnicianId,
         projectId = this.projectId,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt
+        createdAt = this.createdAt.time,
+        updatedAt = this.updatedAt.time
     )
 }

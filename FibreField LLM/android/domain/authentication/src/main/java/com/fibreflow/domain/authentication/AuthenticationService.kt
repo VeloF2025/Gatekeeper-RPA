@@ -13,6 +13,7 @@ import com.fibreflow.core.network.models.response.RefreshTokenResponse
 import com.fibreflow.domain.authentication.entities.AuthToken
 import com.fibreflow.domain.authentication.entities.BiometricCredentials
 import com.fibreflow.domain.authentication.entities.Technician
+import com.fibreflow.core.database.entities.TechnicianRole
 import com.fibreflow.domain.authentication.repositories.AuthRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
@@ -87,12 +88,18 @@ class AuthenticationService @Inject constructor(
                     tokenManager.storeTokens(tokens)
 
                     // Create technician object
+                    val role = try {
+                        TechnicianRole.valueOf(authResponse.user.role.uppercase())
+                    } catch (e: IllegalArgumentException) {
+                        TechnicianRole.TECHNICIAN // Default fallback
+                    }
+
                     val technician = Technician(
                         id = authResponse.user.id,
                         username = authResponse.user.username,
                         email = email,
                         fullName = authResponse.user.fullName,
-                        role = authResponse.user.role,
+                        role = role,
                         isActive = authResponse.user.isActive,
                         permissions = authResponse.permissions
                     )

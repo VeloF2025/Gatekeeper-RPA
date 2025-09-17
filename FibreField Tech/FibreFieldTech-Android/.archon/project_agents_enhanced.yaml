@@ -1,0 +1,569 @@
+# FibreField Tech Android - Enhanced Project-Specific Agents Configuration
+# Generated: 2025-09-17 by Archon Global System
+# Project Complexity: 9.2/10 (Enterprise-Grade with Advanced AI/ML Integration)
+# Based on Comprehensive Codebase Analysis
+
+project:
+  name: "FibreField Tech Android"
+  type: "android-enterprise"
+  complexity_score: 9.2
+  description: "Enterprise-grade fiber optic installation technician application with advanced AI/ML, computer vision, and offline-first architecture"
+  path: "C:/Jarvis/AI Workspace/FibreField Tech/FibreFieldTech-Android"
+
+  technologies:
+    core_android:
+      - "Android SDK (minSdk 24, targetSdk 35)"
+      - "Kotlin 1.9+ with Coroutines and Flow"
+      - "Jetpack Compose with Material Design 3"
+      - "Hilt Dependency Injection"
+      - "AndroidX Lifecycle components"
+
+    architecture:
+      - "Clean Architecture with modular design"
+      - "MVVM pattern with StateFlow"
+      - "Repository pattern with caching"
+      - "Multi-module project structure"
+      - "Offline-first architecture"
+      - "Dependency injection with Hilt"
+
+    data_layer:
+      - "Room Database with SQLCipher encryption"
+      - "DataStore for preferences"
+      - "Paging 3 for large datasets"
+      - "WorkManager for background tasks"
+      - "Retrofit for network calls"
+
+    ai_ml:
+      - "TensorFlow Lite with GPU delegation"
+      - "Phi-3.5 Mini LLM (3.8B parameters)"
+      - "ML Kit Vision for ONT detection"
+      - "ONNX Runtime for model execution"
+      - "Custom model quantization"
+      - "Edge AI optimization"
+
+    camera_media:
+      - "CameraX with advanced features"
+      - "ML Kit Image Labeling"
+      - "ExoPlayer for media"
+      - "Coil for image loading"
+      - "Custom image processing"
+
+    security:
+      - "Biometric authentication"
+      - "Android Keystore"
+      - "SQLCipher encryption"
+      - "Network security with TLS"
+      - "Firebase Authentication"
+
+    testing:
+      - "JUnit 5 with parameterized tests"
+      - "MockK for mocking"
+      - "Espresso for UI tests"
+      - "Compose UI testing"
+      - "Robolectric for unit tests"
+      - "Test containers for integration"
+
+    monitoring:
+      - "Firebase Analytics"
+      - "Firebase Crashlytics"
+      - "Firebase Performance Monitoring"
+      - "Custom ML monitoring"
+      - "LeakCanary for memory leaks"
+
+  architecture_patterns:
+    - "Clean Architecture with Domain-Driven Design"
+    - "MVVM with reactive StateFlow"
+    - "Repository pattern with caching strategies"
+    - "Offline-first with conflict resolution"
+    - "Modular feature-based architecture"
+    - "AI/ML integration with fallback mechanisms"
+    - "Event-driven communication"
+    - "Dependency injection with Hilt"
+
+  project_structure:
+    modules:
+      - "app: Main application module"
+      - "core: Shared utilities and base classes"
+      - "core/common: Common utilities and extensions"
+      - "core/database: Room database and DAOs"
+      - "core/network: Network layer and API calls"
+      - "core/ai: AI/ML components and models"
+      - "core/design: Design system and themes"
+      - "core/ui: Shared UI components"
+      - "domain: Business logic and use cases"
+      - "feature: Feature modules (auth, installation, etc.)"
+      - "infrastructure: Platform-specific implementations"
+
+  quality_gates:
+    global:
+      test_coverage: 95.0
+      startup_time_ms: 3000
+      battery_usage_per_hour: 5.0
+      memory_usage_mb: 500
+      compilation_errors: 0
+      lint_warnings: 0
+
+    android_specific:
+      min_sdk_version: 24
+      target_sdk_version: 35
+      dex_methods_limit: 65536
+      apk_size_mb: 100
+
+    ai_ml_specific:
+      inference_time_ms: 100
+      model_size_mb: 50
+      accuracy_threshold: 0.85
+      battery_impact_ml: 2.0
+
+    ui_specific:
+      material_you_compliance: true
+      accessibility_score: 100
+      animation_performance_fps: 60
+      touch_latency_ms: 16
+
+agents:
+  # Kotlin Compose AI Specialist
+  kotlin-compose-ai-specialist:
+    name: "Kotlin Compose AI Specialist"
+    description: "Jetpack Compose expert with AI/ML integration capabilities for high-tech Android UI"
+    command: "@kotlin-compose-ai"
+    capabilities:
+      - "Jetpack Compose UI development"
+      - "Material You theming implementation"
+      - "AI/ML UI integration"
+      - "High-tech futuristic design"
+      - "Accessibility compliance"
+      - "Animation and transitions"
+      - "Responsive design"
+      - "Glass morphism effects"
+      - "Real-time data visualization"
+      - "Custom component development"
+
+    technologies:
+      - "Jetpack Compose"
+      - "Material Design 3"
+      - "Kotlin Coroutines"
+      - "Coil Image Loading"
+      - "Accompanist Libraries"
+
+    quality_gates:
+      ui_performance_fps: 60
+      accessibility_score: 100
+      animation_latency_ms: 16
+      component_reusability: 85
+
+    validation_rules:
+      - "Zero compilation errors"
+      - "Material You compliance"
+      - "Accessibility WCAG 2.1"
+      - "No hard-coded dimensions"
+      - "Proper state management"
+      - "Memory leak prevention"
+
+    file_patterns:
+      includes: ["**/ui/**/*.kt", "**/compose/**/*.kt", "**/design/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # TensorFlow Lite ML Architect
+  tensorflow-lite-ml-architect:
+    name: "TensorFlow Lite ML Architect"
+    description: "Expert in TensorFlow Lite deployment, ONT detection, and AI model optimization for Android"
+    command: "@tf-ml-architect"
+    capabilities:
+      - "TensorFlow Lite model deployment"
+      - "ONT light detection"
+      - "Photo quality assessment"
+      - "Model optimization and quantization"
+      - "AI inference pipeline"
+      - "Computer vision algorithms"
+      - "ML performance tuning"
+      - "Edge AI deployment"
+      - "Real-time image processing"
+      - "Model versioning"
+
+    technologies:
+      - "TensorFlow Lite"
+      - "ML Kit Vision"
+      - "OpenCV"
+      - "ONNX Runtime"
+      - "MediaPipe"
+      - "CUDA optimizations"
+
+    quality_gates:
+      inference_time_ms: 100
+      model_accuracy: 0.85
+      memory_footprint_mb: 100
+      battery_impact_ml: 2.0
+
+    validation_rules:
+      - "Model inference under 100ms"
+      - "Accuracy above 85%"
+      - "Memory optimization"
+      - "Battery efficiency"
+      - "Error handling for model failures"
+      - "Fallback mechanisms"
+
+    file_patterns:
+      includes: ["**/ai/**/*.kt", "**/ml/**/*.kt", "**/tflite/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # Room Offline-First Expert
+  room-offline-first-expert:
+    name: "Room Offline-First Expert"
+    description: "Database architect specializing in Room with SQLCipher, offline-first architecture, and data synchronization"
+    command: "@offline-db-expert"
+    capabilities:
+      - "Room database design"
+      - "SQLCipher encryption"
+      - "Offline-first architecture"
+      - "Data synchronization"
+      - "Conflict resolution"
+      - "Database migrations"
+      - "Performance optimization"
+      - "Data validation"
+      - "Backup and restore"
+      - "Multi-threading"
+
+    technologies:
+      - "Room Database"
+      - "SQLCipher"
+      - "Kotlin Coroutines"
+      - "Flow"
+      - "WorkManager"
+      - "DataStore"
+
+    quality_gates:
+      db_query_time_ms: 50
+      sync_conflict_rate: 0.01
+      data_integrity_score: 100
+      migration_success_rate: 100
+
+    validation_rules:
+      - "Database thread safety"
+      - "Proper error handling"
+      - "Data encryption"
+      - "Efficient indexing"
+      - "Backup mechanisms"
+      - "Conflict resolution"
+
+    file_patterns:
+      includes: ["**/database/**/*.kt", "**/dao/**/*.kt", "**/entity/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # CameraX Workflow Engineer
+  camerax-workflow-engineer:
+    name: "CameraX Workflow Engineer"
+    description: "Camera integration specialist for 9-step photo capture workflow with AI validation"
+    command: "@camera-workflow"
+    capabilities:
+      - "CameraX integration"
+      - "9-step photo workflow"
+      - "Real-time AI validation"
+      - "Image processing"
+      - "Photo quality assessment"
+      - "Geotagging integration"
+      - "Camera permissions"
+      - "Image compression"
+      - "EXIF data handling"
+      - "Camera preview optimization"
+
+    technologies:
+      - "CameraX"
+      - "ML Kit Vision"
+      - "ExoPlayer"
+      - "Glide/Coil"
+      - "Location Services"
+      - "MediaStore API"
+
+    quality_gates:
+      capture_latency_ms: 200
+      image_quality_score: 90
+      permission_handling: 100
+      storage_efficiency: 85
+
+    validation_rules:
+      - "Permission handling"
+      - "Memory management"
+      - "Image quality optimization"
+      - "Battery efficiency"
+      - "Error recovery"
+      - "Storage optimization"
+
+    file_patterns:
+      includes: ["**/camera/**/*.kt", "**/photo/**/*.kt", "**/capture/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # Material You Tech Designer
+  material-you-tech-designer:
+    name: "Material You Tech Designer"
+    description: "High-tech UI/UX designer specializing in Material You, futuristic themes, and accessibility"
+    command: "@material-you-designer"
+    capabilities:
+      - "Material You theming"
+      - "High-tech futuristic design"
+      - "Dynamic color schemes"
+      - "Glass morphism effects"
+      - "Neon color palettes"
+      - "Accessibility compliance"
+      - "Responsive layouts"
+      - "Animation design"
+      - "Icon system design"
+      - "Typography system"
+
+    technologies:
+      - "Material Design 3"
+      - "Dynamic Colors"
+      - "Jetpack Compose"
+      - "Vector Drawables"
+      - "Lottie Animations"
+
+    quality_gates:
+      material_you_compliance: 100
+      accessibility_score: 100
+      design_consistency: 95
+      user_satisfaction_target: 90
+
+    validation_rules:
+      - "Material Design 3 compliance"
+      - "Accessibility WCAG 2.1 AA"
+      - "Color contrast ratios"
+      - "Typography hierarchy"
+      - "Animation performance"
+      - "Design system consistency"
+
+    file_patterns:
+      includes: ["**/design/**/*.kt", "**/theme/**/*.kt", "**/ui/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # Android Performance Expert
+  android-performance-expert:
+    name: "Android Performance Expert"
+    description: "Performance optimization specialist for memory, battery, startup time, and overall app efficiency"
+    command: "@android-perf"
+    capabilities:
+      - "Memory optimization"
+      - "Battery efficiency"
+      - "Startup time optimization"
+      - "Performance profiling"
+      - "Memory leak detection"
+      - "Thread optimization"
+      - "Network optimization"
+      - "Rendering performance"
+      - "Thermal management"
+      - "Performance monitoring"
+
+    technologies:
+      - "Android Profiler"
+      - "Perfetto"
+      - "LeakCanary"
+      - "StrictMode"
+      - "Baseline Profiles"
+      - "App Startup"
+
+    quality_gates:
+      startup_time_ms: 3000
+      memory_usage_mb: 500
+      battery_usage_per_hour: 5.0
+      crash_rate: 0.1
+      anr_rate: 0.05
+
+    validation_rules:
+      - "No memory leaks"
+      - "Efficient battery usage"
+      - "Fast startup time"
+      - "Smooth UI performance"
+      - "Network efficiency"
+      - "Thermal management"
+
+    file_patterns:
+      includes: ["**/performance/**/*.kt", "**/optimization/**/*.kt", "**/profile/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # Biometric Security Architect
+  biometric-security-architect:
+    name: "Biometric Security Architect"
+    description: "Security specialist for biometric authentication, encryption, and data protection"
+    command: "@bio-security"
+    capabilities:
+      - "Biometric authentication"
+      - "Data encryption"
+      - "Security compliance"
+      - "Authentication flows"
+      - "Permission management"
+      - "Data protection"
+      - "Security audits"
+      - "Encryption key management"
+      - "Secure storage"
+      - "Vulnerability assessment"
+
+    technologies:
+      - "Biometric API"
+      - "Android Keystore"
+      - "SQLCipher"
+      - "Security Libraries"
+      - "Firebase Auth"
+      - "OAuth 2.0"
+
+    quality_gates:
+      security_compliance: 100
+      authentication_success_rate: 99.5
+      data_encryption_coverage: 100
+      vulnerability_count: 0
+
+    validation_rules:
+      - "Zero security vulnerabilities"
+      - "Proper authentication flows"
+      - "Data encryption"
+      - "Secure storage"
+      - "Permission management"
+      - "Compliance standards"
+
+    file_patterns:
+      includes: ["**/security/**/*.kt", "**/auth/**/*.kt", "**/biometric/**/*.kt"]
+      excludes: ["**/test/**", "**/build/**"]
+
+  # Kotlin Testing Specialist
+  kotlin-testing-specialist:
+    name: "Kotlin Testing Specialist"
+    description: "Comprehensive testing expert for unit tests, UI tests, and performance testing"
+    command: "@kotlin-test"
+    capabilities:
+      - "Unit testing with JUnit 5"
+      - "UI testing with Espresso"
+      - "Compose UI testing"
+      - "Integration testing"
+      - "Performance testing"
+      - "Mocking and stubbing"
+      - "Test coverage analysis"
+      - "Test automation"
+      - "CI/CD integration"
+      - "Flaky test detection"
+
+    technologies:
+      - "JUnit 5"
+      - "MockK"
+      - "Espresso"
+      - "Compose Testing"
+      - "Robolectric"
+      - "Test Containers"
+      - "Firebase Test Lab"
+
+    quality_gates:
+      test_coverage: 95.0
+      test_execution_time_min: 10
+      flaky_test_rate: 0.1
+      ui_test_stability: 95
+
+    validation_rules:
+      - "95%+ test coverage"
+      - "Zero flaky tests"
+      - "Fast test execution"
+      - "Comprehensive test scenarios"
+      - "Proper mocking"
+      - "Test isolation"
+
+    file_patterns:
+      includes: ["**/test/**/*.kt", "**/**Test.kt", "**/**Tests.kt"]
+      excludes: ["**/build/**"]
+
+agent_selection:
+  ui_development: "kotlin-compose-ai-specialist"
+  ml_integration: "tensorflow-lite-ml-architect"
+  database_design: "room-offline-first-expert"
+  camera_features: "camerax-workflow-engineer"
+  ui_design: "material-you-tech-designer"
+  performance_optimization: "android-performance-expert"
+  security_implementation: "biometric-security-architect"
+  testing_implementation: "kotlin-testing-specialist"
+
+validation_system:
+  pre_development:
+    - "Agent compatibility check"
+    - "Quality gate validation"
+    - "Technology stack verification"
+    - "File pattern matching"
+
+  during_development:
+    - "Real-time compilation checks"
+    - "Memory usage monitoring"
+    - "Performance impact assessment"
+    - "Security validation"
+
+  post_development:
+    - "Test coverage verification"
+    - "Performance benchmarking"
+    - "Security audit"
+    - "Quality gate final check"
+
+project_patterns:
+  naming_conventions:
+    classes: "PascalCase"
+    functions: "camelCase"
+    variables: "camelCase"
+    constants: "UPPER_SNAKE_CASE"
+    files: "snake_case.kt"
+
+  architecture_patterns:
+    repository: "Repository pattern with interfaces"
+    viewmodel: "MVVM with StateFlow"
+    database: "Room with DAOs and Entities"
+    network: "Retrofit with Repository layer"
+
+  code_quality:
+    max_function_length: 50
+    max_class_length: 500
+    max_file_length: 1000
+    complexity_threshold: 10
+
+deployment_targets:
+  development: "Debug builds with AI debugging"
+  staging: "Release builds with staging models"
+  production: "Optimized builds with production models"
+
+integration_points:
+  backend_api: "RESTful API with GraphQL"
+  analytics: "Firebase Analytics"
+  crash_reporting: "Firebase Crashlytics"
+  remote_config: "Firebase Remote Config"
+  push_notifications: "Firebase Cloud Messaging"
+
+version_control:
+  branching_strategy: "GitFlow"
+  commit_message_format: "feat: <description>"
+  pull_request_template: ".github/PULL_REQUEST_TEMPLATE.md"
+  code_owners: "CODEOWNERS file for automated reviews"
+
+monitoring:
+  performance: "Firebase Performance Monitoring"
+  analytics: "Firebase Analytics"
+  crashes: "Firebase Crashlytics"
+  user_feedback: "In-app feedback system"
+  ml_model_performance: "Custom ML monitoring dashboard"
+
+backup_and_recovery:
+  database_backup: "Encrypted cloud backup"
+  configuration_backup: "Version-controlled config"
+  model_versioning: "ML model version management"
+  disaster_recovery: "Multi-region deployment"
+
+compliance_standards:
+  security: "OWASP Mobile Top 10"
+  privacy: "GDPR and CCPA compliant"
+  accessibility: "WCAG 2.1 AA"
+  performance: "Android Vitals standards"
+  quality: "Google Play Store requirements"
+
+documentation:
+  api_docs: "OpenAPI/Swagger documentation"
+  user_manual: "In-app help system"
+  developer_guide: "Technical documentation"
+  ml_model_docs: "Model cards and usage guides"
+  architecture_docs: "System design documentation"
+
+future_enhancements:
+  ml_models: ["GPT-4 integration", "Advanced computer vision", "Predictive maintenance"]
+  ui_features: ["AR overlays", "Voice control", "Gesture recognition"]
+  performance: ["Edge computing", "Model compression", "Hardware acceleration"]
+  security: ["Zero-trust architecture", "Advanced encryption", "Blockchain verification"]
+
+# Generated by Archon Global System - Enterprise-Grade AI Agent Configuration

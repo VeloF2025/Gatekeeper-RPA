@@ -34,6 +34,8 @@ class AuthRepositoryImpl @Inject constructor(
                     val tokens = AuthToken(
                         accessToken = authResponse.accessToken,
                         refreshToken = authResponse.refreshToken,
+                        tokenType = authResponse.tokenType,
+                        expiresIn = authResponse.expiresIn,
                         expiresAt = System.currentTimeMillis() + (authResponse.expiresIn * 1000)
                     )
                     Result.Success(tokens)
@@ -53,12 +55,14 @@ class AuthRepositoryImpl @Inject constructor(
                 return Result.Error(RuntimeException("No tokens to refresh"))
             }
 
-            val response = authAPI.refreshToken(currentTokens.refreshToken)
+            val response = authAPI.refreshToken()
             if (response.isSuccessful) {
                 response.body()?.let { refreshResponse ->
                     val newTokens = AuthToken(
                         accessToken = refreshResponse.accessToken,
-                        refreshToken = refreshResponse.refreshToken ?: currentTokens.refreshToken,
+                        refreshToken = currentTokens.refreshToken,
+                        tokenType = refreshResponse.tokenType,
+                        expiresIn = refreshResponse.expiresIn,
                         expiresAt = System.currentTimeMillis() + (refreshResponse.expiresIn * 1000)
                     )
                     Result.Success(newTokens)
@@ -104,8 +108,8 @@ class AuthRepositoryImpl @Inject constructor(
                 return Result.Error(RuntimeException("Unable to extract technician ID from token"))
             }
 
-            val technician = technicianDao.getTechnicianById(technicianId)
-            technician?.let { Result.Success(it) } ?: Result.Error(RuntimeException("Technician not found"))
+            val technicianEntity = technicianDao.getTechnicianById(technicianId)
+            technicianEntity?.let { Result.Success(it.toDomain()) } ?: Result.Error(RuntimeException("Technician not found"))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -113,7 +117,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun saveTechnician(technician: Technician): Result<Unit> {
         return try {
-            technicianDao.insertTechnician(technician)
+            technicianDao.insertTechnician(technician.toDatabase())
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
@@ -122,8 +126,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun getTechnicianById(technicianId: String): Result<Technician> {
         return try {
-            val technician = technicianDao.getTechnicianById(technicianId)
-            technician?.let { Result.Success(it) } ?: Result.Error(RuntimeException("Technician not found"))
+            val technicianEntity = technicianDao.getTechnicianById(technicianId)
+            technicianEntity?.let { Result.Success(it.toDomain()) } ?: Result.Error(RuntimeException("Technician not found"))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -218,4 +222,35 @@ class AuthRepositoryImpl @Inject constructor(
         val tokens = tokenManager.getStoredTokens()
         return tokens != null && tokenManager.isTokenValid(tokens)
     }
+}
+
+/**
+ * Extension function to convert TechnicianEntity to Technician domain entity
+ */
+private fun com.fibreflow.core.database.entities.TechnicianEntity.toDomain(): Technician {
+    return Technician(
+        id = this.technicianId,
+        username = this.name, // Using name as username since domain entity doesn't have separate name field
+        email = this.email,
+        fullName = this.name,
+        role = this.role,
+        isActive = this.active,
+        permissions = this.permissions?.split(",") ?: emptyList()
+    )
+}
+
+/**
+ * Extension function to convert Technician domain entity to TechnicianEntity
+ */
+private fun Technician.toDatabase(): com.fibreflow.core.database.entities.TechnicianEntity {
+    return com.fibreflow.core.database.entities.TechnicianEntity(
+        technicianId = this.id,
+        name = this.fullName,
+        email = this.email,
+        role = this.role,
+        active = this.isActive,
+        permissions = this.permissions.joinToString(","),
+        createdAt = java.util.Date(),
+        updatedAt = java.util.Date()
+    )
 }
