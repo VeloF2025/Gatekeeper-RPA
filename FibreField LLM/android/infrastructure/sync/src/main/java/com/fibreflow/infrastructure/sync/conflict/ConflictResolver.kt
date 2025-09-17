@@ -30,7 +30,7 @@ class ConflictResolver @Inject constructor() {
         remote: InstallationEntity
     ): Result<ConflictResolution<InstallationEntity>> = withContext(Dispatchers.Default) {
         try {
-            Log.d(TAG, "Resolving installation conflict for ID: ${local.id}")
+            Log.d(TAG, "Resolving installation conflict for ID: ${local.installationId}")
 
             val resolution = when {
                 // Local is more recent
@@ -70,23 +70,23 @@ class ConflictResolver @Inject constructor() {
         remote: PhotoEntity
     ): Result<ConflictResolution<PhotoEntity>> = withContext(Dispatchers.Default) {
         try {
-            Log.d(TAG, "Resolving photo conflict for ID: ${local.id}")
+            Log.d(TAG, "Resolving photo conflict for ID: ${local.photoId}")
 
             val resolution = when {
-                // Local validation is more recent
-                local.validatedAt ?: 0 > remote.validatedAt ?: 0 -> {
+                // Local update is more recent
+                local.updatedAt.time > remote.updatedAt.time -> {
                     ConflictResolution(
                         resolvedEntity = local,
                         strategy = ConflictStrategy.USE_LOCAL,
-                        reason = "Local validation is more recent"
+                        reason = "Local data is more recent"
                     )
                 }
-                // Remote validation is more recent
-                remote.validatedAt ?: 0 > local.validatedAt ?: 0 -> {
+                // Remote update is more recent
+                remote.updatedAt.time > local.updatedAt.time -> {
                     ConflictResolution(
                         resolvedEntity = remote,
                         strategy = ConflictStrategy.USE_REMOTE,
-                        reason = "Remote validation is more recent"
+                        reason = "Remote data is more recent"
                     )
                 }
                 // Both validated, prefer higher confidence
@@ -123,18 +123,18 @@ class ConflictResolver @Inject constructor() {
         remote: DropEntity
     ): Result<ConflictResolution<DropEntity>> = withContext(Dispatchers.Default) {
         try {
-            Log.d(TAG, "Resolving drop conflict for ID: ${local.id}")
+            Log.d(TAG, "Resolving drop conflict for ID: ${local.dropNumber}")
 
             val resolution = when {
                 // Status progression logic
-                isStatusProgression(local.status, remote.status) -> {
+                isStatusProgression(local.status.name, remote.status.name) -> {
                     ConflictResolution(
                         resolvedEntity = local,
                         strategy = ConflictStrategy.USE_LOCAL,
                         reason = "Local status represents progression"
                     )
                 }
-                isStatusProgression(remote.status, local.status) -> {
+                isStatusProgression(remote.status.name, local.status.name) -> {
                     ConflictResolution(
                         resolvedEntity = remote,
                         strategy = ConflictStrategy.USE_REMOTE,
@@ -253,15 +253,15 @@ class ConflictResolver @Inject constructor() {
         local: InstallationEntity,
         remote: InstallationEntity
     ): ConflictResolution<InstallationEntity> {
-        val statusHierarchy = mapOf(
+        val statusHierarchy: Map<String, Int> = mapOf(
             "PENDING" to 1,
             "IN_PROGRESS" to 2,
             "COMPLETED" to 3,
             "CANCELLED" to 4
         )
 
-        val localPriority = statusHierarchy[local.status] ?: 0
-        val remotePriority = statusHierarchy[remote.status] ?: 0
+        val localPriority = statusHierarchy[local.status.name] ?: 0
+        val remotePriority = statusHierarchy[remote.status.name] ?: 0
 
         return if (localPriority > remotePriority) {
             ConflictResolution(

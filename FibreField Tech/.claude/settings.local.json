@@ -28,7 +28,10 @@
       "Bash(gradlew:*)",
       "Bash(./gradlew:*)",
       "Bash(find:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(gradle:*)",
+      "Bash(dir:*)",
+      "Bash(java:*)"
     ],
     "deny": [],
     "ask": []

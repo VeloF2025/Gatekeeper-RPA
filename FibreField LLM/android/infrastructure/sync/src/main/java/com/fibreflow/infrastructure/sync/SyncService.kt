@@ -13,6 +13,7 @@ import com.fibreflow.infrastructure.sync.conflict.ConflictResolver
 import com.fibreflow.infrastructure.sync.models.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,9 +50,9 @@ class SyncService @Inject constructor(
                 if (serverInstallation != null) {
                     Result.Success(SyncOperationResult(
                         success = true,
-                        entityId = installation.installationId,
+                        entityId = installation.installationId.toString(),
                         operation = SyncOperation.CREATE,
-                        serverVersion = serverInstallation.version
+                        serverVersion = serverInstallation.updatedAt
                     ))
                 } else {
                     Result.Error(RuntimeException("Empty response from server"))
@@ -81,20 +82,20 @@ class SyncService @Inject constructor(
 
             // Upload photo file
             val uploadResult = photoUploadService.uploadPhoto(
-                installationId = photo.installationId,
-                photoFile = photo.photoFile,
-                stepName = photo.stepName ?: "Unknown",
-                sequenceNumber = photo.sequenceNumber ?: 0,
-                latitude = photo.latitude,
-                longitude = photo.longitude
+                installationId = photo.installationId.toString(),
+                photoFile = File(photo.filePath),
+                stepName = photo.photoType.name,
+                sequenceNumber = 0, // PhotoEntity doesn't have sequenceNumber
+                latitude = null, // PhotoEntity doesn't have latitude
+                longitude = null // PhotoEntity doesn't have longitude
             )
 
             if (uploadResult.isSuccess) {
                 Result.Success(SyncOperationResult(
                     success = true,
-                    entityId = photo.photoId,
+                    entityId = photo.photoId.toString(),
                     operation = SyncOperation.CREATE,
-                    serverVersion = uploadResult.getOrNull()?.version
+                    serverVersion = System.currentTimeMillis() // Use current time as version
                 ))
             } else {
                 Result.Error(RuntimeException("Photo upload failed"))
@@ -124,7 +125,7 @@ class SyncService @Inject constructor(
                     success = true,
                     entityId = drop.dropNumber,
                     operation = SyncOperation.UPDATE,
-                    serverVersion = response.body()?.version
+                    serverVersion = response.body()?.updatedAt
                 ))
             } else {
                 when (response.code()) {
@@ -148,9 +149,9 @@ class SyncService @Inject constructor(
 
             when (dataType) {
                 SyncDataType.INSTALLATIONS -> {
-                    val response = installationApi.getInstallations()
+                    val response = installationApi.getTechnicianInstallations("current")
                     if (response.isSuccessful) {
-                        val installations = response.body() ?: emptyList()
+                        val installations = response.body() ?: emptyList<Any>()
                         Result.Success(FetchResult(
                             dataType = dataType,
                             items = installations,
@@ -190,7 +191,7 @@ class SyncService @Inject constructor(
         // For now, assume server wins
         return Result.Success(SyncOperationResult(
             success = true,
-            entityId = local.installationId,
+            entityId = local.installationId.toString(),
             operation = SyncOperation.UPDATE,
             conflictResolved = true,
             resolutionStrategy = "SERVER_WINS"
@@ -242,24 +243,19 @@ data class FetchResult(
 )
 
 // Extension functions for entity conversion
-private fun InstallationEntity.toInstallationCreateRequest(): InstallationCreateRequest {
-    // Placeholder - would convert entity to API request model
-    return InstallationCreateRequest(
-        dropId = "", // Would be populated from actual data
-        technicianId = "", // Would be populated from actual data
-        status = this.status,
-        notes = this.notes
+private fun InstallationEntity.toInstallationCreateRequest(): com.fibreflow.core.network.api.InstallationCreateRequest {
+    // Convert entity to API request model
+    return com.fibreflow.core.network.api.InstallationCreateRequest(
+        dropId = this.dropNumber,
+        technicianId = this.technicianId ?: "",
+        equipmentType = "FIBER_OPTIC", // Default value
+        priority = 1,
+        notes = null,
+        scheduledDate = this.startTime.time
     )
 }
 
 // Placeholder request models
-data class InstallationCreateRequest(
-    val dropId: String,
-    val technicianId: String,
-    val status: String,
-    val notes: String?
-)
-
 data class DropStatusUpdate(
     val status: String,
     val notes: String? = null

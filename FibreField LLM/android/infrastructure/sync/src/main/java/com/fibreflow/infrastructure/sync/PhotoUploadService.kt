@@ -62,8 +62,11 @@ class PhotoUploadService @Inject constructor(
             val response = installationApi.uploadPhoto(
                 installationId = installationId,
                 photo = multipartBody,
-                stepName = stepName,
-                sequenceNumber = sequenceNumber
+                stepName = stepName.toRequestBody(),
+                sequenceNumber = sequenceNumber.toString().toRequestBody(),
+                latitude = latitude?.toString()?.toRequestBody(),
+                longitude = longitude?.toString()?.toRequestBody(),
+                notes = notes?.toRequestBody()
             )
 
             if (response.isSuccessful) {
