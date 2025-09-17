@@ -27,7 +27,8 @@
       "Bash(gradlew.bat test:*)",
       "Bash(gradlew:*)",
       "Bash(./gradlew:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

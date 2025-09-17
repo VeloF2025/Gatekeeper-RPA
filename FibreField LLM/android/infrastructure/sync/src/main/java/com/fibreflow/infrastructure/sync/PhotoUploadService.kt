@@ -24,7 +24,7 @@ class PhotoUploadService @Inject constructor(
     companion object {
         const val MAX_RETRY_ATTEMPTS = 3
         const val MAX_FILE_SIZE_MB = 10
-        const val SUPPORTED_IMAGE_TYPES = arrayOf("image/jpeg", "image/png", "image/webp")
+        val SUPPORTED_IMAGE_TYPES = listOf("image/jpeg", "image/png", "image/webp")
     }
 
     /**
@@ -61,7 +61,9 @@ class PhotoUploadService @Inject constructor(
             // Attempt upload
             val response = installationApi.uploadPhoto(
                 installationId = installationId,
-                photo = multipartBody
+                photo = multipartBody,
+                stepName = stepName,
+                sequenceNumber = sequenceNumber
             )
 
             if (response.isSuccessful) {

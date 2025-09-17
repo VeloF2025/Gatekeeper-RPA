@@ -120,11 +120,12 @@ class SyncManager @Inject constructor(
             }
 
             Log.i(TAG, "Performing immediate synchronization")
-            performFullSync()
+            val result = performFullSync()
+            return result
 
         } catch (e: Exception) {
             Log.e(TAG, "Immediate sync failed", e)
-            Result.Error(e)
+            return Result.Error(e)
         }
     }
 
@@ -220,7 +221,7 @@ class SyncManager @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Full synchronization failed", e)
             _syncState.value = SyncState.ERROR
-            Result.Error(e)
+            return Result.Error(e)
         }
     }
 

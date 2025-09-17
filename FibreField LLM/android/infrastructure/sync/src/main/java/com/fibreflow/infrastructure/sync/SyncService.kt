@@ -6,7 +6,7 @@ import com.fibreflow.core.database.entities.InstallationEntity
 import com.fibreflow.core.database.entities.PhotoEntity
 import com.fibreflow.core.database.entities.DropEntity
 import com.fibreflow.core.network.api.InstallationAPI
-import com.fibreflow.core.network.api.PhotoUploadService
+import com.fibreflow.infrastructure.sync.PhotoUploadService
 import com.fibreflow.core.network.api.DropAPI
 import com.fibreflow.core.network.api.ProjectAPI
 import com.fibreflow.infrastructure.sync.conflict.ConflictResolver
@@ -39,17 +39,17 @@ class SyncService @Inject constructor(
      */
     suspend fun syncInstallation(installation: InstallationEntity): Result<SyncOperationResult> = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Syncing installation: ${installation.id}")
+            Log.d(TAG, "Syncing installation: ${installation.installationId}")
 
             // Attempt to sync with server
-            val response = installationApi.createInstallation(installation.toInstallationRequest())
+            val response = installationApi.createInstallation(installation.toInstallationCreateRequest())
 
             if (response.isSuccessful) {
                 val serverInstallation = response.body()
                 if (serverInstallation != null) {
                     Result.Success(SyncOperationResult(
                         success = true,
-                        entityId = installation.id,
+                        entityId = installation.installationId,
                         operation = SyncOperation.CREATE,
                         serverVersion = serverInstallation.version
                     ))
@@ -77,15 +77,22 @@ class SyncService @Inject constructor(
      */
     suspend fun syncPhoto(photo: PhotoEntity): Result<SyncOperationResult> = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Syncing photo: ${photo.id}")
+            Log.d(TAG, "Syncing photo: ${photo.photoId}")
 
             // Upload photo file
-            val uploadResult = photoUploadService.uploadPhoto(photo)
+            val uploadResult = photoUploadService.uploadPhoto(
+                installationId = photo.installationId,
+                photoFile = photo.photoFile,
+                stepName = photo.stepName ?: "Unknown",
+                sequenceNumber = photo.sequenceNumber ?: 0,
+                latitude = photo.latitude,
+                longitude = photo.longitude
+            )
 
             if (uploadResult.isSuccess) {
                 Result.Success(SyncOperationResult(
                     success = true,
-                    entityId = photo.id,
+                    entityId = photo.photoId,
                     operation = SyncOperation.CREATE,
                     serverVersion = uploadResult.getOrNull()?.version
                 ))
@@ -104,18 +111,18 @@ class SyncService @Inject constructor(
      */
     suspend fun syncDrop(drop: DropEntity): Result<SyncOperationResult> = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Syncing drop: ${drop.id}")
+            Log.d(TAG, "Syncing drop: ${drop.dropNumber}")
 
             // Update drop status on server
-            val response = dropApi.updateDropStatus(drop.id, DropStatusUpdate(
-                status = drop.status,
+            val response = dropApi.updateDropStatus(drop.dropNumber, com.fibreflow.core.network.api.DropStatusUpdate(
+                status = drop.status.name,
                 notes = "Synced from mobile"
             ))
 
             if (response.isSuccessful) {
                 Result.Success(SyncOperationResult(
                     success = true,
-                    entityId = drop.id,
+                    entityId = drop.dropNumber,
                     operation = SyncOperation.UPDATE,
                     serverVersion = response.body()?.version
                 ))
@@ -183,7 +190,7 @@ class SyncService @Inject constructor(
         // For now, assume server wins
         return Result.Success(SyncOperationResult(
             success = true,
-            entityId = local.id,
+            entityId = local.installationId,
             operation = SyncOperation.UPDATE,
             conflictResolved = true,
             resolutionStrategy = "SERVER_WINS"
@@ -194,7 +201,7 @@ class SyncService @Inject constructor(
         // Similar to installation conflict handling
         return Result.Success(SyncOperationResult(
             success = true,
-            entityId = local.id,
+            entityId = local.dropNumber,
             operation = SyncOperation.UPDATE,
             conflictResolved = true,
             resolutionStrategy = "SERVER_WINS"
@@ -235,10 +242,9 @@ data class FetchResult(
 )
 
 // Extension functions for entity conversion
-private fun InstallationEntity.toInstallationRequest(): InstallationRequest {
+private fun InstallationEntity.toInstallationCreateRequest(): InstallationCreateRequest {
     // Placeholder - would convert entity to API request model
-    return InstallationRequest(
-        id = this.id,
+    return InstallationCreateRequest(
         dropId = "", // Would be populated from actual data
         technicianId = "", // Would be populated from actual data
         status = this.status,
@@ -247,8 +253,7 @@ private fun InstallationEntity.toInstallationRequest(): InstallationRequest {
 }
 
 // Placeholder request models
-data class InstallationRequest(
-    val id: String,
+data class InstallationCreateRequest(
     val dropId: String,
     val technicianId: String,
     val status: String,

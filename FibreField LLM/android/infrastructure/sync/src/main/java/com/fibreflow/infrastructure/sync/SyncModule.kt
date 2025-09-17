@@ -4,7 +4,7 @@ import android.content.Context
 import com.fibreflow.core.database.FibreFieldDatabase
 import com.fibreflow.core.database.dao.*
 import com.fibreflow.core.network.api.InstallationAPI
-import com.fibreflow.core.network.api.PhotoUploadService
+import com.fibreflow.infrastructure.sync.PhotoUploadService
 import com.fibreflow.core.network.api.DropAPI
 import com.fibreflow.core.network.api.ProjectAPI
 import dagger.Module
@@ -35,10 +35,8 @@ object SyncModule {
 
     @Provides
     @Singleton
-    fun provideConflictResolver(
-        internalResolver: com.fibreflow.infrastructure.sync.conflict.ConflictResolver
-    ): ConflictResolver {
-        return ConflictResolver(internalResolver)
+    fun provideConflictResolver(): com.fibreflow.infrastructure.sync.conflict.ConflictResolver {
+        return com.fibreflow.infrastructure.sync.conflict.ConflictResolver()
     }
 
     @Provides
@@ -59,7 +57,7 @@ object SyncModule {
         photoDao: PhotoDao,
         dropDao: DropDao,
         syncQueueDao: SyncQueueDao,
-        conflictResolver: ConflictResolver
+        conflictResolver: com.fibreflow.infrastructure.sync.conflict.ConflictResolver
     ): SyncManager {
         return SyncManager(context, installationDao, photoDao, dropDao, syncQueueDao, conflictResolver)
     }
@@ -71,7 +69,7 @@ object SyncModule {
         photoUploadService: PhotoUploadService,
         dropApi: DropAPI,
         projectApi: ProjectAPI,
-        conflictResolver: ConflictResolver
+        conflictResolver: com.fibreflow.infrastructure.sync.conflict.ConflictResolver
     ): SyncService {
         return SyncService(installationApi, photoUploadService, dropApi, projectApi, conflictResolver)
     }
