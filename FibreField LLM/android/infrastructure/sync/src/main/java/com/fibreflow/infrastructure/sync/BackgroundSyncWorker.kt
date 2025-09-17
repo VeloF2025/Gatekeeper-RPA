@@ -40,6 +40,10 @@ class BackgroundSyncWorker(
                         Result.failure()
                     }
                 }
+                is com.fibreflow.core.common.result.Result.Loading -> {
+                    Timber.d("BackgroundSyncWorker: Sync still in progress")
+                    Result.retry()
+                }
             }
 
         } catch (e: Exception) {

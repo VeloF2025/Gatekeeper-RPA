@@ -211,7 +211,7 @@ class DataConsistencyManager @Inject constructor(
                         table = "drops",
                         recordId = drop.dropNumber,
                         field = "status",
-                        value = drop.status,
+                        value = drop.status.name,
                         issue = "Invalid drop status",
                         severity = IssueSeverity.MEDIUM
                     )
@@ -224,9 +224,9 @@ class DataConsistencyManager @Inject constructor(
                 issues.add(
                     DataIntegrityIssue(
                         table = "installations",
-                        recordId = record.id.toString(),
+                        recordId = record.installationId.toString(),
                         field = "timestamp",
-                        value = record.startedAt.toString(),
+                        value = record.startTime.toString(),
                         issue = "Future timestamp detected",
                         severity = IssueSeverity.LOW
                     )
@@ -248,7 +248,7 @@ class DataConsistencyManager @Inject constructor(
                 orphaned.add(
                     OrphanedRecord(
                         table = "offline_queue",
-                        recordId = entry.id.toString(),
+                        recordId = entry.syncId.toString(),
                         reason = "References non-existent installation"
                     )
                 )
@@ -514,7 +514,7 @@ class DataConsistencyManager @Inject constructor(
  */
 
 data class ConsistencyReport(
-    val checkTimestamp: Long = 0,
+    var checkTimestamp: Long = 0,
     var isConsistent: Boolean = true,
     val referentialIntegrityIssues: MutableList<ReferentialIntegrityIssue> = mutableListOf(),
     val dataIntegrityIssues: MutableList<DataIntegrityIssue> = mutableListOf(),
@@ -586,7 +586,7 @@ data class ChecksumFailure(
 
 data class RepairResult(
     var success: Boolean = false,
-    val repairTimestamp: Long = 0,
+    var repairTimestamp: Long = 0,
     val repairedReferentialIssues: MutableList<String> = mutableListOf(),
     val removedOrphanedRecords: MutableList<String> = mutableListOf(),
     val mergedDuplicates: MutableList<String> = mutableListOf(),
