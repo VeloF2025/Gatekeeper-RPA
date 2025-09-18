@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import android.content.ComponentCallbacks2
 import javax.inject.Inject
 
 /**
@@ -495,15 +496,15 @@ class FibreFieldApplication : Application(), Configuration.Provider {
         
         applicationScope.launch {
             when (level) {
-                TRIM_MEMORY_UI_HIDDEN -> {
+                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
                     // App UI hidden, can release UI-related resources
                 }
-                TRIM_MEMORY_BACKGROUND -> {
+                ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> {
                     // App in background, can release more resources
                 }
-                TRIM_MEMORY_CRITICAL -> {
+                ComponentCallbacks2.TRIM_MEMORY_COMPLETE -> {
                     // System critically low on memory
-                    aiManager.clearCache()
+                    aiManager.shutdown()
                     // Aggressive memory cleanup
                 }
             }
