@@ -329,9 +329,9 @@ python quality_gates_validation_system.py --check-test-coverage --check-code-qua
 - [Integration Guide](docs/integration_guide.md) *(To be created)*
 
 ### Examples
-- [Complete Demo](examples/complete_demo.py) *(To be created)*
-- [Phase Development](examples/phase_development.py) *(To be created)*
-- [Custom Configuration](examples/custom_config.py) *(To be created)*
+- [Complete Demo](../examples/complete_demo.py) *(To be created)*
+- [Phase Development](../examples/phase_development.py) *(To be created)*
+- [Custom Configuration](../examples/custom_config.py) *(To be created)*
 
 ### Support
 - **Issues**: GitHub Issues for bug reports
