@@ -45,7 +45,8 @@
       "Bash(wget:*)",
       "Bash(gradlew.bat assembleDebug:*)",
       "Bash(\"./gradlew.bat\" assembleDebug)",
-      "Bash(\"./gradlew.bat\" :infrastructure:sync:build)"
+      "Bash(\"./gradlew.bat\" :infrastructure:sync:build)",
+      "Bash(\"C:\\Jarvis\\AI Workspace\\FibreField Tech\\FibreFieldTech-Android\\gradlew.bat\" assembleDevDebug)"
     ],
     "deny": [],
     "ask": []

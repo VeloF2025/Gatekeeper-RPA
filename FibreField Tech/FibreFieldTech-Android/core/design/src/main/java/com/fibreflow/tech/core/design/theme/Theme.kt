@@ -8,13 +8,18 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 // Primary color scheme - High-tech blue/cyan
@@ -107,8 +112,8 @@ object ExtendedColors {
     val batteryMedium = Color(0xFFFFAA00)   // Medium battery
     val batteryLow = Color(0xFFFF3B30)       // Low battery
 
-    val glassSurface = Color(0xFFFFFFFF.copy(alpha = 0.1f))  // Glass morphism
-    val glassBorder = Color(0xFFFFFFFF.copy(alpha = 0.2f))    // Glass border
+    val glassSurface = Color(0xFFFFFFFF).copy(alpha = 0.1f)  // Glass morphism
+    val glassBorder = Color(0xFFFFFFFF).copy(alpha = 0.2f)    // Glass border
 }
 
 // Component shapes
@@ -213,7 +218,11 @@ fun FibreFieldTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = typography,
-        shapes = AppShapes
+        shapes = androidx.compose.material3.Shapes(
+        small = AppShapes.small,
+        medium = AppShapes.medium,
+        large = AppShapes.large
+    )
     ) {
         CompositionLocalProvider(
             LocalExtendedColors provides ExtendedColors,
@@ -269,16 +278,9 @@ object ThemeExtensions {
         )
     }
 
-    @Composable
-    fun getFloatingActionButtonColors(): androidx.compose.material3.FloatingActionButtonColors {
-        val colorScheme = MaterialTheme.colorScheme
-        return androidx.compose.material3.FloatingActionButtonDefaults.floatingActionButtonColors(
-            containerColor = colorScheme.primary,
-            contentColor = colorScheme.onPrimary,
-            disabledContainerColor = colorScheme.primary.copy(alpha = 0.3f),
-            disabledContentColor = colorScheme.onPrimary.copy(alpha = 0.3f)
-        )
-    }
+    // TEMPORARILY DISABLED - floatingActionButtonColors method not available
+    // @Composable
+    // fun getFloatingActionButtonColors() = FloatingActionButtonDefaults.floatingActionButtonColors()
 
     @Composable
     fun getButtonColors(): androidx.compose.material3.ButtonColors {

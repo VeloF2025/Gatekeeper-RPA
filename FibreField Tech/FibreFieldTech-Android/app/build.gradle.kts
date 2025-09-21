@@ -270,12 +270,15 @@ dependencies {
     implementation(libs.osmdroid.android)
     // implementation(libs.osmdroid.mapsforge) // Disabled due to SVG conflicts
 
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.perf)
-    implementation(libs.firebase.messaging)
+    // Accompanist
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    // Firebase - TEMPORARILY DISABLED
+    // implementation(platform(libs.firebase.bom))
+    // implementation(libs.firebase.analytics)
+    // implementation(libs.firebase.crashlytics)
+    // implementation(libs.firebase.perf)
+    // implementation(libs.firebase.messaging)
 
     // Coroutines
     implementation(libs.bundles.coroutines)
