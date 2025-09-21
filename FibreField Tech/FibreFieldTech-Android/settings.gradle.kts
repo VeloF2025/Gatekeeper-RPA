@@ -30,6 +30,7 @@ include(":app")
 include(":core:common")
 include(":core:database")
 include(":core:network")
+include(":core:design")
 // include(":core:ai")  // Temporarily disabled due to plugin conflicts
 
 // Domain modules

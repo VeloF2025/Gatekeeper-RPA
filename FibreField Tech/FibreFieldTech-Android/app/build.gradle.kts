@@ -195,12 +195,17 @@ android {
 }
 
 dependencies {
-    // TODO: Add back module dependencies once they are fixed
-    // implementation(project(":core:common"))
-    // implementation(project(":core:ai"))
-    // implementation(project(":core:design"))
-    // implementation(project(":android:core:camera"))
-    // implementation(project(":android:core:workflow"))
+    // Core modules
+    implementation(project(":core:common"))
+    implementation(project(":core:design"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
+
+    // Domain modules
+    implementation(project(":domain:installation"))
+
+    // Feature modules
+    implementation(project(":feature:installation"))
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
