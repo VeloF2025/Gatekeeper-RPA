@@ -42,7 +42,10 @@
       "Bash(xargs:*)",
       "Bash(timeout:*)",
       "Bash(gradlew.bat assembleDevDebug:*)",
-      "Bash(wget:*)"
+      "Bash(wget:*)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(\"./gradlew.bat\" assembleDebug)",
+      "Bash(\"./gradlew.bat\" :infrastructure:sync:build)"
     ],
     "deny": [],
     "ask": []
