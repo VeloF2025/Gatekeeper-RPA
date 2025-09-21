@@ -65,6 +65,9 @@ abstract class FibreFieldDatabase : RoomDatabase() {
     // Configuration
     abstract fun configurationDao(): ConfigurationDao
 
+    // Offline maps
+    abstract fun offlineMapTileDao(): OfflineMapTileDao
+
     companion object {
         const val DATABASE_NAME = "fibrefield.db"
     }

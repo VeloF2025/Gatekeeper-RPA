@@ -19,6 +19,8 @@ import com.fibreflow.core.database.dao.DropDao;
 import com.fibreflow.core.database.dao.DropDao_Impl;
 import com.fibreflow.core.database.dao.InstallationDao;
 import com.fibreflow.core.database.dao.InstallationDao_Impl;
+import com.fibreflow.core.database.dao.OfflineMapTileDao;
+import com.fibreflow.core.database.dao.OfflineMapTileDao_Impl;
 import com.fibreflow.core.database.dao.PhotoDao;
 import com.fibreflow.core.database.dao.PhotoDao_Impl;
 import com.fibreflow.core.database.dao.ProjectDao;
@@ -70,6 +72,8 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
   private volatile SessionDao _sessionDao;
 
   private volatile ConfigurationDao _configurationDao;
+
+  private volatile OfflineMapTileDao _offlineMapTileDao;
 
   @Override
   @NonNull
@@ -571,6 +575,7 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
     _typeConvertersMap.put(ValidationResultDao.class, ValidationResultDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(SessionDao.class, SessionDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(ConfigurationDao.class, ConfigurationDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(OfflineMapTileDao.class, OfflineMapTileDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -739,6 +744,20 @@ public final class FibreFieldDatabase_Impl extends FibreFieldDatabase {
           _configurationDao = new ConfigurationDao_Impl(this);
         }
         return _configurationDao;
+      }
+    }
+  }
+
+  @Override
+  public OfflineMapTileDao offlineMapTileDao() {
+    if (_offlineMapTileDao != null) {
+      return _offlineMapTileDao;
+    } else {
+      synchronized(this) {
+        if(_offlineMapTileDao == null) {
+          _offlineMapTileDao = new OfflineMapTileDao_Impl(this);
+        }
+        return _offlineMapTileDao;
       }
     }
   }
