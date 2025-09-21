@@ -2,7 +2,7 @@ package com.fibreflow.tech
 
 import android.app.Application
 
-class FibreFieldApplicationSimple : Application() {
+class FibreFieldApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // Simple application class without Hilt dependencies
