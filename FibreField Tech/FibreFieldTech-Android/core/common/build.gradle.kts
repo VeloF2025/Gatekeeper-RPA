@@ -1,53 +1,28 @@
 plugins {
+    alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "com.fibreflow.tech.core.common"
-    compileSdk = 35
+    namespace = "com.fibreflow.core.common"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-        testOptions.targetSdk = 35
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
-        )
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            excludes += "META-INF/DEPENDENCIES"
-            excludes += "META-INF/LICENSE"
-            excludes += "META-INF/LICENSE.txt"
-            excludes += "META-INF/NOTICE"
-            excludes += "META-INF/NOTICE.txt"
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
         }
     }
 }
@@ -59,8 +34,7 @@ dependencies {
     implementation(libs.androidx.material)
 
     // Coroutines
-    implementation(libs.coroutines)
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.bundles.coroutines)
     testImplementation(libs.kotlinx.coroutines.test)
 
     // Serialization
@@ -70,8 +44,16 @@ dependencies {
     implementation(libs.timber)
 
     // Testing
-    testImplementation(libs.testing.common)
-    testImplementation(libs.testing.android)
-    androidTestImplementation(libs.testing.common)
-    androidTestImplementation(libs.testing.android)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.turbine)
+    testImplementation(libs.junit.ext)
+    testImplementation(libs.espresso.core)
+    testImplementation(libs.espresso.contrib)
+    testImplementation(libs.espresso.intents)
+    androidTestImplementation(libs.junit.ext)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.espresso.contrib)
+    androidTestImplementation(libs.espresso.intents)
 }

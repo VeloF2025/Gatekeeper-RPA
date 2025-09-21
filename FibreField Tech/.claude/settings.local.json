@@ -34,7 +34,15 @@
       "Bash(java:*)",
       "Bash(.gradlew test:*)",
       "Bash(.gradlew.bat:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(where:*)",
+      "Bash(.gradlew:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(xargs:*)",
+      "Bash(timeout:*)",
+      "Bash(gradlew.bat assembleDevDebug:*)",
+      "Bash(wget:*)"
     ],
     "deny": [],
     "ask": []
