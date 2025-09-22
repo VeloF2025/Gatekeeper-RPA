@@ -54,7 +54,10 @@
       "Bash(adb:*)",
       "Bash(.adb.exe devices)",
       "Bash(\"C:\\Users\\HeinvanVuuren\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe\":*)",
-      "Bash(\"./gradlew.bat\" assembleDevDebug)"
+      "Bash(\"./gradlew.bat\" assembleDevDebug)",
+      "Bash(git push:*)",
+      "Bash(\"./gradlew.bat\" connectedAndroidTest --tests \"com.fibreflow.tech.features.FeatureValidationTest\" --info)",
+      "Bash(\"./gradlew.bat\" connectedAndroidTest --info)"
     ],
     "deny": [],
     "ask": []
