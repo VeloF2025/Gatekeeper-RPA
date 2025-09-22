@@ -46,7 +46,15 @@
       "Bash(gradlew.bat assembleDebug:*)",
       "Bash(\"./gradlew.bat\" assembleDebug)",
       "Bash(\"./gradlew.bat\" :infrastructure:sync:build)",
-      "Bash(\"C:\\Jarvis\\AI Workspace\\FibreField Tech\\FibreFieldTech-Android\\gradlew.bat\" assembleDevDebug)"
+      "Bash(\"C:\\Jarvis\\AI Workspace\\FibreField Tech\\FibreFieldTech-Android\\gradlew.bat\" assembleDevDebug)",
+      "Bash(../gradlew.bat:*)",
+      "Read(//c/**)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(copy:*)",
+      "Bash(adb:*)",
+      "Bash(.adb.exe devices)",
+      "Bash(\"C:\\Users\\HeinvanVuuren\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe\":*)",
+      "Bash(\"./gradlew.bat\" assembleDevDebug)"
     ],
     "deny": [],
     "ask": []
