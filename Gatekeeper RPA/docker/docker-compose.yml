@@ -1,0 +1,340 @@
+version: '3.8'
+
+services:
+  # Primary Database
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --max_connections=200
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "3306:3306"
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASS}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # WhatiTicket Backend
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      NODE_ENV: production
+      DB_DIALECT: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      BACKEND_URL: ${BACKEND_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      WA_BUSINESS_TOKEN: ${WA_BUSINESS_TOKEN}
+      WA_BUSINESS_ID: ${WA_BUSINESS_ID}
+      WA_PHONE_NUMBER_ID: ${WA_PHONE_NUMBER_ID}
+    volumes:
+      - ../backend:/app
+      - ../public/uploads:/app/public/uploads
+      - /opt/whats-ticket/logs:/app/logs
+      - ../logs:/app/logs
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # WhatiTicket Frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    volumes:
+      - ../frontend/dist:/usr/share/nginx/html
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ../public/uploads:/var/www/uploads
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RPA Workers for 1Map automation
+  rpa-workers:
+    build:
+      context: ..
+      dockerfile: docker/rpa.Dockerfile
+    environment:
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      BROWSER_POOL_SIZE: ${BROWSER_POOL_SIZE:-10}
+      MAX_CONCURRENT_AUDITS: ${MAX_CONCURRENT_AUDITS:-5}
+      1MAP_USERNAME: ${1MAP_USERNAME}
+      1MAP_PASSWORD: ${1MAP_PASSWORD}
+      SCREENSHOT_PATH: ${SCREENSHOT_PATH:-/app/screenshots}
+      PHOTO_PATH: ${PHOTO_PATH:-/app/photos}
+    volumes:
+      - ../rpa:/app
+      - /opt/whats-ticket/screenshots:/app/screenshots
+      - /opt/whats-ticket/photos:/app/photos
+      - /opt/whats-ticket/logs:/app/logs
+      - ../logs:/app/logs
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    deploy:
+      replicas: ${RPA_REPLICAS:-4}
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+
+  # Queue Worker for processing messages
+  queue-worker:
+    build:
+      context: ..
+      dockerfile: docker/queue.Dockerfile
+    environment:
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: mysql
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY:-10}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    deploy:
+      replicas: ${QUEUE_REPLICAS:-2}
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Project-specific databases (for multi-project isolation)
+  project1-db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROJECT1_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${PROJECT1_DB_NAME}
+      MYSQL_USER: ${PROJECT1_DB_USER}
+      MYSQL_PASSWORD: ${PROJECT1_DB_PASSWORD}
+    volumes:
+      - project1_data:/var/lib/mysql
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${PROJECT1_DB_USER}", "-p${PROJECT1_DB_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  project2-db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROJECT2_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${PROJECT2_DB_NAME}
+      MYSQL_USER: ${PROJECT2_DB_USER}
+      MYSQL_PASSWORD: ${PROJECT2_DB_PASSWORD}
+    volumes:
+      - project2_data:/var/lib/mysql
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${PROJECT2_DB_USER}", "-p${PROJECT2_DB_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3001:3000"
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+
+  # Logging - Fluentd (optional)
+  fluentd:
+    image: fluent/fluentd:v1.16
+    volumes:
+      - ./logging/fluentd.conf:/fluentd/etc/fluent.conf
+      - ../logs:/fluentd/log
+    networks:
+      - whatsticket-network
+    restart: unless-stopped
+
+  # Backup service
+  backup:
+    image: alpine:latest
+    volumes:
+      - mysql_data:/backup/mysql
+      - project1_data:/backup/project1
+      - project2_data:/backup/project2
+      - ./scripts/backup.sh:/backup.sh
+      - /opt/whats-ticket/backups:/output
+    environment:
+      - TZ=UTC
+    networks:
+      - whatsticket-network
+    restart: "no"
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  project1_data:
+    driver: local
+  project2_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  whatsticket-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

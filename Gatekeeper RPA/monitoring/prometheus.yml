@@ -1,0 +1,144 @@
+# Prometheus Configuration for Gatekeeper RPA
+# Enhanced monitoring with security metrics and business KPIs
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Rule files for alerting
+rule_files:
+  - "alert_rules.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Next.js Application Metrics
+  - job_name: 'nextjs-app'
+    static_configs:
+      - targets: ['nextjs:3000']
+    metrics_path: '/api/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: http
+    bearer_token: ${MONITORING_BEARER_TOKEN}
+
+  # RPA Workers Metrics
+  - job_name: 'rpa-workers'
+    static_configs:
+      - targets: ['rpa-workers:8081']
+    metrics_path: '/api/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: http
+
+  # Queue Worker Metrics
+  - job_name: 'queue-workers'
+    static_configs:
+      - targets: ['queue-worker:8082']
+    metrics_path: '/api/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: http
+
+  # PostgreSQL Metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Redis Metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Nginx Metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/nginx_status'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Node Exporter Metrics (system metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Docker Metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+
+  # Business Metrics (custom application metrics)
+  - job_name: 'business-metrics'
+    static_configs:
+      - targets: ['nextjs:3000']
+    metrics_path: '/api/business-metrics'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    scheme: http
+    bearer_token: ${MONITORING_BEARER_TOKEN}
+
+  # Security Metrics
+  - job_name: 'security-metrics'
+    static_configs:
+      - targets: ['nextjs:3000']
+    metrics_path: '/api/security-metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+    bearer_token: ${MONITORING_BEARER_TOKEN}
+
+  # WhatsApp Integration Metrics
+  - job_name: 'whatsapp-metrics'
+    static_configs:
+      - targets: ['nextjs:3000']
+    metrics_path: '/api/whatsapp-metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+    bearer_token: ${MONITORING_BEARER_TOKEN}
+
+  # WhatiTicket Integration Metrics
+  - job_name: 'whatiTicket-metrics'
+    static_configs:
+      - targets: ['nextjs:3000']
+    metrics_path: '/api/whatiTicket-metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+    bearer_token: ${MONITORING_BEARER_TOKEN}
+
+  # 1Map Integration Metrics
+  - job_name: 'onemap-metrics'
+    static_configs:
+      - targets: ['rpa-workers:8081']
+    metrics_path: '/api/onemap-metrics'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    scheme: http

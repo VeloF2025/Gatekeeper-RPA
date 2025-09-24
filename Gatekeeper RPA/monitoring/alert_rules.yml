@@ -1,0 +1,208 @@
+# Alert Rules for Gatekeeper RPA
+# Critical alerts for production monitoring
+
+groups:
+  - name: application_health
+    rules:
+      # Application availability alerts
+      - alert: ApplicationDown
+        expr: up{job=~"nextjs-app|rpa-workers|queue-workers"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: application
+        annotations:
+          summary: "Application service is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | printf "%.2f" }}% for service {{ $labels.job }}"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, http_request_duration_seconds_bucket) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for service {{ $labels.job }}"
+
+  - name: database_health
+    rules:
+      # Database alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL service on {{ $labels.instance }} is not responding"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_calls_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL is experiencing slow queries (rate: {{ $value }})"
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "PostgreSQL high connection usage"
+          description: "PostgreSQL connection usage is {{ $value }}%"
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Redis is down"
+          description: "Redis service on {{ $labels.instance }} is not responding"
+
+      - alert: RedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value }}%"
+
+  - name: security_alerts
+    rules:
+      # Security alerts
+      - alert: FailedLoginAttempts
+        expr: rate(auth_failed_attempts_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High rate of failed login attempts"
+          description: "Failed login attempt rate is {{ $value }} per minute"
+
+      - alert: SuspiciousActivity
+        expr: security_suspicious_events_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "Suspicious security event detected: {{ $labels.event_type }}"
+
+      - alert: RateLimitExceeded
+        expr: rate(http_requests_total{status="429"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Rate limiting exceeded"
+          description: "Rate limit exceeded {{ $value }} times in 5 minutes"
+
+  - name: business_metrics
+    rules:
+      # Business KPI alerts
+      - alert: NoWhatsAppMessages
+        expr: rate(whatsapp_messages_sent_total[1h]) == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No WhatsApp messages sent"
+          description: "No WhatsApp messages have been sent in the last hour"
+
+      - alert: HighAuditFailureRate
+        expr: rate(audit_failures_total[1h]) / rate(audit_attempts_total[1h]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "High audit failure rate"
+          description: "Audit failure rate is {{ $value | printf "%.2f" }}%"
+
+      - alert: QueueBacklog
+        expr: redis_queue_length > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "Queue backlog detected"
+          description: "Queue backlog has reached {{ $value }} items"
+
+      - alert: LowRPAWorkerUtilization
+        expr: rpa_worker_utilization < 0.2
+        for: 30m
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "Low RPA worker utilization"
+          description: "RPA worker utilization is only {{ $value | printf "%.0f" }}%"
+
+  - name: infrastructure
+    rules:
+      # Infrastructure alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is {{ $value }}% used on {{ $labels.instance }} {{ $labels.mountpoint }}"
+
+      - alert: ContainerRestarted
+        expr: changes(container_restart_count_total[1h]) > 3
+        for: 1m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Container restarted frequently"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last hour"

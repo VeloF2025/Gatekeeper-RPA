@@ -1,0 +1,379 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      skip_tests:
+        description: 'Skip tests (not recommended)'
+        required: false
+        default: false
+        type: boolean
+      backup_before_deploy:
+        description: 'Create backup before deployment'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: gatekeeper-rpa
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || !github.event.inputs.skip_tests }}
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gatekeeper_rpa_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'package-lock.json'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run type checking
+      run: npm run type-check
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run unit tests
+      run: npm test
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gatekeeper_rpa_test
+        REDIS_URL: redis://localhost:6379/0
+        NODE_ENV: test
+
+    - name: Run integration tests
+      run: npm run test:integration
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gatekeeper_rpa_test
+        REDIS_URL: redis://localhost:6379/0
+        NODE_ENV: test
+
+    - name: Upload coverage reports
+      if: matrix.node-version == '18.x'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ github.event_name != 'workflow_dispatch' || !github.event.inputs.skip_tests }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [test, security-scan]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build RPA workers image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/rpa.Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository }}-rpa:latest
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build queue workers image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/queue.Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository }}-queue:latest
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create backup before deployment
+      if: ${{ github.event.inputs.backup_before_deploy != 'false' }}
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          ./scripts/backup.sh
+
+    - name: Deploy to production
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          git pull origin main
+          ./scripts/deploy.sh
+
+    - name: Verify deployment
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          ./scripts/health-check.sh
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  monitoring-setup:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Update monitoring configuration
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          docker-compose restart prometheus grafana
+
+    - name: Verify monitoring
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Check Prometheus health
+          curl -f http://localhost:9090/-/healthy
+          # Check Grafana health
+          curl -f http://localhost:3001/api/health
+
+  rollback:
+    runs-on: ubuntu-latest
+    if: failure() && needs.deploy.result == 'failure'
+    needs: [deploy, monitoring-setup]
+
+    steps:
+    - name: Rollback deployment
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          # Find the latest backup
+          LATEST_BACKUP=$(ls -t backups/gatekeeper_rpa_backup_*.tar.gz | head -1)
+          if [ -n "$LATEST_BACKUP" ]; then
+            echo "Rolling back to backup: $LATEST_BACKUP"
+            ./scripts/restore.sh "$LATEST_BACKUP"
+          else
+            echo "No backup found for rollback"
+            exit 1
+          fi
+
+    - name: Notify rollback status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  cleanup:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test, security-scan, build-and-push, deploy, monitoring-setup, rollback]
+
+    steps:
+    - name: Clean up old Docker images
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          docker image prune -f
+          docker volume prune -f
+
+    - name: Clean up old backups
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          ./scripts/backup.sh clean
+
+    - name: Generate deployment summary
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /opt/gatekeeper
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          echo "Deployment Summary - $TIMESTAMP" > deployment_summary_$TIMESTAMP.txt
+          echo "======================================" >> deployment_summary_$TIMESTAMP.txt
+          echo "GitHub Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> deployment_summary_$TIMESTAMP.txt
+          echo "Branch: ${{ github.ref_name }}" >> deployment_summary_$TIMESTAMP.txt
+          echo "Commit: ${{ github.sha }}" >> deployment_summary_$TIMESTAMP.txt
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}" >> deployment_summary_$TIMESTAMP.txt
+          echo "Status: ${{ job.status }}" >> deployment_summary_$TIMESTAMP.txt
+          echo "" >> deployment_summary_$TIMESTAMP.txt
+          echo "Service Status:" >> deployment_summary_$TIMESTAMP.txt
+          docker-compose ps >> deployment_summary_$TIMESTAMP.txt 2>/dev/null || echo "Docker services not available" >> deployment_summary_$TIMESTAMP.txt
+          echo "" >> deployment_summary_$TIMESTAMP.txt
+          echo "Disk Usage:" >> deployment_summary_$TIMESTAMP.txt
+          df -h >> deployment_summary_$TIMESTAMP.txt
+          mv deployment_summary_$TIMESTAMP.txt logs/
+
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-artifacts
+        path: |
+          deployment-*.log
+          test-results/
+          coverage/
+        retention-days: 30

@@ -1,0 +1,335 @@
+# Gatekeeper RPA Docker Compose Configuration
+# Enhanced orchestration with security, monitoring, and scalability
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database with enhanced security
+  postgres:
+    image: postgres:15-alpine
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c max_connections=200
+    environment:
+      POSTGRES_DB: ${DB_NAME:-gatekeeper_rpa}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - "5432:5432"
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-gatekeeper_rpa}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Redis for caching and queues with security
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword} --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "auth", "${REDIS_PASSWORD:-redispassword}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Next.js Application with enhanced security
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gatekeeper_rpa}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379/0
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
+      ONEMAP_USERNAME: ${ONEMAP_USERNAME}
+      ONEMAP_PASSWORD: ${ONEMAP_PASSWORD}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./public:/app/public
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: ${NEXTJS_REPLICAS:-2}
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Nginx Reverse Proxy with enhanced security
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/security.conf:/etc/nginx/security.conf
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+      - ./uploads:/var/www/uploads
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - nextjs
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RPA Workers for automation with security isolation
+  rpa-workers:
+    build:
+      context: .
+      dockerfile: docker/rpa.Dockerfile
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379/0
+      BROWSER_POOL_SIZE: ${BROWSER_POOL_SIZE:-5}
+      MAX_CONCURRENT_AUDITS: ${MAX_CONCURRENT_AUDITS:-3}
+      ONEMAP_USERNAME: ${ONEMAP_USERNAME}
+      ONEMAP_PASSWORD: ${ONEMAP_PASSWORD}
+      SCREENSHOT_PATH: /app/screenshots
+      PHOTO_PATH: /app/photos
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./photos:/app/photos
+      - ./logs/rpa:/app/logs
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+    deploy:
+      replicas: ${RPA_REPLICAS:-3}
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  # Queue Worker for message processing
+  queue-worker:
+    build:
+      context: .
+      dockerfile: docker/queue.Dockerfile
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379/0
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gatekeeper_rpa}
+      QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY:-10}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: ${QUEUE_REPLICAS:-2}
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel
+      GF_SECURITY_ADMIN_USER: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3001:3000"
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+
+  # Security - Fail2Ban for IP blocking
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    volumes:
+      - ./fail2ban/jail.local:/etc/fail2ban/jail.local
+      - ./fail2ban/filter.d:/etc/fail2ban/filter.d
+      - ./logs/nginx:/var/log/nginx:ro
+      - ./logs/app:/var/log/app:ro
+    network_mode: host
+    restart: unless-stopped
+    privileged: true
+
+  # Logging - Fluentd for log aggregation
+  fluentd:
+    image: fluent/fluentd:v1.16-1
+    volumes:
+      - ./logging/fluentd.conf:/fluentd/etc/fluent.conf
+      - ./logs:/fluentd/log
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - gatekeeper-network
+    restart: unless-stopped
+
+  # Backup service
+  backup:
+    image: postgres:15-alpine
+    environment:
+      PGPASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${DB_NAME:-gatekeeper_rpa}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      BACKUP_DIR: /backups
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./backups:/backups
+      - postgres_data:/data:ro
+    networks:
+      - gatekeeper-network
+    restart: "no"
+    profiles:
+      - backup
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  gatekeeper-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: gatekeeper
+
+# Profiles for different environments
+profiles:
+  dev:
+    services:
+      - nextjs
+      - postgres
+      - redis
+      - nginx
+
+  prod:
+    services:
+      - nextjs
+      - postgres
+      - redis
+      - nginx
+      - rpa-workers
+      - queue-worker
+      - prometheus
+      - grafana
+      - fluentd
+      - fail2ban
+
+  monitoring:
+    services:
+      - prometheus
+      - grafana
+      - fluentd
+
+  backup:
+    services:
+      - backup

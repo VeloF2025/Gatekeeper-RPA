@@ -1,0 +1,186 @@
+# Archon Project Configuration - Gatekeeper RPA
+project_name: "Gatekeeper RPA"
+project_type: "whatsapp_rpa_audit_system"
+project_description: "WhatsApp-driven RPA audit agent for 1Map home installations"
+tech_stack:
+  - "Next.js 14+ (App Router)"
+  - "TypeScript"
+  - "Neon PostgreSQL"
+  - "Playwright"
+  - "WhatsApp API"
+  - "Drizzle ORM"
+complexity_score: 7
+development_status: "planning_phase"
+
+# Project-Specific Specialized Agents
+specialized_agents:
+  - name: "whatsapp-ticketing-integrator"
+    description: "Expert in WhatsApp Business API integration, webhook handling, and ticketing systems"
+    skills:
+      - "WhatsApp Business API integration"
+      - "Message queue processing"
+      - "Ticketing system architecture"
+      - "Real-time communication"
+      - "Error handling and retry logic"
+    quality_gates:
+      - "Zero message loss"
+      - "Sub-second response time"
+      - "100% message delivery tracking"
+      - "Comprehensive error logging"
+
+  - name: "rpa-automation-specialist"
+    description: "Playwright RPA automation expert for web scraping and interaction"
+    skills:
+      - "Playwright automation"
+      - "Web scraping best practices"
+      - "Dynamic selector handling"
+      - "Authentication flows"
+      - "Screenshot and data extraction"
+    quality_gates:
+      - "99.9% automation reliability"
+      - "Robust error handling"
+      - "Anti-bot detection"
+      - "Performance optimization"
+
+  - name: "neon-database-architect"
+    description: "Neon PostgreSQL and Drizzle ORM specialist"
+    skills:
+      - "Neon PostgreSQL optimization"
+      - "Drizzle ORM schema design"
+      - "Database migration management"
+      - "Query performance tuning"
+      - "Data integrity and validation"
+    quality_gates:
+      - "Zero data corruption"
+      - "Optimal query performance"
+      - "Proper indexing strategies"
+      - "Data validation rules"
+
+  - name: "audit-workflow-engineer"
+    description: "Audit workflow and compliance checking specialist"
+    skills:
+      - "Audit process design"
+      - "Compliance validation"
+      - "Workflow orchestration"
+      - "Status tracking"
+      - "Report generation"
+    quality_gates:
+      - "100% audit coverage"
+      - "Real-time status updates"
+      - "Comprehensive logging"
+      - "Error recovery mechanisms"
+
+  - name: "ml-audit-preparer"
+    description: "ML audit system preparation and data collection specialist"
+    skills:
+      - "ML data preparation"
+      - "Image processing pipelines"
+      - "Feature extraction"
+      - "Model integration readiness"
+      - "Data labeling workflows"
+    quality_gates:
+      - "High-quality training data"
+      - "Proper data formatting"
+      - "Metadata completeness"
+      - "Scalable data pipelines"
+
+# Global Agent Templates (with project-specific context)
+global_agents:
+  - name: "system-architect"
+    project_context: "Design WhatsApp-RPA audit system with scalable architecture"
+
+  - name: "code-implementer"
+    project_context: "Implement TypeScript Next.js with strict typing and zero errors"
+
+  - name: "test-coverage-validator"
+    project_context: "Ensure >95% test coverage for WhatsApp, RPA, and database components"
+
+  - name: "security-auditor"
+    project_context: "Secure WhatsApp API, 1Map credentials, and audit data"
+
+  - name: "performance-optimizer"
+    project_context: "Optimize for 30-second end-to-end audit processing"
+
+  - name: "antihallucination-validator"
+    project_context: "Validate all code references exist in WhatsApp/RPA/Next.js stack"
+
+# Project Quality Gates
+quality_gates:
+  mandatory:
+    - "Zero TypeScript compilation errors"
+    - "Zero ESLint errors/warnings"
+    - "Zero console.log statements"
+    - "Zero undefined error references"
+    - "Bundle size <500kB per chunk"
+    - ">95% test coverage"
+    - "End-to-end audit <30 seconds"
+    - "100% message delivery tracking"
+
+  performance:
+    - "WhatsApp response <1 second"
+    - "RPA automation <20 seconds"
+    - "Database queries <100ms"
+    - "API endpoints <200ms"
+
+  security:
+    - "Encrypted credential storage"
+    - "Rate limiting on WhatsApp endpoints"
+    - "Audit trail for all actions"
+    - "Role-based access control"
+
+# Technology-Specific Rules
+tech_rules:
+  nextjs:
+    - "Use App Router exclusively"
+    - "Server components for data fetching"
+    - "Client components only for interactivity"
+    - "Proper error boundaries"
+
+  typescript:
+    - "Strict mode enabled"
+    - "No 'any' types allowed"
+    - "Proper interface definitions"
+    - "Null safety enforcement"
+
+  playwright:
+    - "Use CSS selectors over XPath"
+    - "Implement retry logic"
+    - "Proper wait strategies"
+    - "Screenshot on failure"
+
+  database:
+    - "Use Drizzle ORM for all queries"
+    - "Proper foreign key relationships"
+    - "Indexing for performance"
+    - "Migration versioning"
+
+# Development Workflow
+development_workflow:
+  phases:
+    - name: "WhatsApp Integration"
+      agents: ["whatsapp-ticketing-integrator", "api-design-architect"]
+      deliverables: ["WhatsApp webhook API", "Message queue system", "Ticket tracking"]
+
+    - name: "RPA Automation"
+      agents: ["rpa-automation-specialist", "performance-optimizer"]
+      deliverables: ["1Map login automation", "Data extraction scripts", "Error handling"]
+
+    - name: "Database Design"
+      agents: ["neon-database-architect", "database-architect"]
+      deliverables: ["Schema design", "Migration scripts", "Query optimization"]
+
+    - name: "Audit Workflow"
+      agents: ["audit-workflow-engineer", "system-architect"]
+      deliverables: ["Audit engine", "Status tracking", "Report generation"]
+
+    - name: "ML Preparation"
+      agents: ["ml-audit-preparer", "documentation-generator"]
+      deliverables: ["Data collection", "Feature extraction", "ML pipeline"]
+
+# Activation Commands
+activation_commands:
+  - "@Archon whatsapp - Activate WhatsApp ticketing integration specialist"
+  - "@Archon rpa - Activate RPA automation specialist"
+  - "@Archon database - Activate Neon database architect"
+  - "@Archon audit - Activate audit workflow engineer"
+  - "@Archon ml - Activate ML audit preparation specialist"

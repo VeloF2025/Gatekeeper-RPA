@@ -1,0 +1,202 @@
+# Gatekeeper RPA Docker Test Configuration
+# Comprehensive testing environment for Docker containers
+
+version: '3.8'
+
+services:
+  # Test PostgreSQL instance
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: gatekeeper_rpa_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d gatekeeper_rpa_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Test Redis instance
+  redis-test:
+    image: redis:7-alpine
+    command: redis-server --requirepass test_password
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "auth", "test_password", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Next.js Application (Test)
+  nextjs-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://test_user:test_password@postgres-test:5432/gatekeeper_rpa_test
+      REDIS_URL: redis://:test_password@redis-test:6379/0
+      JWT_SECRET: test_jwt_secret
+      JWT_REFRESH_SECRET: test_jwt_refresh_secret
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    volumes:
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+    command: npm run test:docker
+
+  # RPA Workers (Test)
+  rpa-workers-test:
+    build:
+      context: .
+      dockerfile: docker/rpa.Dockerfile
+    environment:
+      NODE_ENV: test
+      REDIS_URL: redis://:test_password@redis-test:6379/0
+      BROWSER_POOL_SIZE: 2
+      MAX_CONCURRENT_AUDITS: 2
+    depends_on:
+      redis-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    volumes:
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+    command: npm run test:docker
+
+  # Queue Worker (Test)
+  queue-worker-test:
+    build:
+      context: .
+      dockerfile: docker/queue.Dockerfile
+    environment:
+      NODE_ENV: test
+      REDIS_URL: redis://:test_password@redis-test:6379/0
+      DATABASE_URL: postgresql://test_user:test_password@postgres-test:5432/gatekeeper_rpa_test
+      QUEUE_CONCURRENCY: 5
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    volumes:
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+    command: npm run test:docker
+
+  # Security Testing Service
+  security-test:
+    image: owasp/zap2docker-stable
+    command: zap-baseline.py -t http://nextjs-test:3000 -r zap_report.html
+    depends_on:
+      - nextjs-test
+    networks:
+      - test-network
+    volumes:
+      - ./test-reports:/zap/wrk
+
+  # Performance Testing Service
+  performance-test:
+    image: loadimpact/k6:latest
+    command: run /scripts/performance-test.js
+    depends_on:
+      - nextjs-test
+    networks:
+      - test-network
+    volumes:
+      - ./tests/docker/performance-test.js:/scripts/performance-test.js
+      - ./test-reports:/reports
+
+  # Integration Test Runner
+  integration-test:
+    build:
+      context: .
+      dockerfile: tests/docker/Dockerfile.test
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://test_user:test_password@postgres-test:5432/gatekeeper_rpa_test
+      REDIS_URL: redis://:test_password@redis-test:6379/0
+      NEXTJS_URL: http://nextjs-test:3000
+      RPA_URL: http://rpa-workers-test:8081
+      QUEUE_URL: http://queue-worker-test:8082
+    depends_on:
+      nextjs-test:
+        condition: service_started
+      rpa-workers-test:
+        condition: service_started
+      queue-worker-test:
+        condition: service_started
+    networks:
+      - test-network
+    volumes:
+      - ./tests:/app/tests
+      - ./test-reports:/app/test-reports
+    command: npm run test:integration
+
+volumes:
+  postgres_test_data:
+    driver: local
+  redis_test_data:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# Test profiles
+profiles:
+  unit:
+    services:
+      - nextjs-test
+      - rpa-workers-test
+      - queue-worker-test
+
+  integration:
+    services:
+      - postgres-test
+      - redis-test
+      - nextjs-test
+      - rpa-workers-test
+      - queue-worker-test
+      - integration-test
+
+  security:
+    services:
+      - nextjs-test
+      - security-test
+
+  performance:
+    services:
+      - nextjs-test
+      - performance-test
+
+  full:
+    services:
+      - postgres-test
+      - redis-test
+      - nextjs-test
+      - rpa-workers-test
+      - queue-worker-test
+      - security-test
+      - performance-test
+      - integration-test

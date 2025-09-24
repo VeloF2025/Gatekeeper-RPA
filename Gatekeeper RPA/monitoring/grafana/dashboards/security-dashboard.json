@@ -1,0 +1,267 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Gatekeeper RPA - Security Dashboard",
+    "description": "Security monitoring and compliance dashboard",
+    "tags": ["gatekeeper", "security", "compliance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Security Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "security_healthy",
+            "legendFormat": "Security Health"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "Unhealthy"
+                  },
+                  "1": {
+                    "text": "Healthy"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Failed Login Attempts",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(auth_failed_attempts_total[5m])",
+            "legendFormat": "Failed Logins"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Rate Limit Violations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=\"429\"}[5m])",
+            "legendFormat": "Rate Limited"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Security Events by Type",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "security_events_total",
+            "legendFormat": "{{event_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 18,
+          "y": 0
+        }
+      },
+      {
+        "id": 5,
+        "title": "Authentication Success Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(auth_success_attempts_total[5m]) / (rate(auth_success_attempts_total[5m]) + rate(auth_failed_attempts_total[5m])) * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "Session Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "active_sessions_count",
+            "legendFormat": "Active Sessions"
+          },
+          {
+            "expr": "rate(session_created_total[5m])",
+            "legendFormat": "New Sessions"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 7,
+        "title": "Threat Detection",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "security_threats_detected_total",
+            "legendFormat": "{{threat_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 8,
+        "title": "IP Reputation",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "topk(10, sum(rate(security_events_total[1h])) by (ip_address))",
+            "legendFormat": "{{ip_address}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 9,
+        "title": "User Agent Analysis",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "topk(10, sum(rate(security_events_total[1h])) by (user_agent))",
+            "legendFormat": "{{user_agent}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        }
+      },
+      {
+        "id": 10,
+        "title": "Compliance Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "compliance_score",
+            "legendFormat": "Compliance Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 70
+                },
+                {
+                  "color": "green",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 11,
+        "title": "Audit Events",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(audit_events_total[5m])",
+            "legendFormat": "{{event_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}
