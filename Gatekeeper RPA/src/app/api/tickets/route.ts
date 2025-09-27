@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
 
     const filters = {
-      status: searchParams.get('status')?.split(',').filter(Boolean) || undefined,
-      priority: searchParams.get('priority')?.split(',').filter(Boolean) || undefined,
+      status: searchParams.get('status') ? [searchParams.get('status')].filter(Boolean) : undefined,
+      priority: searchParams.get('priority') ? [searchParams.get('priority')].filter(Boolean) : undefined,
       assignedTo: searchParams.get('assignedTo') || undefined,
       technicianNumber: searchParams.get('technicianNumber') || undefined,
       drNumber: searchParams.get('drNumber') || undefined,
@@ -42,8 +42,23 @@ export async function GET(request: NextRequest) {
     // Validate filters
     const validatedFilters = ticketFiltersSchema.parse(filters);
 
+    // Transform filters to match expected types
+    const transformedFilters = {
+      ...validatedFilters,
+      status: validatedFilters.status
+        ? Array.isArray(validatedFilters.status)
+          ? validatedFilters.status
+          : [validatedFilters.status]
+        : undefined,
+      priority: validatedFilters.priority
+        ? Array.isArray(validatedFilters.priority)
+          ? validatedFilters.priority
+          : [validatedFilters.priority]
+        : undefined,
+    };
+
     // Get tickets
-    const tickets = await ticketService.getTickets(validatedFilters);
+    const tickets = await ticketService.getTickets(transformedFilters);
 
     logger.info('Tickets retrieved successfully', {
       userId: authResult.userId,

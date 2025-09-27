@@ -1,0 +1,9 @@
+{
+  "name": "Gatekeeper RPA",
+  "short_name": "Gatekeeper",
+  "description": "Enterprise-grade WhatsApp ticketing and audit automation system with Zero Trust security",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000"
+}

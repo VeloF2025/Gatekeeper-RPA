@@ -1105,7 +1105,7 @@ export let options = {
 
 export default function () {
   // Test WhatsApp webhook endpoint
-  let res = http.post('http://localhost:3000/api/whatsapp/webhook', {
+  let res = http.post('http://localhost:3020/api/whatsapp/webhook', {
     from: `+2782${Math.floor(Math.random() * 10000000)}`,
     body: `DR${Math.floor(Math.random() * 10000000)}`,
     timestamp: new Date().toISOString()
@@ -1117,7 +1117,7 @@ export default function () {
   });
 
   // Test ticket endpoint
-  res = http.get('http://localhost:3000/api/tickets');
+  res = http.get('http://localhost:3020/api/tickets');
 
   check(res, {
     'status was 200': (r) => r.status == 200,

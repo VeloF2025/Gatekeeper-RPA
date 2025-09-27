@@ -18,7 +18,7 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - gatekeeper-network
     restart: unless-stopped
@@ -44,7 +44,7 @@ services:
       - redis_data:/data
       - ./redis/redis.conf:/etc/redis/redis.conf
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
       - gatekeeper-network
     restart: unless-stopped
@@ -70,7 +70,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379/0
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3020}
       WHATSAPP_API_KEY: ${WHATSAPP_API_KEY}
       WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
       WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
@@ -81,7 +81,7 @@ services:
       - ./logs:/app/logs
       - ./public:/app/public
     ports:
-      - "3000:3000"
+      - "3020:3020"
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,7 +91,7 @@ services:
       - gatekeeper-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3020/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -302,34 +302,4 @@ networks:
     driver_opts:
       com.docker.network.bridge.name: gatekeeper
 
-# Profiles for different environments
-profiles:
-  dev:
-    services:
-      - nextjs
-      - postgres
-      - redis
-      - nginx
-
-  prod:
-    services:
-      - nextjs
-      - postgres
-      - redis
-      - nginx
-      - rpa-workers
-      - queue-worker
-      - prometheus
-      - grafana
-      - fluentd
-      - fail2ban
-
-  monitoring:
-    services:
-      - prometheus
-      - grafana
-      - fluentd
-
-  backup:
-    services:
-      - backup
+# Service groups for different environments (use with --profile flag)

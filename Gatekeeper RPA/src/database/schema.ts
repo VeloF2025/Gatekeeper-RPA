@@ -178,7 +178,7 @@ export const rpa_executions = pgTable('rpa_executions', {
   dr_number: text('dr_number').notNull(),
   user_id: uuid('user_id').notNull().references(() => users.id),
   status: text('status').notNull().default('pending'), // pending, running, completed, failed, cancelled
-  progress: numeric('progress').notNull().default(0), // 0-100
+  progress: numeric('progress').notNull().default('0'), // 0-100
   execution_details: jsonb('execution_details'),
   screenshots: text('screenshots').array().default([]), // Array of screenshot paths/URLs
   logs: text('logs').array().default([]), // Array of log entries

@@ -287,7 +287,7 @@ describe('Message Flow E2E', () => {
 
   it('should complete full message flow', async () => {
     // Send WhatsApp message
-    await page.goto('http://localhost:3000/test/whatsapp');
+    await page.goto('http://localhost:3020/test/whatsapp');
     await page.fill('#phone', '+27821234567');
     await page.fill('#message', 'DR1854443');
     await page.click('#send');

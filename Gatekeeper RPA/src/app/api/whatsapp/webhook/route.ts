@@ -169,7 +169,7 @@ async function processWhatsAppMessage(message: any, _entryId: string, _metadata:
 
   // Extract message content based on type
   let content = '';
-  let mediaItems = [];
+  const mediaItems = [];
 
   switch (message.type) {
     case 'text':

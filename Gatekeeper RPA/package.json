@@ -23,7 +23,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts seed",
     "db:reset": "tsx scripts/seed.ts reset",
-    "db:setup": "npm run db:push && npm run db:seed"
+    "db:setup": "npm run db:push && npm run db:seed",
+    "fix:vitest": "node scripts/fix-vitest-rpc.js"
   },
   "keywords": [
     "rpa",
@@ -37,6 +38,8 @@
   "license": "MIT",
   "dependencies": {
     "@clerk/nextjs": "^4.29.0",
+    "@radix-ui/react-progress": "^1.1.7",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
@@ -58,17 +61,19 @@
     "lucide-react": "^0.544.0",
     "multer": "^1.4.5-lts.1",
     "next": "^14.0.0",
+    "next-auth": "^4.24.11",
     "pg": "^8.11.3",
     "playwright": "^1.40.0",
+    "prom-client": "^15.1.0",
     "puppeteer": "^21.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^3.2.1",
     "redis": "^4.6.11",
     "sharp": "^0.33.1",
     "tailwind-merge": "^3.3.1",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0",
-    "prom-client": "^15.1.0"
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",
@@ -83,8 +88,8 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/uuid": "^9.0.7",
-    "@typescript-eslint/eslint-plugin": "^6.13.1",
-    "@typescript-eslint/parser": "^6.13.1",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
     "@vitest/coverage-v8": "^1.0.1",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.20.4",
@@ -92,6 +97,7 @@
     "eslint-config-next": "^14.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.5.6",
     "prettier": "^3.1.0",
     "tailwindcss": "^3.4.17",

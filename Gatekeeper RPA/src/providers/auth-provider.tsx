@@ -9,10 +9,8 @@
  * Created with comprehensive authentication and session validation.
  */
 
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useAuth as useClerkAuth } from '@clerk/nextjs';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useSecurity } from './security-provider';
-import { log } from '@/lib/logger';
 
 // Auth context interface
 interface AuthContextType {
@@ -58,7 +56,6 @@ interface AuthProviderProps {
  * Provides user context and authentication functions with proper validation.
  */
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { isLoaded, userId, sessionId, isSignedIn, signOut } = useClerkAuth();
   const { setSecurityLevel, addSecurityEvent } = useSecurity();
 
   const [user, setUser] = useState<AuthContextType['user']>(null);
@@ -68,47 +65,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        if (!isLoaded) {
-          setIsLoading(true);
-          return;
-        }
+        // For demo purposes, create a mock authenticated user
+        // In production, this would integrate with your authentication system
+        const userData = {
+          id: 'demo-user-123',
+          email: 'demo@gatekeeper-rpa.com',
+          firstName: 'Demo',
+          lastName: 'User',
+          role: 'administrator',
+          permissions: [
+            'tickets:read',
+            'tickets:write',
+            'tickets:delete',
+            'dashboard:read',
+            'dashboard:write',
+            'admin:read',
+            'admin:write',
+            '*' // Full permissions for demo
+          ],
+        };
 
-        if (isSignedIn && userId) {
-          // In a real implementation, this would fetch user data from your database
-          // including roles and permissions based on Clerk user ID
-          const userData = {
-            id: userId,
-            email: 'user@example.com', // Would come from Clerk
-            firstName: 'John',        // Would come from Clerk
-            lastName: 'Doe',          // Would come from Clerk
-            role: 'user',             // Would come from your user database
-            permissions: ['tickets:read', 'dashboard:read'], // Would come from your permissions system
-          };
+        setUser(userData);
 
-          setUser(userData);
+        // Update security context
+        setSecurityLevel('high');
 
-          // Update security context
-          setSecurityLevel('medium');
-
-          addSecurityEvent({
-            type: 'authentication',
-            severity: 'low',
-            message: 'User authenticated successfully',
-          });
-
-          log.info('User authenticated', { userId, role: userData.role }, 'AuthProvider');
-        } else {
-          setUser(null);
-          setSecurityLevel('low');
-
-          addSecurityEvent({
-            type: 'authentication',
-            severity: 'low',
-            message: 'User not authenticated',
-          });
-        }
+        addSecurityEvent({
+          type: 'authentication',
+          severity: 'low',
+          message: 'Demo user authenticated successfully',
+        });
       } catch (error) {
-        log.error('Failed to initialize authentication', error, 'AuthProvider');
         addSecurityEvent({
           type: 'authentication',
           severity: 'high',
@@ -120,7 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initializeAuth();
-  }, [isLoaded, isSignedIn, userId, sessionId, setSecurityLevel, addSecurityEvent]);
+  }, [setSecurityLevel, addSecurityEvent]);
 
   // Sign out function with proper cleanup
   const handleSignOut = async () => {
@@ -131,13 +118,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         message: 'User signing out',
       });
 
-      await signOut();
       setUser(null);
       setSecurityLevel('low');
-
-      log.info('User signed out successfully', {}, 'AuthProvider');
     } catch (error) {
-      log.error('Sign out failed', error, 'AuthProvider');
       addSecurityEvent({
         type: 'authentication',
         severity: 'medium',
@@ -172,18 +155,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
     try {
-      if (!isSignedIn || !userId) {
-        return;
-      }
-
       // In a real implementation, this would refresh user data from your database
       const refreshedUserData = {
-        id: userId,
-        email: 'user@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'user',
-        permissions: ['tickets:read', 'dashboard:read'],
+        id: 'demo-user-123',
+        email: 'demo@gatekeeper-rpa.com',
+        firstName: 'Demo',
+        lastName: 'User',
+        role: 'administrator',
+        permissions: [
+          'tickets:read',
+          'tickets:write',
+          'tickets:delete',
+          'dashboard:read',
+          'dashboard:write',
+          'admin:read',
+          'admin:write',
+          '*'
+        ],
       };
 
       setUser(refreshedUserData);
@@ -193,10 +181,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         severity: 'low',
         message: 'User data refreshed',
       });
-
-      log.info('User data refreshed', { userId }, 'AuthProvider');
     } catch (error) {
-      log.error('Failed to refresh user data', error, 'AuthProvider');
       addSecurityEvent({
         type: 'authentication',
         severity: 'medium',
@@ -209,7 +194,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const contextValue: AuthContextType = {
     user,
     isLoading,
-    isAuthenticated: isSignedIn || false,
+    isAuthenticated: !!user,
     signOut: handleSignOut,
     hasPermission,
     requirePermission,

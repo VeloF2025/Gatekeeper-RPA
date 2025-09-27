@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { database } from '../database';
 import { users, apiSessions } from '../schemas';
 import {
@@ -397,7 +397,7 @@ export class AuthService {
   private generateAccessToken(userId: string): string {
     return jwt.sign(
       { userId, type: 'access' },
-      this.jwtSecret,
+      this.jwtSecret as jwt.Secret,
       { expiresIn: this.accessTokenExpiresIn }
     );
   }
@@ -408,7 +408,7 @@ export class AuthService {
   private generateRefreshToken(userId: string): string {
     return jwt.sign(
       { userId, type: 'refresh' },
-      this.jwtRefreshSecret,
+      this.jwtRefreshSecret as jwt.Secret,
       { expiresIn: this.refreshTokenExpiresIn }
     );
   }

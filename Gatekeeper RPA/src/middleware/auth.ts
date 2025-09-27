@@ -6,6 +6,49 @@ import { rbac } from '@/lib/security/rbac';
 import { inputValidator } from '@/lib/security/input-validation';
 
 /**
+ * Higher-order function for wrapping handlers with authentication
+ */
+export function withAuth<T extends (...args: any[]) => any>(
+  handler: T,
+  options?: { requireRole?: string; requirePermission?: string }
+): T {
+  return (async (request: NextRequest, ...args: any[]) => {
+    try {
+      // Authenticate the user
+      const authResult = await authMiddleware(request);
+
+      if (authResult instanceof NextResponse) {
+        return authResult; // Return error response
+      }
+
+      // Check role requirements
+      if (options?.requireRole) {
+        const roleCheck = await requireRole([options.requireRole])(request);
+        if (roleCheck instanceof NextResponse) {
+          return roleCheck;
+        }
+      }
+
+      // Check permission requirements
+      if (options?.requirePermission) {
+        const permissionCheck = await requirePermission(options.requirePermission)(request);
+        if (permissionCheck instanceof NextResponse) {
+          return permissionCheck;
+        }
+      }
+
+      // Add user info to request for handler use
+      (request as any).user = authResult;
+
+      // Call the original handler
+      return await handler(request, ...args);
+    } catch (error) {
+      return handleError(error, 'withAuth middleware');
+    }
+  }) as T;
+}
+
+/**
  * Enhanced JWT Authentication Middleware
  */
 export async function authMiddleware(request: NextRequest): Promise<NextResponse | { userId: string; email: string; role: string; permissions: string[] }> {

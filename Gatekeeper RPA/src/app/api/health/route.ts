@@ -117,7 +117,7 @@ export async function HEAD() {
         'Expires': '0'
       }
     });
-  } catch (error) {
+  } catch (_error) {
     return new NextResponse(null, {
       status: 503,
       headers: {

@@ -93,7 +93,7 @@ services:
       - nextjs_uploads:/app/uploads
       - nextjs_public:/app/public
     ports:
-      - "3000:3000"
+      - "3020:3020"
     depends_on:
       postgres:
         condition: service_healthy

@@ -124,7 +124,6 @@ const ToastDescription = React.forwardRef<
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
 
 export {
-  type ToastProps,
   ToastProvider,
   ToastViewport,
   Toast,
@@ -133,3 +132,6 @@ export {
   ToastClose,
   ToastAction,
 };
+
+// Re-export the ToastProps type from the hook
+export type { ToastProps } from '@/hooks/use-toast-simple';

@@ -24,7 +24,7 @@ This document provides comprehensive deployment procedures for the Gatekeeper RP
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Load Balancer │────│   Nginx Proxy   │────│  Next.js App    │
-│   (HAProxy)     │    │   (Security)    │    │   (Port 3000)   │
+│   (HAProxy)     │    │   (Security)    │    │   (Port 3020)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │
                     ┌─────────────────┐
@@ -280,7 +280,7 @@ docker-compose up -d
 sleep 30
 
 # Health check
-curl -f http://localhost:3000/api/health || exit 1
+curl -f http://localhost:3020/api/health || exit 1
 
 echo "Deployment completed successfully!"
 ```
@@ -290,7 +290,7 @@ echo "Deployment completed successfully!"
 ```nginx
 # /etc/nginx/sites-available/gatekeeper
 upstream gatekeeper_app {
-    server localhost:3000;
+    server localhost:3020;
 }
 
 upstream rpa_workers {
@@ -474,7 +474,7 @@ jobs:
     - name: Run security scan
       run: |
         docker run --rm -v "$(pwd):/app" owasp/zap2docker-stable zap-baseline.py \
-          -t http://localhost:3000 \
+          -t http://localhost:3020 \
           -r zap_report.html
 
     - name: Upload security report
@@ -699,7 +699,7 @@ scrape_configs:
 
   - job_name: 'nextjs-app'
     static_configs:
-      - targets: ['nextjs:3000']
+      - targets: ['nextjs:3020']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
@@ -759,7 +759,7 @@ scrape_configs:
 # health-check.sh
 
 services=(
-    "http://localhost:3000/api/health"
+    "http://localhost:3020/api/health"
     "http://localhost:8081/health"
     "http://localhost:8082/health"
     "http://localhost:9090/-/healthy"
@@ -977,7 +977,7 @@ docker-compose logs rpa-workers
 docker-compose logs queue-workers
 
 # Check health
-curl http://localhost:3000/api/health
+curl http://localhost:3020/api/health
 ```
 
 #### Database Connection Issues
@@ -1021,7 +1021,7 @@ docker-compose exec redis redis-cli info memory
 #### Slow Response Times
 ```bash
 # Check response times
-curl -w "@curl-format.txt" -o /dev/null -s http://localhost:3000/api/health
+curl -w "@curl-format.txt" -o /dev/null -s http://localhost:3020/api/health
 
 # Monitor network latency
 ping localhost

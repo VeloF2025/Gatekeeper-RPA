@@ -10,7 +10,6 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { log } from '@/lib/logger';
 
 // Security context interface
 interface SecurityContextType {
@@ -74,7 +73,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
       try {
         // In a real implementation, this would check current authentication status
         // and load user permissions from a secure source
-        log.info('SecurityProvider initialized', { level: securityLevel }, 'SecurityProvider');
+        // Client-side - logger not available
 
         // Add initialization event
         addSecurityEvent({
@@ -83,7 +82,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
           message: 'Security provider initialized',
         });
       } catch (error) {
-        log.error('Failed to initialize security provider', error, 'SecurityProvider');
+        // Client-side - logger not available
         addSecurityEvent({
           type: 'monitoring',
           severity: 'high',
@@ -104,7 +103,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
     }, 300000); // Every 5 minutes
 
     return () => clearInterval(securityCheckInterval);
-  }, [securityLevel]);
+  }, []); // Empty dependency array to prevent infinite loop
 
   // Validate access to resources following Zero Trust principles
   const validateAccess = (resource: string, action: string): boolean => {
@@ -172,7 +171,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
     });
 
     // Log security events (in production, this would go to a security monitoring service)
-    log.info('Security event recorded', newEvent, 'SecurityProvider');
+    // Client-side - logger not available
   };
 
   // Update security level with validation

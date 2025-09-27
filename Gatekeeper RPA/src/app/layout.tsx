@@ -9,7 +9,6 @@
 
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { SecurityProvider } from '@/providers/security-provider';
@@ -29,7 +28,6 @@ export const metadata: Metadata = {
   description: 'Enterprise-grade WhatsApp ticketing and audit automation system with Zero Trust security',
   keywords: ['RPA', 'automation', 'audit', 'WhatsApp', 'zero-trust', 'ticketing'],
   authors: [{ name: 'FibreField Technologies' }],
-  viewport: 'width=device-width, initial-scale=1',
   robots: {
     index: false,
     follow: false,
@@ -52,7 +50,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
       <html lang="en" className={inter.variable}>
         <head>
           {/* Preconnect to external domains for performance */}
@@ -91,6 +88,5 @@ export default function RootLayout({
           </ErrorBoundary>
         </body>
       </html>
-    </ClerkProvider>
   );
 }

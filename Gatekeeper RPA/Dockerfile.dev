@@ -36,15 +36,15 @@ RUN mkdir -p logs uploads
 # Set environment variables for development
 ENV NODE_ENV=development \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
+    PORT=3020 \
     HOSTNAME=0.0.0.0
 
 # Expose ports for development
-EXPOSE 3000
+EXPOSE 3020
 
 # Health check for development
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD curl -f http://localhost:3020/api/health || exit 1
 
 # Start development server
 CMD ["npm", "run", "dev"]

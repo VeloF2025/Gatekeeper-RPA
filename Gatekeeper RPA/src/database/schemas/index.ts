@@ -10,7 +10,8 @@ import {
   boolean,
   primaryKey,
   index,
-  unique
+  unique,
+  numeric
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -188,6 +189,28 @@ export const rateLimits = pgTable('rate_limits', {
   windowEndIdx: index('rate_limits_window_end_idx').on(table.windowEnd),
 }));
 
+// RPA Jobs table for automation task management
+export const rpaJobs = pgTable('rpa_jobs', {
+  id: uuid('id').default(sql`gen_random_uuid()`).primaryKey(),
+  ticketId: uuid('ticket_id').references(() => tickets.id, { onDelete: 'cascade' }).notNull(),
+  drNumber: varchar('dr_number', { length: 50 }).notNull(),
+  status: varchar('status', { length: 20 }).default('pending').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`NOW()`).notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  retryCount: integer('retry_count').default(0).notNull(),
+  error: text('error'),
+  result: jsonb('result'),
+  metadata: jsonb('metadata').default({}),
+}, (table) => ({
+  ticketIdIdx: index('rpa_jobs_ticket_id_idx').on(table.ticketId),
+  drNumberIdx: index('rpa_jobs_dr_number_idx').on(table.drNumber),
+  statusIdx: index('rpa_jobs_status_idx').on(table.status),
+  createdAtIdx: index('rpa_jobs_created_at_idx').on(table.createdAt),
+  startedAtIdx: index('rpa_jobs_started_at_idx').on(table.startedAt),
+  completedAtIdx: index('rpa_jobs_completed_at_idx').on(table.completedAt),
+}));
+
 // Export all table types
 export type Ticket = typeof tickets.$inferSelect;
 export type NewTicket = typeof tickets.$inferInsert;
@@ -207,6 +230,8 @@ export type ApiSession = typeof apiSessions.$inferSelect;
 export type NewApiSession = typeof apiSessions.$inferInsert;
 export type RateLimit = typeof rateLimits.$inferSelect;
 export type NewRateLimit = typeof rateLimits.$inferInsert;
+export type RPAJob = typeof rpaJobs.$inferSelect;
+export type NewRPAJob = typeof rpaJobs.$inferInsert;
 
 // Export all tables
 export const schema = {
@@ -219,4 +244,5 @@ export const schema = {
   users,
   apiSessions,
   rateLimits,
+  rpaJobs,
 };

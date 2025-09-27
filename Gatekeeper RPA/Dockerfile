@@ -16,11 +16,10 @@ RUN apk add --no-cache \
     curl \
     && update-ca-certificates
 
-# Security hardening
-RUN apk add --no-cache --virtual .security-tools \
+# Security hardening - basic packages only
+RUN apk add --no-cache \
     nmap \
-    ncat \
-    && apk del .security-tools
+    nmap-ncat
 
 # Set secure build environment
 ENV NODE_ENV=production \
@@ -34,7 +33,7 @@ WORKDIR /app
 # Copy package files with verification
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY tailwind.config.js ./
+COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY next.config.js ./
 
@@ -92,15 +91,16 @@ RUN mkdir -p /app/logs /app/uploads && \
 # Set environment variables for Zero Trust security
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
+    PORT=3020 \
     HOSTNAME=0.0.0.0 \
     TZ=UTC \
-    NODE_OPTIONS="--max-old-space-size=512 --no-warnings" \
-    # Zero Trust Security Headers
-    # CSP for strict content security
-    # Rate limiting enabled
-    # Input validation required
-    # Audit logging enabled
+    NODE_OPTIONS="--max-old-space-size=512 --no-warnings"
+
+# Zero Trust Security Headers
+# CSP for strict content security
+# Rate limiting enabled
+# Input validation required
+# Audit logging enabled
 
 # Add security middleware and monitoring
 COPY scripts/security-middleware.js /app/scripts/security-middleware.js
@@ -114,11 +114,11 @@ RUN chmod 600 /app/scripts/security-middleware.js && \
 USER nextjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3020
 
 # Health check with comprehensive validation
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f -s http://localhost:3000/api/health || exit 1
+    CMD curl -f -s http://localhost:3020/api/health || exit 1
 
 # Security hardening: No shell access
 RUN rm -rf /bin/sh /bin/bash /bin/ash || true

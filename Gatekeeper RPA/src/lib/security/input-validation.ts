@@ -520,4 +520,3 @@ export const inputValidator = new InputValidator();
 
 // Export for easy access
 export type { ValidationRule, ValidationError, ValidationSchema };
-export { InputValidator };

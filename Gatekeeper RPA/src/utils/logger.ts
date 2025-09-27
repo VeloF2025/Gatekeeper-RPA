@@ -20,7 +20,7 @@ const logFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
 
 // Create logger instance
 export const logger = winston.createLogger({
-  level: config.logging.level,
+  level: config.logging?.level || 'info',
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     errors({ stack: true }),
@@ -42,7 +42,7 @@ export const logger = winston.createLogger({
     // File transport (only in production)
     ...(config.nodeEnv === 'production' ? [
       new winston.transports.File({
-        filename: config.logging.file,
+        filename: config.logging?.file || './logs/app.log',
         maxsize: 5242880, // 5MB
         maxFiles: 5,
         tailable: true

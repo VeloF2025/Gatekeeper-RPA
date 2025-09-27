@@ -635,7 +635,7 @@ docker-compose logs -f --tail=100 -t
 ### Performance Monitoring
 ```bash
 # Access Grafana dashboard
-# URL: http://localhost:3001
+# URL: http://localhost:3020
 # Username: admin
 # Password: ${GRAFANA_PASSWORD}
 

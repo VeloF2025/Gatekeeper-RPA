@@ -14,7 +14,7 @@ async function seedDatabase() {
     logger.info('Starting database seeding...');
 
     // Check if we should seed (only in development or if explicitly enabled)
-    if (config.nodeEnv === 'production' && process.env.SEED_DATABASE !== 'true') {
+    if (config.env === 'production' && process.env.SEED_DATABASE !== 'true') {
       logger.info('Skipping database seeding in production mode');
       return;
     }

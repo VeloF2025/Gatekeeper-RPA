@@ -179,7 +179,7 @@ docker-compose logs > system.log
 ### Access Monitoring Dashboards
 ```bash
 # Grafana Dashboard
-# URL: http://localhost:3001
+# URL: http://localhost:3020
 # Username: admin
 # Password: ${GRAFANA_PASSWORD}
 

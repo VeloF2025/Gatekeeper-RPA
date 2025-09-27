@@ -11,7 +11,7 @@ const nextConfig = {
     // Enable server actions for better performance
     serverActions: {
       bodySizeLimit: '1mb',
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: ['localhost:3020'],
     },
 
     // Optimize bundle size
@@ -79,8 +79,11 @@ const nextConfig = {
 
   // Bundle analyzer conditionally loaded
   ...(process.env.ANALYZE === 'true' && {
-    bundleAnalyzer: {
-      enabled: true,
+    experimental: {
+      ...this.experimental,
+      bundleAnalyzer: {
+        enabled: true,
+      },
     },
   }),
 
